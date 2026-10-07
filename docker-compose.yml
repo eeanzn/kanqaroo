@@ -1,0 +1,14 @@
+# 로컬 개발용 Postgres. `docker compose up -d` 후 `npm run db:migrate`
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: kanqaroo
+      POSTGRES_PASSWORD: kanqaroo
+      POSTGRES_DB: kanqaroo
+    ports:
+      - '54329:5432'
+    volumes:
+      - kanqaroo-db:/var/lib/postgresql/data
+volumes:
+  kanqaroo-db:

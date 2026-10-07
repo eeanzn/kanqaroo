@@ -1,0 +1,91 @@
+@import 'tailwindcss';
+
+/*
+ * 디자인 토큰의 원본(SSoT). Notion `03 Design`은 방향만 적고 값은 여기를 가리킨다.
+ * Figma Variables는 이 값을 그대로 옮긴 뷰. 토큰을 바꿀 땐 여기부터 고친다.
+ *
+ * 1) 원시 팔레트(primitive)  : sand / ochre / ink / eucalyptus
+ * 2) 의미 토큰(semantic)     : bg, surface, text, primary ... 컴포넌트는 의미 토큰만 쓴다
+ */
+@theme {
+  /* ── Primitive: 호주 내륙의 모래·황토 + 진한 잉크 + 유칼립투스 ── */
+  --color-sand-50: #fbf7f0;
+  --color-sand-100: #f5ede0;
+  --color-sand-200: #eadbc4;
+  --color-sand-300: #dcc3a0;
+  --color-sand-400: #c9a878;
+
+  --color-ochre-300: #ecbc7c;
+  --color-ochre-400: #e09c4c;
+  --color-ochre-500: #c97b2a;
+  --color-ochre-600: #a8611c;
+  --color-ochre-700: #7f4813;
+
+  --color-ink-900: #211b16;
+  --color-ink-700: #4a4038;
+  --color-ink-500: #7a6e64;
+  --color-ink-300: #b4a99e;
+
+  --color-eucalyptus-100: #dcefe9;
+  --color-eucalyptus-500: #3e8e7e;
+  --color-eucalyptus-700: #2a6458;
+
+  --color-berry-500: #c4473a;
+
+  /* ── Semantic ── */
+  --color-bg: var(--color-sand-50);
+  --color-surface: #ffffff;
+  --color-surface-sunken: var(--color-sand-100);
+  --color-border: var(--color-sand-200);
+  --color-border-strong: var(--color-sand-300);
+  --color-text: var(--color-ink-900);
+  --color-text-muted: var(--color-ink-500);
+  --color-text-subtle: var(--color-ink-300);
+  --color-primary: var(--color-ochre-500);
+  --color-primary-hover: var(--color-ochre-600);
+  --color-primary-soft: var(--color-sand-100);
+  --color-on-primary: #ffffff;
+  --color-accent: var(--color-eucalyptus-500);
+  --color-accent-soft: var(--color-eucalyptus-100);
+  --color-danger: var(--color-berry-500);
+
+  /* 반응 3종 색 (fit / new / miss) */
+  --color-reaction-fit: var(--color-ochre-500);
+  --color-reaction-new: var(--color-eucalyptus-500);
+  --color-reaction-miss: var(--color-ink-500);
+
+  /* ── Type ── */
+  --font-sans:
+    var(--font-pretendard), 'Pretendard', system-ui, -apple-system, 'Apple SD Gothic Neo',
+    'Noto Sans KR', sans-serif;
+
+  /* ── Shape ── */
+  --radius-card: 1.25rem;
+  --radius-control: 0.875rem;
+
+  /* ── Elevation ── */
+  --shadow-card: 0 1px 2px rgb(33 27 22 / 0.04), 0 4px 16px rgb(33 27 22 / 0.06);
+  --shadow-pop: 0 8px 32px rgb(33 27 22 / 0.14);
+}
+
+@layer base {
+  html {
+    background: var(--color-bg);
+    color: var(--color-text);
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    word-break: keep-all;
+  }
+
+  ::selection {
+    background: var(--color-ochre-300);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
