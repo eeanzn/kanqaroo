@@ -4,7 +4,7 @@
 
 내 취향 보드(`/@handle`)를 열어두면, 그걸 본 친구가 "너 이거 좋아할 듯" 하고 곡 한 개와 한마디를 내 **주머니**에 넣어줘요. 받은 사람은 듣고 나서 _딱 내 취향 / 새로웠어 / 내 스타일 아냐_ 중 하나로 반응하고, 넣어준 사람은 **영수증** 링크로 그 반응을 확인해요.
 
-- 기획·결정·로드맵(SSoT): [Notion · Kanqaroo](https://app.notion.com/p/3f20e0600bce810296edc52af16b4c3a)
+- 기획·결정·로드맵(SSoT): [Notion · Kanqaroo](https://app.notion.com/p/damhong/Kanqaroo-3f20e0600bce810296edc52af16b4c3a)
 - 현재 단계: **Stage 2 · Walking skeleton** (핵심 루프가 처음부터 끝까지 동작)
 
 | 랜딩                                 | 보드                               | 영수증                               | 주머니                                    |
