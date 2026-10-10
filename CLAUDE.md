@@ -2,7 +2,7 @@
 
 @AGENTS.md
 
-사람이 사람에게 곡을 소매넣기 하는 웹 서비스. 지금은 **Stage 2 (walking skeleton)**.
+사람이 사람에게 곡을 소매넣기 하는 웹 서비스. 지금은 **Artifact 프로토타입 단계** (`prototype/`). `src/`의 Stage 2 앱은 개편 전(v1) 상태로 보류 중.
 
 ## SSoT: 무엇을 어디서 확인하나
 
@@ -13,14 +13,17 @@
 | 비전·원칙·PRD·플로우·로드맵·결정 기록·리서치 | Notion [Kanqaroo](https://app.notion.com/p/damhong/Kanqaroo-3f20e0600bce810296edc52af16b4c3a) |
 | 용어 (UI 용어 ↔ 코드 이름)                   | Notion Glossary (아래 표는 복사본이 아니라 코드 쪽 요약)                                      |
 | DB 스키마                                    | `src/db/schema.ts` → `drizzle/` 마이그레이션                                                  |
-| 디자인 토큰                                  | `src/app/globals.css` (`@theme`)                                                              |
-| UI 문구                                      | 각 화면 컴포넌트                                                                              |
+| 디자인 토큰·버튼 규격·UI 문구 (지금)         | `prototype/src.html` (데모 Artifact의 원본)                                                   |
+| 디자인 토큰 (Stage 2 앱, v1 스냅샷)          | `src/app/globals.css` (`@theme`)                                                              |
+| UI 문구 (Stage 2 앱)                         | 각 화면 컴포넌트                                                                              |
 
 결정을 바꾸거나 새로 내리면 Notion **Decision Log**에 한 줄 남긴다.
 
 ## 용어 (코드 이름)
 
-`board` 취향 보드 · `crate` 군집 · `slip` 소매넣기 · `pouch` 주머니 · `reaction` 반응(`fit`/`new`/`miss`) · `receipt` 영수증 · `keep` 담기 · `track` 곡
+지금(v2): `playlist` 플레이리스트 · `song` 노래 · 노래 넣기(사용자가 고른 자리에 바로 들어감, 승인·반응 없음) · `activity` 활동 · 관리 링크(주인용) · 추가 링크(넣기만 가능). 소매넣기는 서비스 개념일 뿐, 기능 이름이 아님
+
+Stage 2 앱(v1, 폐기 예정): `board` 취향 보드 · `crate` 군집 · `slip` 소매넣기 · `pouch` 주머니 · `reaction` 반응 · `receipt` 영수증 · `keep` 담기 · `track` 곡
 
 ## 구조 원칙
 
@@ -34,6 +37,7 @@
 ## 명령어
 
 ```bash
+python3 prototype/build.py   # 프로토타입 빌드 → prototype/dist/ (같은 Artifact URL에 다시 publish)
 npm run dev            # 개발 서버
 npm run lint && npm run typecheck
 npm test               # 단위 테스트 (+ TEST_DATABASE_URL 있으면 DB 통합 테스트)

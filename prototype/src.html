@@ -1,0 +1,826 @@
+<title>Kanqaroo 데모</title>
+<style>
+/* Layout: 모바일 한 줄(최대 30rem) 트랙리스트. 흰 배경 + 오렌지 한 가지(기본·디밍·라이트) + 무채색.
+   디자인 시스템을 만들기 전 임시 토큰. 오렌지는 사용자가 준 색 샘플에서 뽑음(#ED692C) */
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --fg: #ed692c;          /* 전경색: 버튼, 강조, 끼워 넣은 곡 번호 */
+  --fg-dim: #b8460f;      /* 디밍: 흰 배경 위 작은 오렌지 글자 (명도 대비 5.4:1) */
+  --fg-light: #fdede6;    /* 라이트: 선택·방금 넣은 곡 배경 */
+  --ink: #141414;
+  --ink-2: #5c5c5c;
+  --ink-3: #9b9b9b;
+  --line: #ececec;
+  --line-2: #dcdcdc;
+  --surface: #f6f6f6;
+  --font: 'Pretendard', system-ui, -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  --r: 12px;
+  --r-lg: 18px;
+  /* 버튼 규격: 모든 버튼이 같은 높이·글자·두께·모서리·테두리를 쓴다.
+     CTA(primary)와 나머지(secondary)는 색으로만 구별한다. 아이콘 버튼도 같은 높이(정사각형) */
+  --btn-h: 44px;
+  --btn-px: 18px;
+  --btn-fs: 15px;
+  --btn-fw: 700;
+  --btn-radius: 999px;
+  --btn-border: 1px;
+}
+@font-face { font-family: 'Pretendard'; font-weight: 400; font-display: swap; src: url(data:font/woff2;base64,__FONT_400__) format('woff2'); }
+@font-face { font-family: 'Pretendard'; font-weight: 600; font-display: swap; src: url(data:font/woff2;base64,__FONT_600__) format('woff2'); }
+@font-face { font-family: 'Pretendard'; font-weight: 700; font-display: swap; src: url(data:font/woff2;base64,__FONT_700__) format('woff2'); }
+@font-face { font-family: 'Pretendard'; font-weight: 800; font-display: swap; src: url(data:font/woff2;base64,__FONT_800__) format('woff2'); }
+
+*, *::before, *::after { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.5; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+button, input, textarea { font: inherit; color: inherit; }
+a { color: inherit; }
+h1, h2, p { margin: 0; }
+h1, h2 { text-wrap: balance; }
+ol, ul { margin: 0; padding: 0; list-style: none; }
+:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; border-radius: 4px; }
+.wrap { max-width: 30rem; margin: 0 auto; padding-inline: 16px; }
+
+/* ── 헤더 ── */
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: rgb(255 255 255 / 0.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+.logo { display: inline-flex; align-items: center; gap: 6px; border: 0; background: none; padding: 0; cursor: pointer; font-size: 17px; font-weight: 800; letter-spacing: -0.02em; }
+.logo svg { width: 26px; height: 26px; }
+main { padding-block: 20px 72px; }
+footer.site { padding-block: 0 40px; font-size: 12px; color: var(--ink-3); line-height: 1.6; }
+
+/* ── 공통 ── */
+.stack { display: flex; flex-direction: column; gap: 24px; }
+.stack-sm { display: flex; flex-direction: column; gap: 12px; }
+.row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.eyebrow { font-size: 13px; font-weight: 700; color: var(--fg-dim); letter-spacing: 0.02em; }
+.h1 { font-size: 1.625rem; font-weight: 800; line-height: 1.25; letter-spacing: -0.02em; }
+.h2 { font-size: 1rem; font-weight: 700; }
+.muted { color: var(--ink-2); font-size: 15px; line-height: 1.6; }
+.small { font-size: 13px; color: var(--ink-2); }
+.tiny { font-size: 12px; color: var(--ink-3); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: var(--btn-h); padding: 0 var(--btn-px); border-radius: var(--btn-radius); border: var(--btn-border) solid transparent; font-size: var(--btn-fs); font-weight: var(--btn-fw); line-height: 1; cursor: pointer; text-decoration: none; white-space: nowrap; flex: none; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn svg { width: 14px; height: 14px; }
+/* CTA: 오렌지. 오렌지 위 글자는 검정 — 흰 글자(3.2:1)보다 대비가 높고(6:1) 디지털한 인상 */
+.btn-primary { background: var(--fg); border-color: var(--fg); color: var(--ink); }
+.btn-primary:hover:not(:disabled) { box-shadow: inset 0 0 0 999px rgb(0 0 0 / 0.07); }
+.btn-secondary { background: var(--bg); border-color: var(--line-2); color: var(--ink); }
+.btn-secondary:hover:not(:disabled) { background: var(--surface); }
+.btn-block { width: 100%; }
+/* 버튼이 나란히 놓이면 같은 너비로 나눈다 */
+.btn-row { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; }
+.btn-row .btn { width: 100%; }
+.input { width: 100%; height: 46px; padding: 0 14px; border: 1px solid var(--line-2); border-radius: var(--r); background: var(--bg); font-size: 15px; }
+textarea.input { height: auto; min-height: 132px; padding: 12px 14px; line-height: 1.6; resize: vertical; }
+.input::placeholder { color: var(--ink-3); }
+.input:focus { outline: none; border-color: var(--fg); }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > label { font-size: 13px; font-weight: 700; }
+.err { font-size: 13px; color: var(--fg-dim); font-weight: 600; }
+.box { border-radius: var(--r-lg); padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.box.tint { background: var(--fg-light); }
+.box.gray { background: var(--surface); }
+.box.line { border: 1px solid var(--line); }
+
+/* ── 트랙리스트 ── */
+.tracks { border-top: 1px solid var(--line); }
+.song { display: flex; align-items: center; gap: 12px; padding: 12px 2px; border-bottom: 1px solid var(--line); }
+.song.new { background: var(--fg-light); margin-inline: -16px; padding-inline: 18px; }
+.num { flex: none; width: 1.75rem; font-size: 14px; font-weight: 700; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.song.by .num { color: var(--fg); }
+.meta { flex: 1; min-width: 0; }
+.t { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.35; }
+.a { font-size: 14px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tag { display: inline-block; margin-top: 3px; font-size: 12px; font-weight: 700; color: var(--fg-dim); }
+.acts { flex: none; display: flex; align-items: center; gap: 2px; }
+.icon-btn { display: grid; place-items: center; width: var(--btn-h); height: var(--btn-h); border-radius: 999px; border: 0; background: none; color: var(--ink-2); cursor: pointer; text-decoration: none; }
+.icon-btn:hover { background: var(--surface); color: var(--ink); }
+.icon-btn svg { width: 16px; height: 16px; }
+.icon-btn.play { color: var(--fg-dim); }
+.slot { border-bottom: 1px solid var(--line); }
+.slot > button { display: flex; align-items: center; gap: 8px; width: 100%; height: 34px; border: 0; background: none; cursor: pointer; font-size: 13px; font-weight: 700; color: var(--ink-3); padding: 0 2px; }
+.slot > button::before { content: ''; flex: none; width: 1.75rem; height: 2px; background: var(--line-2); border-radius: 2px; }
+.slot > button:hover { color: var(--fg-dim); }
+.slot > button:hover::before { background: var(--fg); }
+.slot.on { border-bottom: 0; }
+.insert-form { margin: 8px -16px; padding: 16px; background: var(--fg-light); border-top: 2px solid var(--fg); display: flex; flex-direction: column; gap: 10px; }
+.insert-form .head { font-size: 14px; font-weight: 800; }
+.insert-form .grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.empty { padding: 28px 4px; text-align: center; color: var(--ink-2); font-size: 15px; border-bottom: 1px solid var(--line); }
+
+/* ── 탭 ── */
+.tabs { display: flex; gap: 20px; border-bottom: 1px solid var(--line); }
+.tabs button { position: relative; border: 0; background: none; padding: 10px 0; font-size: 15px; font-weight: 700; color: var(--ink-3); cursor: pointer; }
+.tabs button[aria-selected="true"] { color: var(--ink); }
+.tabs button[aria-selected="true"]::after { content: ''; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--fg); }
+.badge { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; margin-left: 4px; border-radius: 999px; background: var(--fg); color: var(--ink); font-size: 12px; font-variant-numeric: tabular-nums; }
+.seg { display: flex; gap: 4px; background: var(--surface); border-radius: 999px; padding: 4px; }
+.seg button { flex: 1; height: 36px; border: 0; border-radius: 999px; background: transparent; font-size: 14px; font-weight: 700; color: var(--ink-2); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--bg); color: var(--ink); box-shadow: 0 1px 3px rgb(0 0 0 / 0.08); }
+
+/* ── 활동 ── */
+.feed li { display: flex; gap: 12px; padding: 14px 2px; border-bottom: 1px solid var(--line); }
+.feed .dot { flex: none; width: 8px; height: 8px; margin-top: 8px; border-radius: 999px; background: var(--line-2); }
+.feed .dot.unseen { background: var(--fg); }
+.feed .body { flex: 1; min-width: 0; }
+.feed .what { font-size: 15px; line-height: 1.5; }
+.feed .what b { font-weight: 700; }
+.feed .song-name { color: var(--ink-2); font-size: 14px; overflow-wrap: anywhere; }
+
+/* ── 링크 상자 ── */
+.link-row { display: flex; gap: 8px; }
+.link-row .link-field { flex: 1; }
+.link-field { min-width: 0; display: flex; align-items: center; background: var(--bg); border: 1px solid var(--line-2); border-radius: var(--r); padding: 0 12px; height: var(--btn-h); }
+.link-field code { flex: 1; min-width: 0; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.guide { font-size: 14px; line-height: 1.6; color: var(--ink); }
+.guide ol { list-style: decimal; padding-left: 20px; display: flex; flex-direction: column; gap: 2px; }
+
+/* ── 랜딩 ── */
+.hero h1 { font-size: 2rem; line-height: 1.22; font-weight: 800; letter-spacing: -0.03em; }
+.hero h1 em { font-style: normal; color: var(--fg); }
+.steps { counter-reset: s; display: flex; flex-direction: column; }
+.steps li { counter-increment: s; display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.steps li::before { content: counter(s, decimal-leading-zero); flex: none; width: 1.75rem; font-weight: 800; color: var(--fg); font-variant-numeric: tabular-nums; }
+.steps b { display: block; font-weight: 700; }
+.mine li button { display: flex; justify-content: space-between; align-items: center; gap: 12px; width: 100%; padding: 14px 2px; border: 0; border-bottom: 1px solid var(--line); background: none; cursor: pointer; text-align: left; }
+.mine li:first-child button { border-top: 1px solid var(--line); }
+.mine .go { font-size: 13px; font-weight: 700; color: var(--fg-dim); flex: none; }
+
+.toast-action { border: 0; background: none; padding: 0 0 0 10px; font: inherit; font-weight: var(--btn-fw); color: var(--fg); cursor: pointer; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 50; background: var(--ink); color: var(--bg); padding: 12px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; max-width: calc(100% - 32px); text-align: center; }
+@media (prefers-reduced-motion: no-preference) {
+  .toast { animation: rise 0.18s ease-out; }
+  .song.new { animation: flash 1.2s ease-out; }
+  @keyframes rise { from { opacity: 0; transform: translate(-50%, 8px); } }
+  @keyframes flash { from { background: rgb(237 105 44 / 0.35); } }
+}
+</style>
+
+<header class="top"><div class="wrap">
+  <button class="logo" data-go="" aria-label="Kanqaroo 처음으로"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 11c0-2.2 1.8-4 4-4h12c2.2 0 4 1.8 4 4v5c0 6.1-4.9 11-11 11h-.1C9.4 27 6 23.6 6 19.1V11Z" fill="var(--fg)"/><path d="M9 13.5c2.2 1.4 4.5 2 7 2s4.8-.6 7-2" stroke="#fff" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="14" cy="21.5" r="2.2" fill="#fff"/><path d="M16.2 21.5V15.8l3.6-1" stroke="#fff" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>kanqaroo</button>
+  <button class="btn btn-secondary" id="nav-new" data-go="new">플레이리스트 만들기</button>
+</div></header>
+<main><div class="wrap" id="app"></div></main>
+<footer class="site"><div class="wrap" id="foot">음악은 유튜브에서 들어요. Kanqaroo는 곡 목록과 링크만 보여줘요.</div></footer>
+<div id="toast-slot"></div>
+
+<script>
+'use strict'
+
+/* ════════ 설정 ════════ */
+// 공유 링크의 바탕 주소. 이 데모 Artifact의 주소이고, # 뒤로 플레이리스트를 가리킨다
+const ARTIFACT_URL = 'https://claude.ai/artifact/UZhD2gemzbihsP5vWZM1uU'
+const MAX_SONGS = 100
+
+/* ════════ 유틸 ════════ */
+const $ = (s) => document.querySelector(s)
+function esc(v) { return String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]) }
+function rand(n, abc) { const b = new Uint8Array(n); crypto.getRandomValues(b); return Array.from(b, (x) => abc[x % abc.length]).join('') }
+const LOWER = 'abcdefghijkmnpqrstuvwxyz23456789'
+const ALNUM = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789'
+async function sha256(text) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text))
+  return Array.from(new Uint8Array(buf), (b) => b.toString(16).padStart(2, '0')).join('')
+}
+const dateFmt = new Intl.DateTimeFormat('ko-KR', { month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' })
+function cleanName(v) { return String(v || '').trim().replace(/님$/, '').slice(0, 12) }
+function toast(msg) {
+  const slot = $('#toast-slot')
+  slot.innerHTML = `<div class="toast" role="status">${esc(msg)}</div>`
+  clearTimeout(toast.t)
+  toast.t = setTimeout(() => { slot.innerHTML = '' }, 2600)
+}
+let lastDeleted = null
+function toastUndo(msg) {
+  const slot = $('#toast-slot')
+  slot.innerHTML = `<div class="toast" role="status">${esc(msg)} <button class="toast-action" data-act="undo">되돌리기</button></div>`
+  clearTimeout(toast.t)
+  toast.t = setTimeout(() => { slot.innerHTML = ''; lastDeleted = null }, 5000)
+}
+function copyText(text, done = '링크를 복사했어요') {
+  const ok = () => toast(done)
+  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(ok, () => toast('복사가 안 돼요. 링크를 길게 눌러 복사해 주세요'))
+  else toast('복사가 안 돼요. 링크를 길게 눌러 복사해 주세요')
+}
+
+/* 유튜브: 링크에서 영상 id를 뽑고, 없으면 제목으로 검색 링크 */
+function ytId(s) {
+  const m = String(s || '').match(/(?:youtube\.com\/(?:watch\?(?:[^#\s]*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/)
+  return m ? m[1] : null
+}
+function playUrl(song) {
+  return song.yt
+    ? `https://www.youtube.com/watch?v=${song.yt}`
+    : `https://www.youtube.com/results?search_query=${encodeURIComponent(`${song.artist} ${song.title}`.trim())}`
+}
+// 유튜브 영상 id들을 순서대로 이어 재생하는 임시 재생목록 주소 (비공식 형식이라 동작 보장 없음)
+function playAllUrl(songs) {
+  const ids = songs.filter((s) => s.yt).map((s) => s.yt).slice(0, 50)
+  return ids.length ? `https://www.youtube.com/watch_videos?video_ids=${ids.join(',')}` : null
+}
+
+/* "가수 - 제목" 한 줄씩, 유튜브 링크를 붙여도 됨 */
+function parseLines(text) {
+  return String(text || '').split('\n').map((l) => l.trim()).filter(Boolean).slice(0, MAX_SONGS).map((line) => {
+    const yt = ytId(line)
+    const rest = line.replace(/https?:\/\/\S+/g, '').replace(/^\d+[.)]\s*/, '').trim()
+    const parts = rest.split(/\s+[-–—]\s+/)
+    if (parts.length >= 2) return { artist: parts[0].trim(), title: parts.slice(1).join(' - ').trim(), yt }
+    return { artist: '', title: rest, yt }
+  }).filter((s) => s.title)
+}
+
+/* ════════ 이 브라우저의 설정 (내 관리 링크, 닉네임, 읽은 활동) ════════ */
+const PREFS_KEY = 'kq2-prefs'
+let prefs = (() => { try { return { mine: [], seen: {}, myAdds: {}, nickname: '', ...JSON.parse(localStorage.getItem(PREFS_KEY) || '{}') } } catch { return { mine: [], seen: {}, myAdds: {}, nickname: '' } } })()
+function savePrefs() { try { localStorage.setItem(PREFS_KEY, JSON.stringify(prefs)) } catch { /* 저장 불가 환경 */ } }
+function rememberMine(pid, token, title) {
+  prefs.mine = [{ pid, token, title, at: Date.now() }, ...prefs.mine.filter((m) => m.pid !== pid)].slice(0, 20)
+  savePrefs()
+}
+function myToken(pid) { return prefs.mine.find((m) => m.pid === pid)?.token || null }
+
+/* ════════ 저장소: Artifact 공유 저장소(db)가 있으면 그걸, 없으면 이 브라우저 ════════ */
+function strip(song) { const { id, ...rest } = song; return rest }
+async function retryOnce(fn) {
+  try { return await fn() } catch (e) {
+    if (e?.code !== 'unavailable') throw e
+    await new Promise((r) => setTimeout(r, 400 + Math.random() * 500))
+    return fn()
+  }
+}
+
+function sharedStore(db) {
+  return {
+    mode: 'shared',
+    watch(pid, cb) {
+      let playlist, songs, gotP = false, gotS = false, dead = false
+      const push = () => { if (gotP && gotS && !dead) cb(playlist ? { playlist, songs } : { missing: true }) }
+      const fail = (e) => { if (!dead) { dead = true; cb({ error: e?.code || 'unavailable' }) } }
+      const u1 = db.doc('pl/' + pid).onSnapshot((s) => { gotP = true; playlist = s.exists ? s.data() : null; push() }, fail)
+      const u2 = db.collection(`pl/${pid}/songs`).onSnapshot((q) => {
+        gotS = true
+        songs = q.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => a.pos - b.pos)
+        push()
+      }, fail)
+      return () => { u1(); u2() }
+    },
+    async createPlaylist(pid, playlist, songs) {
+      await retryOnce(() => db.doc('pl/' + pid).set(playlist))
+      for (const s of songs) await retryOnce(() => db.doc(`pl/${pid}/songs/${s.id}`).set(strip(s)))
+    },
+    addSong(pid, song) { return retryOnce(() => db.doc(`pl/${pid}/songs/${song.id}`).set(strip(song))) },
+    deleteSong(pid, sid) { return retryOnce(() => db.doc(`pl/${pid}/songs/${sid}`).delete()) },
+  }
+}
+
+function localStore() {
+  const KEY = 'kq2-local'
+  const read = () => { try { return JSON.parse(localStorage.getItem(KEY)) || { pl: {}, songs: {} } } catch { return { pl: {}, songs: {} } } }
+  let data = read()
+  const subs = new Map()
+  const write = () => { try { localStorage.setItem(KEY, JSON.stringify(data)) } catch { /* 메모리에서만 */ } }
+  const snap = (pid) => {
+    const p = data.pl[pid]
+    if (!p) return { missing: true }
+    const songs = Object.entries(data.songs[pid] || {}).map(([id, s]) => ({ id, ...s })).sort((a, b) => a.pos - b.pos)
+    return { playlist: p, songs }
+  }
+  const emit = (pid) => subs.get(pid)?.forEach((cb) => cb(snap(pid)))
+  // 같은 브라우저의 다른 탭(예: 친구 화면으로 연 탭)에서 넣은 곡도 바로 반영
+  window.addEventListener('storage', (e) => { if (e.key === KEY) { data = read(); subs.forEach((_, pid) => emit(pid)) } })
+  return {
+    mode: 'local',
+    watch(pid, cb) {
+      if (!subs.has(pid)) subs.set(pid, new Set())
+      subs.get(pid).add(cb)
+      queueMicrotask(() => cb(snap(pid)))
+      return () => subs.get(pid)?.delete(cb)
+    },
+    async createPlaylist(pid, playlist, songs) {
+      data.pl[pid] = playlist
+      data.songs[pid] = Object.fromEntries(songs.map((s) => [s.id, strip(s)]))
+      write(); emit(pid)
+    },
+    async addSong(pid, song) { (data.songs[pid] ??= {})[song.id] = strip(song); write(); emit(pid) },
+    async deleteSong(pid, sid) { if (data.songs[pid]) delete data.songs[pid][sid]; write(); emit(pid) },
+  }
+}
+
+let store = null
+let signedOutInViewer = false   // claude.ai 화면 안인데 공유 저장소를 못 쓰는 경우(로그아웃 등)
+let sample = null
+let canReadImages = false
+
+/* ════════ 화면 상태 ════════ */
+let route = { name: 'home' }
+let view = {}
+let current = { status: 'loading' }   // 지금 보는 플레이리스트의 { playlist, songs } 또는 missing/error
+let unwatch = null
+let pendingWelcome = false
+
+function parseRoute() {
+  const h = location.hash.replace(/^#/, '')
+  let m
+  if (h === 'new') return { name: 'new' }
+  if ((m = h.match(/^m-([a-z0-9]{10,16})-([A-Za-z0-9]{16,40})$/))) return { name: 'manage', pid: m[1], token: m[2] }
+  if ((m = h.match(/^a-([a-z0-9]{10,16})$/))) return { name: 'add', pid: m[1] }
+  return { name: 'home' }
+}
+function go(hash) {
+  if (location.hash.replace(/^#/, '') === hash) onRoute()
+  else location.hash = hash
+}
+function onRoute() {
+  unwatch?.(); unwatch = null
+  route = parseRoute()
+  view = route.name === 'manage' ? { tab: 'list', verified: null, insertAt: null, shareGuide: false, welcome: pendingWelcome }
+    : route.name === 'add' ? { insertAt: null, justAdded: null, error: null }
+    : route.name === 'new' ? { method: 'manual', draft: [], ocr: null, errors: {} }
+    : {}
+  pendingWelcome = false
+  current = { status: 'loading' }
+  window.scrollTo(0, 0)
+  if ((route.name === 'manage' || route.name === 'add') && store) subscribe()
+  render()
+}
+function subscribe() {
+  const pid = route.pid
+  unwatch = store.watch(pid, (snap) => {
+    if (route.pid !== pid) return
+    current = snap
+    if (route.name === 'manage' && snap.playlist && view.verified === null && !view.verifying) { view.verifying = true; verifyManage(snap.playlist) }
+    render()
+  })
+}
+async function verifyManage(playlist) {
+  const ok = (await sha256(route.token)) === playlist.mh
+  view.verified = ok
+  if (ok) rememberMine(route.pid, route.token, playlist.title)
+  render()
+}
+
+/* ════════ 링크 ════════ */
+const addLink = (pid) => `${ARTIFACT_URL}#a-${pid}`
+const manageLink = (pid, token) => `${ARTIFACT_URL}#m-${pid}-${token}`
+
+/* ════════ 렌더 조각 ════════ */
+const ICON_PLAY = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.8v10.4c0 .6.7 1 1.2.6l8-5.2c.5-.3.5-1 0-1.3l-8-5.2c-.5-.3-1.2 0-1.2.7Z" fill="currentColor"/></svg>'
+const ICON_X = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>'
+
+function songRow(song, i, { canDelete = false, mine = false, fresh = false } = {}) {
+  const tag = mine ? '내가 넣음' : song.by ? `${esc(song.by)}님이 넣음` : ''
+  return `<li class="song ${song.by ? 'by' : ''} ${fresh ? 'new' : ''}" data-sid="${song.id}">
+    <span class="num">${String(i + 1).padStart(2, '0')}</span>
+    <div class="meta"><p class="t">${esc(song.title)}</p>${song.artist ? `<p class="a">${esc(song.artist)}</p>` : ''}${tag ? `<span class="tag">${tag}</span>` : ''}</div>
+    <div class="acts">
+      <a class="icon-btn play" href="${esc(playUrl(song))}" target="_blank" rel="noopener noreferrer" aria-label="${esc(song.title)} 유튜브에서 듣기" title="${song.yt ? '유튜브에서 듣기' : '유튜브에서 찾아 듣기'}">${ICON_PLAY}</a>
+      ${canDelete ? `<button class="icon-btn" data-act="delete" data-sid="${song.id}" aria-label="${esc(song.title)} 빼기" title="빼기">${ICON_X}</button>` : ''}
+    </div></li>`
+}
+
+function insertForm(i, total, { askName }) {
+  const nth = i + 1
+  const e = view.formErrors || {}
+  return `<li class="slot on"><form class="insert-form" data-form="insert" data-i="${i}" novalidate>
+    <p class="head">${nth}번째 자리에 들어가요${total === 0 ? '' : i === 0 ? ' (맨 앞)' : i === total ? ' (맨 뒤)' : ''}</p>
+    <div class="grid">
+      <input class="input" name="title" maxlength="100" placeholder="노래 제목" aria-label="노래 제목" autocomplete="off">
+      <input class="input" name="artist" maxlength="60" placeholder="가수 (선택)" aria-label="가수" autocomplete="off">
+    </div>
+    <input class="input" name="yt" inputmode="url" placeholder="유튜브 링크 (선택, 있으면 바로 재생)" aria-label="유튜브 링크" autocomplete="off">
+    ${askName ? `<input class="input" name="name" maxlength="12" placeholder="내 이름 (예: 민지)" aria-label="내 이름" value="${esc(prefs.nickname)}" autocomplete="off">` : ''}
+    ${e.msg ? `<p class="err" role="alert">${esc(e.msg)}</p>` : ''}
+    <div class="btn-row">
+      <button type="button" class="btn btn-secondary" data-act="cancel-insert">취소</button>
+      <button type="submit" class="btn btn-primary">넣기</button>
+    </div>
+  </form></li>`
+}
+
+function trackList(songs, { insertable, askName, canDelete, mineSet, fresh }) {
+  const parts = []
+  const slot = (i) => {
+    if (!insertable) return ''
+    if (view.insertAt === i) return insertForm(i, songs.length, { askName })
+    return `<li class="slot"><button type="button" data-act="slot" data-i="${i}" aria-label="${i + 1}번째 자리에 넣기">여기에 넣기</button></li>`
+  }
+  songs.forEach((s, i) => {
+    parts.push(slot(i))
+    parts.push(songRow(s, i, { canDelete: canDelete || mineSet?.has(s.id), mine: mineSet?.has(s.id), fresh: fresh === s.id }))
+  })
+  parts.push(slot(songs.length))
+  if (!songs.length && !insertable) parts.push(`<li class="empty">아직 곡이 없어요</li>`)
+  return `<ol class="tracks">${parts.join('')}</ol>`
+}
+
+function playAll(songs) {
+  const url = playAllUrl(songs)
+  const withLink = songs.filter((s) => s.yt).length
+  if (!songs.length) return ''
+  return `<div class="stack-sm" style="gap:6px">
+    ${url ? `<a class="btn btn-secondary btn-block" href="${esc(url)}" target="_blank" rel="noopener noreferrer">${ICON_PLAY} 유튜브에서 이어 듣기</a>` : `<button class="btn btn-secondary btn-block" disabled>유튜브에서 이어 듣기</button>`}
+    <p class="tiny" style="text-align:center">${url ? `유튜브 링크가 있는 ${withLink}곡을 순서대로 재생해요 (실험 기능)` : '유튜브 링크가 있는 곡만 이어서 들을 수 있어요. 나머지는 ▶로 하나씩 들어요'}</p>
+  </div>`
+}
+
+function stateScreen() {
+  if (!store || current.status === 'loading') return `<p class="muted" style="padding-top:3rem;text-align:center">불러오는 중…</p>`
+  if (current.error) return `<div class="stack" style="padding-top:3rem;text-align:center"><p class="h2">플레이리스트를 불러오지 못했어요</p><p class="muted">잠시 뒤에 다시 열어 주세요.</p></div>`
+  if (current.missing && signedOutInViewer) return `<div class="stack" style="padding-top:3rem;text-align:center;align-items:center"><p class="h2">claude.ai에 로그인하면 보여요</p><p class="muted">이 데모는 claude.ai 공유 저장소를 써서, 로그인한 사람만 플레이리스트를 볼 수 있어요.</p></div>`
+  if (current.missing) return `<div class="stack" style="padding-top:3rem;text-align:center;align-items:center"><p class="h2">플레이리스트를 찾을 수 없어요</p><p class="muted">링크가 잘못됐거나, ${store.mode === 'local' ? '다른 브라우저에서 만든 플레이리스트예요 (지금은 이 브라우저에만 저장되는 모드)' : '지워진 플레이리스트예요'}.</p><button class="btn btn-secondary" data-go="">처음으로</button></div>`
+  return null
+}
+
+/* ════════ 화면 ════════ */
+const SCREENS = {}
+
+SCREENS.home = () => {
+  const demoSongs = [
+    { id: 'd1', title: 'Nights', artist: 'Frank Ocean' },
+    { id: 'd2', title: 'Kyoto', artist: 'Phoebe Bridgers', by: '민지' },
+    { id: 'd3', title: 'Square (2017)', artist: '백예린' },
+  ]
+  return `<div class="stack" style="gap:2.5rem">
+    <section class="stack-sm hero" style="gap:16px">
+      <h1>친구 플레이리스트에<br>노래를 <em>슬쩍</em><br>끼워 넣어요</h1>
+      <p class="muted">링크만 있으면 로그인 없이, 원하는 자리에 바로 들어가요. 누가 뭘 넣었는지는 주인만 확인하고 뺄 수 있어요.</p>
+      <div class="stack-sm">
+        <button class="btn btn-primary btn-block" data-go="new">플레이리스트 만들기</button>
+        <button class="btn btn-secondary btn-block" data-act="example">예시로 바로 해보기</button>
+      </div>
+    </section>
+    <section aria-label="예시 화면">
+      <p class="eyebrow" style="margin-bottom:8px">새벽 운전 · 지우님의 플레이리스트</p>
+      <ol class="tracks">${demoSongs.map((s, i) => songRow(s, i)).join('')}</ol>
+    </section>
+    ${prefs.mine.length ? `<section class="stack-sm"><h2 class="h2">내 플레이리스트</h2><ul class="mine">${prefs.mine.map((m) => `<li><button data-go="m-${m.pid}-${m.token}"><span class="t">${esc(m.title)}</span><span class="go">관리 →</span></button></li>`).join('')}</ul><p class="tiny">이 브라우저에 기억해 둔 관리 링크예요. 다른 기기에서는 관리 링크로 열어 주세요.</p></section>` : ''}
+    <section class="stack-sm">
+      <h2 class="h2">이렇게 써요</h2>
+      <ol class="steps">
+        <li><span><b>플레이리스트 만들기</b><span class="small">캡처 한 장을 올리거나, 곡을 한 줄씩 적어요.</span></span></li>
+        <li><span><b>추가 링크 공유하기</b><span class="small">친구는 이 링크로 노래를 넣기만 할 수 있어요. 인스타 스토리나 X에 바로 걸 수 있어요.</span></span></li>
+        <li><span><b>활동 확인하기</b><span class="small">누가 몇 번째에 뭘 넣었는지 보고, 마음에 안 들면 빼요.</span></span></li>
+      </ol>
+    </section>
+  </div>`
+}
+
+SCREENS.new = () => {
+  const d = view
+  const e = d.errors
+  const captureOk = !!sample && canReadImages
+  return `<div class="stack">
+    <div class="stack-sm" style="gap:6px"><p class="eyebrow">새 플레이리스트</p><h1 class="h1">플레이리스트 만들기</h1><p class="muted">곡은 나중에 넣어도 되고, 비워 두고 친구들한테 채워 달라고 해도 돼요.</p></div>
+    <form class="stack" data-form="create" novalidate>
+      <div class="field"><label for="pl-title">플레이리스트 이름</label><input class="input" id="pl-title" name="title" maxlength="40" placeholder="예: 새벽 운전" value="${esc(d.title || '')}">${e.title ? `<p class="err">${esc(e.title)}</p>` : ''}</div>
+      <div class="field"><label for="pl-owner">내 이름</label><input class="input" id="pl-owner" name="owner" maxlength="12" placeholder="예: 지우" value="${esc(d.owner ?? prefs.nickname)}"><p class="tiny">친구에게는 ‘${esc(cleanName(d.owner ?? prefs.nickname) || '지우')}님의 플레이리스트’로 보여요</p>${e.owner ? `<p class="err">${esc(e.owner)}</p>` : ''}</div>
+      <div class="stack-sm">
+        <p class="h2" style="font-size:14px">곡 가져오기</p>
+        <div class="seg" role="group" aria-label="곡 가져오는 방법">
+          <button type="button" data-act="method" data-value="manual" aria-pressed="${d.method === 'manual'}">한 줄씩 적기</button>
+          <button type="button" data-act="method" data-value="capture" aria-pressed="${d.method === 'capture'}">캡처로 가져오기</button>
+        </div>
+        ${d.method === 'manual' ? `
+          <textarea class="input" id="pl-lines" placeholder="가수 - 제목 (한 줄에 한 곡)&#10;Frank Ocean - Nights&#10;백예린 - Square (2017) https://youtu.be/..."></textarea>
+          <button type="button" class="btn btn-secondary btn-block" data-act="add-lines">목록에 추가</button>`
+        : captureOk ? `
+          <label class="box gray" style="cursor:pointer;align-items:center;text-align:center">
+            <span class="h2" style="font-size:15px">플레이리스트 화면 캡처 올리기</span>
+            <span class="small">멜론·스포티파이·유튜브 뮤직 등 어떤 앱이든 돼요. Claude가 곡 이름을 읽어요.</span>
+            <input type="file" id="pl-shot" accept="image/png,image/jpeg,image/webp" style="position:absolute;opacity:0;width:1px;height:1px">
+          </label>
+          ${d.ocr ? `<p class="${d.ocr.error ? 'err' : 'small'}" role="status">${esc(d.ocr.msg)}</p>` : ''}`
+        : `<div class="box gray"><p class="small">이 화면에서는 캡처 인식을 쓸 수 없어요. claude.ai에서 이 데모를 열면 돼요. 지금은 ‘한 줄씩 적기’를 써 주세요.</p></div>`}
+      </div>
+      ${d.draft.length ? `<div class="stack-sm"><p class="h2" style="font-size:14px">담을 곡 ${d.draft.length}개</p><ol class="tracks">${d.draft.map((s, i) => `<li class="song"><span class="num">${String(i + 1).padStart(2, '0')}</span><div class="meta"><p class="t">${esc(s.title)}</p>${s.artist ? `<p class="a">${esc(s.artist)}</p>` : ''}${s.yt ? '<span class="tag">유튜브 링크 있음</span>' : ''}</div><div class="acts"><button type="button" class="icon-btn" data-act="draft-remove" data-i="${i}" aria-label="${esc(s.title)} 빼기">${ICON_X}</button></div></li>`).join('')}</ol></div>` : ''}
+      ${e.form ? `<p class="err" role="alert">${esc(e.form)}</p>` : ''}
+      <button class="btn btn-primary btn-block" type="submit" ${d.saving ? 'disabled' : ''}>${d.saving ? '만드는 중…' : '만들기'}</button>
+    </form>
+  </div>`
+}
+
+SCREENS.manage = () => {
+  const blocked = stateScreen(); if (blocked) return blocked
+  if (view.verified === null) return `<p class="muted" style="padding-top:3rem;text-align:center">관리 링크 확인 중…</p>`
+  if (!view.verified) return `<div class="stack" style="padding-top:3rem;text-align:center;align-items:center"><p class="h2">관리 링크가 맞지 않아요</p><p class="muted">링크 끝부분이 잘렸을 수 있어요. 받은 관리 링크를 그대로 열어 주세요.</p><button class="btn btn-secondary" data-go="a-${route.pid}">노래 넣는 화면으로 보기</button></div>`
+  const { playlist, songs } = current
+  const seen = prefs.seen[route.pid] || 0
+  const dotSince = view.seenAt ?? seen
+  const added = songs.filter((s) => s.by).sort((a, b) => b.at - a.at)
+  const unseen = added.filter((s) => s.at > seen).length
+  const link = addLink(route.pid)
+  return `<div class="stack">
+    <div class="stack-sm" style="gap:6px">
+      <p class="eyebrow">내 플레이리스트 · 관리</p>
+      <h1 class="h1">${esc(playlist.title)}</h1>
+      <p class="small">${songs.length}곡${added.length ? ` · 친구들이 넣은 곡 ${added.length}개` : ''}</p>
+    </div>
+    ${view.welcome ? `<div class="box tint"><p class="h2">만들었어요! 아래 두 링크만 기억하면 돼요</p><p class="small">친구에게는 <b>추가 링크</b>를, 나는 <b>관리 링크</b>를 보관해요. 로그인은 없어요.</p></div>` : ''}
+    <section class="box tint">
+      <div><p class="h2">추가 링크 · 친구에게 보내기</p><p class="small">이 링크로는 노래를 넣기만 할 수 있어요. 빼거나 고치지는 못해요.</p></div>
+      <div class="link-field"><code>${esc(link)}</code></div>
+      <button class="btn btn-primary btn-block" data-act="copy" data-text="${esc(link)}">링크 복사</button>
+      <div class="btn-row">
+        <button class="btn btn-secondary" data-act="ig">인스타 스토리</button>
+        <a class="btn btn-secondary" href="https://x.com/intent/tweet?text=${encodeURIComponent(`내 플레이리스트 ‘${playlist.title}’에 노래 하나 끼워 넣어줘`)}&url=${encodeURIComponent(link)}" target="_blank" rel="noopener noreferrer">X에 올리기</a>
+      </div>
+      ${view.shareGuide ? `<div class="guide box line" style="background:var(--bg)"><p class="h2" style="font-size:14px">추가 링크를 복사했어요</p><ol><li>인스타그램에서 스토리를 열어요</li><li>스티커에서 <b>링크</b>를 골라 붙여 넣어요</li></ol><p class="tiny">웹에서는 스토리에 링크를 바로 넣을 수 없어서(인스타그램 정책) 링크 스티커로 붙여요.</p><a class="btn btn-secondary btn-block" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer">인스타그램 열기</a></div>` : ''}
+      ${store.mode === 'local' ? `<p class="tiny">지금은 이 브라우저에만 저장되는 모드라, 다른 사람이 링크를 열면 플레이리스트가 안 보여요.</p>` : `<p class="tiny">데모 제한: 친구는 claude.ai에 로그인하면 링크로 보기까지 돼요. 노래 넣기는 claude.ai 규칙상 지금은 주인만 할 수 있어요. 친구 입장은 ‘친구 화면으로 미리 보기’로 체험해 보세요.</p>`}
+      <button class="btn btn-secondary btn-block" data-go="a-${route.pid}">친구 화면으로 미리 보기</button>
+    </section>
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="${view.tab === 'list'}" data-act="tab" data-value="list">플레이리스트</button>
+      <button role="tab" aria-selected="${view.tab === 'activity'}" data-act="tab" data-value="activity">활동${unseen ? `<span class="badge">${unseen}</span>` : ''}</button>
+    </div>
+    ${view.tab === 'list' ? `
+      <div class="stack-sm">
+        <button class="btn btn-secondary btn-block" data-act="toggle-insert">${view.inserting ? '자리 고르기 끝내기' : '나도 노래 넣기'}</button>
+        ${view.inserting ? '<p class="small">곡 사이 원하는 자리를 눌러 넣어요</p>' : ''}
+        ${trackList(songs, { insertable: !!view.inserting, askName: false, canDelete: true })}
+        ${playAll(songs)}
+      </div>`
+    : `<div class="stack-sm">
+        ${added.length ? `<ul class="feed">${added.map((s) => {
+          const idx = songs.findIndex((x) => x.id === s.id)
+          return `<li><span class="dot ${s.at > dotSince ? 'unseen' : ''}"></span><div class="body"><p class="what"><b>${esc(s.by)}님</b>이 ${idx + 1}번째 자리에 넣었어요</p><p class="song-name">${esc(s.title)}${s.artist ? ` · ${esc(s.artist)}` : ''}</p><p class="tiny">${dateFmt.format(s.at)}</p></div><div class="acts"><a class="icon-btn play" href="${esc(playUrl(s))}" target="_blank" rel="noopener noreferrer" aria-label="${esc(s.title)} 듣기">${ICON_PLAY}</a><button class="btn btn-secondary" data-act="delete" data-sid="${s.id}">빼기</button></div></li>`
+        }).join('')}</ul>` : `<p class="empty">아직 넣은 사람이 없어요. 추가 링크를 공유해 보세요.</p>`}
+      </div>`}
+    <section class="box gray">
+      <div><p class="h2">관리 링크 · 나만 보관</p><p class="small">이 링크가 있으면 곡을 뺄 수 있어요. 잃어버리면 다시 찾을 수 없으니 메모나 북마크에 저장해 두세요.</p></div>
+      <div class="link-row"><div class="link-field"><code>${esc(manageLink(route.pid, route.token))}</code></div><button class="btn btn-secondary" data-act="copy" data-text="${esc(manageLink(route.pid, route.token))}" data-done="관리 링크를 복사했어요">복사</button></div>
+    </section>
+  </div>`
+}
+
+SCREENS.add = () => {
+  const blocked = stateScreen(); if (blocked) return blocked
+  const { playlist, songs } = current
+  const mineSet = new Set(prefs.myAdds[route.pid] || [])
+  const isOwner = !!myToken(route.pid)
+  return `<div class="stack">
+    <div class="stack-sm" style="gap:6px">
+      <p class="eyebrow">${esc(playlist.owner)}님의 플레이리스트</p>
+      <h1 class="h1">${esc(playlist.title)}</h1>
+      <p class="muted">곡 사이 원하는 자리를 눌러 노래를 넣어 주세요. 넣으면 바로 들어가요.</p>
+    </div>
+    ${isOwner ? `<div class="box gray" style="flex-direction:row;align-items:center;justify-content:space-between"><p class="small">내 플레이리스트를 친구 화면으로 보는 중이에요</p><button class="btn btn-secondary" data-go="m-${route.pid}-${myToken(route.pid)}">관리로</button></div>` : ''}
+    ${view.error ? `<p class="err" role="alert">${esc(view.error)}</p>` : ''}
+    ${trackList(songs, { insertable: true, askName: true, canDelete: false, mineSet, fresh: view.justAdded })}
+    ${playAll(songs)}
+    ${mineSet.size ? `<p class="tiny">내가 넣은 곡은 이 브라우저에서 바로 뺄 수 있어요.</p>` : ''}
+    <div class="box gray"><p class="h2">나도 받아 볼래요</p><p class="small">내 플레이리스트를 만들고 링크를 걸면, 친구들이 노래를 넣어줘요.</p><button class="btn btn-secondary btn-block" data-go="new">내 플레이리스트 만들기</button></div>
+  </div>`
+}
+
+function inputKey(el) {
+  if (el.id) return '#' + el.id
+  const f = el.closest('form')
+  return f && el.name ? `${f.dataset.form}:${f.dataset.i ?? ''}:${el.name}` : null
+}
+function render() {
+  const fn = SCREENS[route.name] || SCREENS.home
+  const app = $('#app')
+  const kept = new Map()
+  for (const el of app.querySelectorAll('input:not([type=file]), textarea')) {
+    const k = inputKey(el)
+    if (k) kept.set(k, { value: el.value, focused: document.activeElement === el, start: el.selectionStart, end: el.selectionEnd })
+  }
+  if (route.name === 'manage' && view.tab === 'activity' && current.songs && view.verified) {
+    // 활동 탭을 보고 있으면 지금까지의 활동은 읽은 것으로 (배지 끄기)
+    const latest = Math.max(0, ...current.songs.filter((s) => s.by).map((s) => s.at))
+    if (latest > (prefs.seen[route.pid] || 0)) { prefs.seen[route.pid] = latest; savePrefs() }
+  }
+  app.innerHTML = fn()
+  for (const el of app.querySelectorAll('input:not([type=file]), textarea')) {
+    const k = inputKey(el)
+    const prev = k && kept.get(k)
+    if (!prev) continue
+    el.value = prev.value
+    if (prev.focused) { el.focus(); try { el.setSelectionRange(prev.start, prev.end) } catch { /* 일부 input 타입은 미지원 */ } }
+  }
+  const focusEl = document.querySelector('.insert-form input[name="title"]')
+  if (focusEl && view.focusInsert) { focusEl.focus(); view.focusInsert = false }
+  $('#nav-new').hidden = route.name === 'home' || route.name === 'new'
+  $('#foot').innerHTML = `음악은 유튜브에서 들어요. Kanqaroo는 곡 목록과 링크만 보여줘요.<br>${store?.mode === 'shared' ? '데모 · claude.ai 공유 저장소에 저장돼요.' : store ? '데모 · 지금은 이 브라우저에만 저장돼요.' : '데모'}`
+}
+
+/* ════════ 동작 ════════ */
+function positionFor(songs, i) {
+  if (!songs.length) return 1
+  if (i <= 0) return songs[0].pos - 1
+  if (i >= songs.length) return songs[songs.length - 1].pos + 1
+  return (songs[i - 1].pos + songs[i].pos) / 2
+}
+
+function writeError(e) {
+  const code = e?.code
+  if (code === 'invalid_argument') return '데모에서는 보기까지만 돼요. 노래 넣기는 claude.ai 규칙상 이 Artifact 주인만 할 수 있어요.'
+  if (code === 'quota_exceeded') return '저장 공간이 가득 찼어요. 오래된 플레이리스트를 정리해야 해요.'
+  return '저장하지 못했어요. 잠시 뒤에 다시 해 주세요.'
+}
+
+async function createPlaylist({ title, owner, draft, byExample = [] }) {
+  const pid = rand(12, LOWER)
+  const token = rand(24, ALNUM)
+  const now = Date.now()
+  const songs = draft.map((s, i) => ({ id: rand(10, LOWER), title: s.title, artist: s.artist || '', yt: s.yt || null, pos: i + 1, by: null, at: now }))
+  for (const ex of byExample) {
+    const at = ex.at
+    songs.push({ id: rand(10, LOWER), title: ex.title, artist: ex.artist, yt: null, pos: ex.pos, by: ex.by, at })
+  }
+  await store.createPlaylist(pid, { title, owner, mh: await sha256(token), createdAt: now, v: 2 }, songs)
+  rememberMine(pid, token, title)
+  return { pid, token }
+}
+
+const ACTIONS = {
+  async example() {
+    if (!store) return toast('잠깐만요, 불러오는 중이에요')
+    try {
+      const now = Date.now()
+      const { pid, token } = await createPlaylist({
+        title: '새벽 운전', owner: cleanName(prefs.nickname) || '지우',
+        draft: [
+          { title: 'Nights', artist: 'Frank Ocean' },
+          { title: 'Square (2017)', artist: '백예린' },
+          { title: '우리의 밤을 외워요', artist: '검정치마' },
+        ],
+        byExample: [
+          { title: 'Kyoto', artist: 'Phoebe Bridgers', by: '민지', pos: 1.5, at: now - 1000 * 60 * 42 },
+          { title: 'Plastic Love', artist: '竹内まりや', by: '민준', pos: 4, at: now - 1000 * 60 * 5 },
+        ],
+      })
+      go(`m-${pid}-${token}`)
+      toast('예시 플레이리스트를 만들었어요. 활동 탭을 열어 보세요')
+    } catch (e) { toast(writeError(e)) }
+  },
+  method(el) { view.method = el.dataset.value; keepCreateInputs(); render() },
+  'add-lines'() {
+    keepCreateInputs()
+    const box = $('#pl-lines')
+    const parsed = parseLines(box?.value)
+    if (!parsed.length) return toast('‘가수 - 제목’ 형식으로 한 줄에 한 곡씩 적어 주세요')
+    view.draft = [...view.draft, ...parsed].slice(0, MAX_SONGS)
+    box.value = ''
+    render()
+  },
+  'draft-remove'(el) { keepCreateInputs(); view.draft.splice(Number(el.dataset.i), 1); render() },
+  tab(el) {
+    if (el.dataset.value === 'activity' && view.tab !== 'activity') view.seenAt = prefs.seen[route.pid] || 0
+    view.tab = el.dataset.value
+    render()
+  },
+  'toggle-insert'() { view.inserting = !view.inserting; view.insertAt = null; render() },
+  slot(el) { view.insertAt = Number(el.dataset.i); view.formErrors = null; view.focusInsert = true; render() },
+  'cancel-insert'() { view.insertAt = null; view.formErrors = null; render() },
+  async delete(el) {
+    const sid = el.dataset.sid
+    const song = current.songs?.find((s) => s.id === sid)
+    try {
+      await store.deleteSong(route.pid, sid)
+      if (prefs.myAdds[route.pid]) { prefs.myAdds[route.pid] = prefs.myAdds[route.pid].filter((x) => x !== sid); savePrefs() }
+      lastDeleted = song ? { pid: route.pid, song } : null
+      toastUndo(song ? `‘${song.title}’을(를) 뺐어요` : '뺐어요')
+    } catch (e) { toast(writeError(e)) }
+  },
+  async undo() {
+    const d = lastDeleted
+    lastDeleted = null
+    $('#toast-slot').innerHTML = ''
+    if (!d) return
+    try {
+      await store.addSong(d.pid, d.song)
+      if (route.name === 'add' && d.song.by) { (prefs.myAdds[d.pid] ??= []).push(d.song.id); savePrefs() }
+      toast('되돌렸어요')
+    } catch (e) { toast(writeError(e)) }
+  },
+  copy(el) { copyText(el.dataset.text, el.dataset.done) },
+  ig() { copyText(addLink(route.pid), '추가 링크를 복사했어요'); view.shareGuide = true; render() },
+}
+
+function keepCreateInputs() {
+  const t = $('#pl-title'), o = $('#pl-owner')
+  if (t) view.title = t.value
+  if (o) view.owner = o.value
+}
+
+const FORMS = {
+  async create(form) {
+    keepCreateInputs()
+    const lines = $('#pl-lines')
+    if (lines && lines.value.trim()) view.draft = [...view.draft, ...parseLines(lines.value)].slice(0, MAX_SONGS)
+    const title = String(view.title || '').trim()
+    const owner = cleanName(view.owner ?? prefs.nickname)
+    view.errors = {}
+    if (!title) view.errors.title = '플레이리스트 이름을 적어 주세요'
+    if (!owner) view.errors.owner = '친구들에게 보일 이름을 적어 주세요'
+    if (view.errors.title || view.errors.owner) return render()
+    if (!store) { view.errors.form = '잠깐만요, 아직 불러오는 중이에요'; return render() }
+    view.saving = true; render()
+    try {
+      prefs.nickname = owner; savePrefs()
+      const { pid, token } = await createPlaylist({ title, owner, draft: view.draft })
+      pendingWelcome = true
+      go(`m-${pid}-${token}`)
+    } catch (e) { view.saving = false; view.errors.form = writeError(e); render() }
+  },
+  async insert(form) {
+    const i = Number(form.dataset.i)
+    const title = form.title.value.trim()
+    const artist = form.artist.value.trim()
+    const ytRaw = form.yt.value.trim()
+    const askName = !!form.name
+    const by = askName ? cleanName(form.name.value) : null
+    const yt = ytRaw ? ytId(ytRaw) : null
+    const err = !title ? '노래 제목을 적어 주세요'
+      : ytRaw && !yt ? '유튜브 영상 링크가 아닌 것 같아요 (비워 둬도 돼요)'
+      : askName && !by ? '내 이름을 적어 주세요. 주인에게 ‘○○님이 넣음’으로 보여요'
+      : (current.songs?.length || 0) >= MAX_SONGS ? `한 플레이리스트에는 ${MAX_SONGS}곡까지예요`
+      : ''
+    if (err) { view.formErrors = { msg: err }; render(); return }
+    const songs = current.songs || []
+    const song = { id: rand(10, LOWER), title, artist, yt, pos: positionFor(songs, i), by, at: Date.now() }
+    try {
+      await store.addSong(route.pid, song)
+      if (askName) {
+        prefs.nickname = by
+        ;(prefs.myAdds[route.pid] ??= []).push(song.id)
+        savePrefs()
+      }
+      view.insertAt = null; view.formErrors = null; view.justAdded = song.id
+      render()
+      toast(`${i + 1}번째 자리에 들어갔어요`)
+    } catch (e) { view.formErrors = { msg: writeError(e) }; render() }
+  },
+}
+
+/* 캡처 → Claude가 곡 목록을 읽음 */
+async function readScreenshot(file) {
+  keepCreateInputs()
+  view.ocr = { msg: 'Claude가 캡처에서 곡 이름을 읽고 있어요… (처음 한 번은 허용 창이 떠요)' }
+  render()
+  try {
+    const result = await sample.json(
+      '이 이미지는 음악 앱의 플레이리스트(곡 목록) 화면 캡처예요. 화면에 보이는 곡을 위에서부터 순서대로 읽어서 JSON 배열로만 답하세요.\n' +
+      '형식: [{"title": "곡 제목", "artist": "가수"}]\n' +
+      '- 메뉴, 버튼, 광고, 앨범 이름, 재생 시간은 빼세요.\n- 가수를 읽을 수 없으면 artist는 빈 문자열.\n- 곡이 없으면 [].',
+      { images: [file], modelTier: 'quick' },
+    )
+    const rows = Array.isArray(result) ? result : []
+    const songs = rows
+      .map((r) => ({ title: String(r?.title || '').trim().slice(0, 100), artist: String(r?.artist || '').trim().slice(0, 60), yt: null }))
+      .filter((s) => s.title)
+    view.draft = [...view.draft, ...songs].slice(0, MAX_SONGS)
+    view.ocr = songs.length ? { msg: `${songs.length}곡을 읽었어요. 틀린 곡은 아래에서 빼 주세요.` } : { msg: '캡처에서 곡을 찾지 못했어요. 곡 목록이 보이는 화면으로 다시 올려 주세요.', error: true }
+  } catch (e) {
+    const code = e?.code
+    view.ocr = { error: true, msg:
+      code === 'not_granted' || code === 'sampling_disabled' ? 'Claude 사용이 허용되지 않아 캡처를 읽을 수 없어요. ‘한 줄씩 적기’를 써 주세요.'
+      : code === 'image_rejected' ? '이 이미지는 읽을 수 없어요. PNG나 JPG 캡처로 올려 주세요.'
+      : code === 'rate_limited' ? '지금은 요청이 많아요. 잠시 뒤에 다시 올려 주세요.'
+      : '캡처를 읽지 못했어요. 다시 올리거나 ‘한 줄씩 적기’를 써 주세요.' }
+  }
+  render()
+}
+
+/* ════════ 이벤트 ════════ */
+document.addEventListener('click', (e) => {
+  const g = e.target.closest('[data-go]')
+  if (g) { e.preventDefault(); return go(g.dataset.go) }
+  const a = e.target.closest('[data-act]')
+  if (a && ACTIONS[a.dataset.act]) { e.preventDefault(); ACTIONS[a.dataset.act](a) }
+})
+document.addEventListener('submit', (e) => {
+  const f = e.target.closest('[data-form]')
+  if (!f) return
+  e.preventDefault()
+  FORMS[f.dataset.form]?.(f)
+})
+document.addEventListener('change', (e) => {
+  if (e.target.id === 'pl-shot' && e.target.files?.[0]) readScreenshot(e.target.files[0])
+})
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && view.insertAt != null) ACTIONS['cancel-insert']()
+})
+window.addEventListener('hashchange', onRoute)
+
+/* ════════ 시작 ════════ */
+onRoute()
+;(async () => {
+  let db = null
+  try { if (window.claude?.use) db = await window.claude.use('db') } catch { db = null }
+  signedOutInViewer = !db && !!window.claude?.use
+  store = db ? sharedStore(db) : localStore()
+  if ((route.name === 'manage' || route.name === 'add') && !unwatch) subscribe()
+  render()
+})()
+;(async () => {
+  try {
+    sample = window.claude?.use ? await window.claude.use('sample') : null
+    if (sample) canReadImages = !!(await sample.limits().catch(() => null))?.images
+  } catch { sample = null }
+  if (route.name === 'new') render()
+})()
+</script>

@@ -48,3 +48,6 @@ next-env.d.ts
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# 프로토타입 빌드 결과 (폰트 포함 1.4MB)
+prototype/dist/
