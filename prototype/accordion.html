@@ -1,0 +1,671 @@
+<title>Kanqaroo 아코디언 파일철</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;600;700&family=Nanum+Gothic+Coding:wght@400;700&family=Nanum+Pen+Script&display=swap">
+<style>
+/* Layout: 한 화면 무대. 어두운 책상 위 아코디언 파일철을 살짝 위에서 내려다봄.
+   칸막이(플레이리스트)가 바닥 경첩에서 앞으로 넘어가고, 옆면 주름이 벌어졌다 접힌다.
+   실험용이라 Kanqaroo 디자인 시스템은 일부러 안 따름. 어두운 책상 한 가지 테마로 고정 */
+:root {
+  color-scheme: dark;
+  --desk: #15161a;
+  --desk-glow: #272a35;
+  --chalk: #f2efe8;
+  --chalk-dim: #a9a59c;
+  --kraft: #c49a68;
+  --kraft-dk: #9c7445;
+  --kraft-lt: #d9b689;
+  --paper: #fbf9f3;
+  --paper-line: #e3ddcf;
+  --ink: #1d1b19;
+  --ink-soft: #66615a;
+  --elastic: #b3263a;
+  --display: 'Black Han Sans', 'IBM Plex Sans KR', 'Apple SD Gothic Neo', sans-serif;
+  --body: 'IBM Plex Sans KR', 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif;
+  --mono: 'Nanum Gothic Coding', ui-monospace, Menlo, monospace;
+  --pen: 'Nanum Pen Script', 'IBM Plex Sans KR', cursive;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { height: 100%; }
+body { height: 100%; margin: 0; overflow: hidden; background-color: var(--desk); background-image: radial-gradient(110% 70% at 50% 28%, var(--desk-glow), var(--desk) 72%); color: var(--chalk); font-family: var(--body); word-break: keep-all; -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--desk); }
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--chalk); outline-offset: 3px; }
+
+.app { height: 100%; display: flex; flex-direction: column; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.bar { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 54px; }
+.mark { font-family: var(--display); font-size: 20px; letter-spacing: -0.01em; }
+.count { font-family: var(--mono); font-size: 13px; color: var(--chalk-dim); font-variant-numeric: tabular-nums; }
+.bar-btns { display: flex; gap: 6px; }
+.chip { height: 34px; padding: 0 12px; border-radius: 999px; border: 1px solid color-mix(in srgb, var(--chalk) 28%, transparent); background: transparent; font-size: 13px; cursor: pointer; }
+.chip:hover { background: color-mix(in srgb, var(--chalk) 10%, transparent); }
+.chip[aria-pressed="false"] { color: var(--chalk-dim); }
+
+.stage { position: relative; flex: 1; min-height: 0; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+.stage.dragging { cursor: grabbing; }
+.gusset { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.file { position: absolute; inset: 0; perspective: 1300px; perspective-origin: 50% 6%; }
+.hint { position: absolute; left: 0; right: 0; bottom: 3%; margin: 0; text-align: center; font-family: var(--pen); font-size: 24px; color: var(--chalk); pointer-events: none; transition: opacity .4s; }
+.hint.gone { opacity: 0; }
+
+/* ── 칸막이(포켓) ── */
+.pocket { position: absolute; left: 50%; bottom: var(--hingeB, 13%); width: var(--W, 340px); height: var(--H, 440px); margin-left: calc(var(--W, 340px) / -2); transform-origin: 50% 100%; will-change: transform; --c-dk: color-mix(in srgb, var(--c) 78%, #000); }
+.pocket > .back { position: absolute; inset: 0; border-radius: 10px 10px 5px 5px; background: var(--c-dk); }
+.tab { opacity: var(--tabop, 1); position: absolute; top: -30px; height: 34px; width: 40%; padding: 0 12px; display: flex; align-items: center; border-radius: 10px 10px 0 0; background: var(--c-dk); color: var(--on); font-family: var(--display); font-size: 15px; white-space: nowrap; }
+.tab span { overflow: hidden; text-overflow: ellipsis; }
+.paper { position: absolute; left: 7%; right: 7%; top: 5%; bottom: 7%; padding: 10px 12px; border-radius: 3px; background: var(--paper); color: var(--ink); font-family: var(--mono); font-size: 12px; line-height: 1.85; overflow: hidden; }
+.paper p { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.paper b { color: var(--ink-soft); font-weight: 700; margin-right: 4px; }
+.peeks { position: absolute; left: 7%; right: 7%; top: calc(24% - 26px); height: 60px; }
+.peek { position: absolute; top: var(--lift); width: 31%; height: 50px; padding: 2px 8px; background: var(--sc); color: var(--ink); font-family: var(--pen); font-size: 21px; line-height: 1.1; transform: rotate(var(--r)); box-shadow: 0 1px 0 rgb(0 0 0 / .14); white-space: nowrap; overflow: hidden; }
+.peek.fresh { animation: peekpop .5s cubic-bezier(.3,1.6,.5,1); }
+@keyframes peekpop { from { transform: translateY(26px) rotate(var(--r)); } }
+.front { position: absolute; left: 0; right: 0; bottom: 0; height: 76%; border-radius: 4px 4px 8px 8px; background: var(--c); box-shadow: inset 0 3px 0 rgb(255 255 255 / .18), inset 0 -10px 0 rgb(0 0 0 / .07); -webkit-mask: radial-gradient(circle 24px at 50% 0, transparent 23px, #000 24px); mask: radial-gradient(circle 24px at 50% 0, transparent 23px, #000 24px); }
+.label { position: absolute; top: 20%; left: 9%; right: 9%; padding: 14px 16px 12px; background: #fffdf7; color: var(--ink); transform: rotate(-1.2deg); box-shadow: 0 1px 0 rgb(0 0 0 / .18); }
+.l-title { margin: 0; font-family: var(--display); font-size: clamp(22px, 7.4vw, 30px); line-height: 1.1; text-wrap: balance; }
+.l-who { margin: 6px 0 0; font-size: 13px; color: var(--ink-soft); }
+.l-meta { margin: 2px 0 0; font-family: var(--mono); font-size: 12px; color: var(--ink-soft); }
+.front-hint { position: absolute; left: 0; right: 0; bottom: 9%; margin: 0; text-align: center; font-family: var(--pen); font-size: 22px; color: var(--on); opacity: 0; transition: opacity .25s; }
+.pocket.is-focus .front-hint { opacity: .85; }
+.shade { position: absolute; inset: -30px 0 0 0; border-radius: 10px 10px 5px 5px; background: #000; opacity: var(--shade, 0); pointer-events: none; }
+.pocket.is-back .paper, .pocket.is-back .peeks, .pocket.is-back .front, .pocket.is-back .tab span { visibility: hidden; }
+.pocket.pulled .paper, .pocket.pulled .peeks { visibility: hidden; }
+
+/* 앞표지(뚜껑 + 고무줄) · 뒤표지 */
+.pocket.cover > .back, .pocket.backcover > .back { background: var(--kraft-dk); }
+.pocket.cover .front { height: 100%; background: var(--kraft); -webkit-mask: none; mask: none; border-radius: 6px; }
+.cover-label { position: absolute; left: 10%; right: 10%; top: 40%; text-align: center; color: var(--ink); }
+.cover-label h1 { margin: 0; font-family: var(--display); font-size: clamp(34px, 11vw, 46px); font-weight: 400; letter-spacing: -0.01em; }
+.cover-label p { margin: 6px 0 0; font-family: var(--mono); font-size: 12px; color: color-mix(in srgb, var(--ink) 70%, var(--kraft)); }
+.cover-pen { position: absolute; left: 0; right: 0; bottom: 12%; margin: 0; text-align: center; font-family: var(--pen); font-size: 28px; color: var(--ink); }
+.flap { position: absolute; top: -4px; left: -3%; right: -3%; height: 32%; border-radius: 6px 6px 48% 48% / 6px 6px 38% 38%; background: var(--kraft-dk); box-shadow: 0 5px 0 rgb(0 0 0 / .16); transform-origin: 50% 0; transform: perspective(700px) rotateX(0deg); transition: transform .5s cubic-bezier(.3,1.35,.5,1); }
+.unflapped .flap { transform: perspective(700px) rotateX(178deg); }
+.band { position: absolute; top: -5%; bottom: -5%; left: 82%; width: 14px; border-radius: 7px; background: var(--elastic); box-shadow: inset -3px 0 0 rgb(0 0 0 / .25); transform-origin: 50% 100%; transition: transform .38s cubic-bezier(.5,-0.7,.7,1.5), opacity .2s .22s; }
+.band::after { content: ""; position: absolute; left: 50%; top: 31%; width: 26px; height: 26px; margin-left: -13px; border-radius: 50%; background: var(--kraft-lt); box-shadow: 0 2px 0 rgb(0 0 0 / .25); }
+.unbanded .band { transform: translate(70px, -30px) rotate(38deg) scaleY(.3); opacity: 0; }
+.pocket.cover.is-back .cover-label, .pocket.cover.is-back .cover-pen, .pocket.cover.is-back .flap, .pocket.cover.is-back .band { visibility: hidden; }
+.backcover .back { border-radius: 10px; }
+.backcover .end { position: absolute; left: 0; right: 0; top: 7%; margin: 0; text-align: center; font-family: var(--mono); font-size: 12px; color: color-mix(in srgb, var(--ink) 60%, var(--kraft)); }
+
+/* ── 꺼낸 시트 ── */
+.layer { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: calc(16px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
+.backdrop { position: absolute; inset: 0; background: rgb(10 10 14 / .62); backdrop-filter: blur(3px); }
+.card { position: relative; width: min(100%, 440px); max-height: 100%; display: flex; flex-direction: column; border-radius: 6px; background: var(--paper); color: var(--ink); transform-origin: 0 0; box-shadow: 0 30px 60px -20px rgb(0 0 0 / .6); overflow: hidden; }
+.card-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 14px 12px 18px; background: var(--c); color: var(--on); }
+.card-title { margin: 0; font-family: var(--display); font-size: 24px; font-weight: 400; line-height: 1.15; min-width: 0; }
+.put-back { flex: none; height: 34px; padding: 0 12px; border-radius: 999px; border: 1.5px solid currentColor; background: transparent; font-size: 13px; font-weight: 600; cursor: pointer; }
+.card-body { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 18px 8px; overscroll-behavior: contain; }
+.card-who { margin: 0 0 6px; font-size: 13px; color: var(--ink-soft); }
+.lines { margin: 0; padding: 0; list-style: none; }
+.lines li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 10px 2px; border-bottom: 1px dashed var(--paper-line); }
+.lines .n { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+.lines .s b { display: block; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lines .s i { display: block; font-style: normal; font-size: 13px; color: var(--ink-soft); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lines li.slip { margin: 8px -8px; padding: 10px 12px; border-bottom: 0; background: var(--sc); transform: rotate(var(--r)); box-shadow: 0 1px 0 rgb(0 0 0 / .12), 0 8px 14px -10px rgb(0 0 0 / .45); }
+.lines .pen { font-family: var(--pen); font-size: 22px; line-height: 1; white-space: nowrap; }
+.card-foot { flex: none; padding: 10px 18px 16px; }
+.add { width: 100%; height: 48px; border: 0; border-radius: 999px; background: var(--c); color: var(--on); font-family: var(--display); font-size: 19px; cursor: pointer; }
+.slip-form { flex: none; margin: 0 16px 16px; padding: 12px 14px 14px; background: #ffe169; transform: rotate(-1deg); box-shadow: 0 10px 18px -12px rgb(0 0 0 / .5); display: grid; gap: 4px; }
+.slip-form .pen-h { margin: 0 0 2px; font-family: var(--pen); font-size: 26px; line-height: 1; }
+.slip-form input { width: 100%; height: 38px; padding: 0 2px; border: 0; border-bottom: 1.5px dashed rgb(29 27 25 / .45); background: transparent; color: var(--ink); font-family: var(--pen); font-size: 25px; outline: none; }
+.slip-form input::placeholder { color: rgb(29 27 25 / .4); }
+.slip-form input:focus { border-bottom-style: solid; }
+.sf-err { min-height: 18px; margin: 2px 0 0; font-size: 13px; font-weight: 600; color: #8a1c1c; }
+.sf-row { display: grid; grid-template-columns: auto 1fr; gap: 8px; margin-top: 4px; }
+.sf-row button { height: 42px; border-radius: 999px; padding: 0 16px; font-weight: 700; cursor: pointer; }
+.sf-cancel { border: 1.5px solid var(--ink); background: transparent; color: var(--ink); }
+.sf-go { border: 0; background: var(--ink); color: #ffe169; font-family: var(--display); font-size: 18px; font-weight: 400; }
+
+.flyer { position: fixed; left: 0; top: 0; z-index: 60; width: 168px; height: 92px; padding: 8px 12px; display: flex; flex-direction: column; justify-content: space-between; color: var(--ink); font-family: var(--pen); box-shadow: 0 12px 20px -12px rgb(0 0 0 / .6); pointer-events: none; }
+.flyer b { font-size: 24px; font-weight: 400; line-height: 1.05; overflow: hidden; }
+.flyer span { font-size: 20px; text-align: right; }
+.pop { position: fixed; z-index: 61; margin: 0; font-family: var(--pen); font-size: 40px; color: var(--chalk); pointer-events: none; }
+@media (prefers-reduced-motion: reduce) {
+  .flap, .band, .hint, .front-hint { transition: none; }
+  .peek.fresh { animation: none; }
+}
+</style>
+
+<div class="app">
+  <header class="bar">
+    <span class="mark">kanqaroo</span>
+    <span class="count" id="count" aria-live="polite">닫힘</span>
+    <div class="bar-btns">
+      <button class="chip" id="sound" aria-pressed="true">소리 켬</button>
+      <button class="chip" id="close-file" hidden>닫기</button>
+    </div>
+  </header>
+  <div class="stage" id="stage" role="application" aria-label="플레이리스트 파일철. 위아래로 넘기고, 누르면 꺼내 봐요. 방향키와 Enter도 돼요" tabindex="0">
+    <svg class="gusset" id="gusset" aria-hidden="true"><path id="gl1" fill="var(--kraft-lt)"/><path id="gl2" fill="var(--kraft-dk)"/><path id="gr1" fill="var(--kraft-lt)"/><path id="gr2" fill="var(--kraft-dk)"/></svg>
+    <div class="file" id="file"></div>
+    <p class="hint" id="hint">고무줄을 눌러서 열어 보세요</p>
+  </div>
+</div>
+<div class="layer" id="layer" hidden>
+  <div class="backdrop" id="backdrop" data-act="close-sheet"></div>
+  <article class="card" id="card" role="dialog" aria-modal="true" aria-labelledby="card-title"></article>
+</div>
+
+<script>
+'use strict'
+/* ════════ 데이터 (예시) ════════ */
+const NOW = Date.now(), MIN = 60e3, HOUR = 60 * MIN
+const S = (t, a, by = null, ago = 0) => ({ t, a, by, at: NOW - ago })
+const LISTS = [
+  { title: '새벽 운전', owner: '지우', c: '#e5533d', songs: [S('Nights', 'Frank Ocean'), S('Kyoto', 'Phoebe Bridgers', '민지', 2 * HOUR), S('Square (2017)', '백예린'), S('Antifreeze', '검정치마'), S('Plastic Love', '竹内まりや', '민준', 20 * MIN), S('Space Song', 'Beach House'), S('밤편지', '아이유')] },
+  { title: '첫 자취방', owner: '준호', c: '#f2b33d', songs: [S('별일 없이 산다', '장기하와 얼굴들'), S('위잉위잉', '혁오'), S('난춘', '새소년', '민지', 40 * MIN), S('NO PAIN', '실리카겔'), S('주저하는 연인들을 위해', '잔나비')] },
+  { title: '헬스장 금지곡', owner: '도윤', c: '#1f9e89', songs: [S('Lose Yourself', 'Eminem'), S('Stronger', 'Kanye West'), S('Numb', 'Linkin Park'), S('말달리자', '크라잉넛', '서준', 5 * HOUR), S('낭만고양이', '체리필터', '유나', 3 * HOUR), S('고백 (Go Back)', '다이나믹 듀오')] },
+  { title: '비 오는 날 작업용', owner: '민지', c: '#2e5aac', songs: [S('No Surprises', 'Radiohead'), S('Weird Fishes/Arpeggi', 'Radiohead'), S('Chamber of Reflection', 'Mac DeMarco', '하늘', 9 * HOUR), S('기억을 걷는 시간', '넬'), S('바람이 분다', '이소라'), S('산책', '백예린', '지우', 5 * HOUR)] },
+  { title: '출근길 30분', owner: '서연', c: '#ef8fb0', songs: [S('Blinding Lights', 'The Weeknd'), S('Hype Boy', 'NewJeans'), S('우주를 줄게', '볼빨간사춘기'), S('Yellow', 'Coldplay', '도윤', 30 * HOUR), S('봄이 좋냐??', '10cm')] },
+  { title: '여름 끝물', owner: '하늘', c: '#8ba44a', songs: [S('Maria También', 'Khruangbin'), S('The Less I Know The Better', 'Tame Impala'), S('TOMBOY', '혁오'), S('Ditto', 'NewJeans', '서연', 50 * HOUR), S('Get Lucky', 'Daft Punk')] },
+  { title: '이별 후 3일차', owner: '유나', c: '#a88bd6', songs: [S('너의 모든 순간', '성시경'), S('모든 날, 모든 순간', '폴킴', '지우', 7 * HOUR), S('Someone Like You', 'Adele'), S('서른 즈음에', '김광석'), S('Paris in the Rain', 'Lauv', '민준', HOUR)] },
+  { title: '노래방 18번', owner: '서준', c: '#f07e2e', songs: [S('가시', '버즈'), S('Tears', '소찬휘', '수아', 2 * HOUR), S('하하하쏭', '자우림'), S('해변의 여인', '쿨'), S('소녀시대', '이승철', '도윤', 12 * HOUR)] },
+  { title: '고양이랑 낮잠', owner: '수아', c: '#6bb6e8', songs: [S("Don't Know Why", 'Norah Jones'), S('My Funny Valentine', 'Chet Baker'), S('공드리', '혁오', '유나', 4 * HOUR), S('무릎', '아이유')] },
+  { title: '시험 기간', owner: '지호', c: '#4c6b5a', songs: [S('Aruarian Dance', 'Nujabes'), S('Summer', '久石譲'), S('사건의 지평선', '윤하', '서준', 6 * HOUR), S('Fix You', 'Coldplay')] },
+]
+const N = LISTS.length
+const SLIP_COLORS = ['#ffe169', '#a7f3c9', '#ffc4b0', '#c9d7ff', '#f9c6f0']
+function hash(s) { let h = 0; for (const ch of String(s)) h = (h * 31 + ch.codePointAt(0)) | 0; return Math.abs(h) }
+const slipColor = (name) => SLIP_COLORS[hash(name) % SLIP_COLORS.length]
+const slipTilt = (s) => ((hash(s.t + s.by) % 7) - 3) * 0.55
+function onColor(hex) {
+  const n = parseInt(hex.slice(1), 16), r = (n >> 16) / 255, g = ((n >> 8) & 255) / 255, b = (n & 255) / 255
+  const lin = (v) => (v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4)
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b) > 0.32 ? '#1d1b19' : '#fbf9f3'
+}
+LISTS.forEach((l) => { l.on = onColor(l.c) })
+
+/* ════════ 유틸 ════════ */
+const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+const $ = (s, r = document) => r.querySelector(s)
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+const pad = (n) => String(n).padStart(2, '0')
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v))
+const ease = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2)
+
+/* ════════ 소리 (WebAudio로 즉석 합성) ════════ */
+let actx = null, noise = null, soundOn = true, lastFlick = 0
+function ac() {
+  if (!actx) {
+    try {
+      actx = new (window.AudioContext || window.webkitAudioContext)()
+      noise = actx.createBuffer(1, actx.sampleRate * 0.5, actx.sampleRate)
+      const d = noise.getChannelData(0)
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1
+    } catch { actx = null }
+  }
+  if (actx?.state === 'suspended') actx.resume()
+  return actx
+}
+function burst({ type = 'bandpass', freq = 2500, freqTo = null, q = 1, gain = 0.15, dur = 0.06, attack = 0.004 }) {
+  const ctx = soundOn && ac()
+  if (!ctx) return
+  const t = ctx.currentTime
+  const src = ctx.createBufferSource(); src.buffer = noise
+  const fl = ctx.createBiquadFilter(); fl.type = type; fl.frequency.setValueAtTime(freq, t); fl.Q.value = q
+  if (freqTo) fl.frequency.exponentialRampToValueAtTime(freqTo, t + dur)
+  const g = ctx.createGain()
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(gain, t + attack); g.gain.exponentialRampToValueAtTime(0.0001, t + dur)
+  src.connect(fl).connect(g).connect(ctx.destination)
+  src.start(t, Math.random() * 0.3, dur + 0.05)
+}
+function tone(f0, f1, dur, gain, type = 'sine') {
+  const ctx = soundOn && ac()
+  if (!ctx) return
+  const t = ctx.currentTime
+  const o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur)
+  const g = ctx.createGain(); g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur)
+  o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + dur + 0.02)
+}
+function flick(strength = 1) {
+  const now = performance.now()
+  if (now - lastFlick < 26) return
+  lastFlick = now
+  burst({ freq: 1800 + Math.random() * 2200, q: 0.8, gain: 0.16 * strength, dur: 0.055 })
+  try { navigator.vibrate?.(6) } catch { /* 진동 미지원 */ }
+}
+const snapSound = () => { tone(880, 130, 0.1, 0.18, 'triangle'); burst({ freq: 3200, gain: 0.12, dur: 0.03 }) }
+const thud = () => { burst({ type: 'lowpass', freq: 520, q: 0.7, gain: 0.35, dur: 0.14 }); tone(130, 62, 0.16, 0.22) }
+const swish = (back = false) => burst({ freq: back ? 2600 : 700, freqTo: back ? 700 : 2600, q: 0.6, gain: 0.08, dur: 0.24, attack: 0.05 })
+
+/* ════════ 무대 만들기 ════════ */
+const stage = $('#stage'), file = $('#file'), hint = $('#hint'), countEl = $('#count')
+const POCKETS = []
+let cover, backcover
+function pocketInner(l, i, freshLast = false) {
+  const slips = l.songs.filter((s) => s.by)
+  const shown = slips.slice(-3)
+  const peeks = shown.map((s, k) => `<span class="peek${freshLast && k === shown.length - 1 ? ' fresh' : ''}" style="left:${4 + k * 33}%;--r:${[-5, 3, -2][k]}deg;--sc:${slipColor(s.by)};--lift:${[0, 7, 3][k]}px">${esc(s.by)}</span>`).join('')
+  const lines = l.songs.slice(0, 3).map((s, k) => `<p><b>${pad(k + 1)}</b>${esc(s.t)} — ${esc(s.a)}</p>`).join('')
+  return `<div class="back"></div>
+    <div class="tab" style="left:${(i % 4) * 20}%"><span>${esc(l.title)}</span></div>
+    <div class="paper">${lines}</div>
+    <div class="peeks">${peeks}</div>
+    <div class="front"><div class="label"><p class="l-title">${esc(l.title)}</p><p class="l-who">${esc(l.owner)}님의 플레이리스트</p><p class="l-meta">${l.songs.length}곡 · 쪽지 ${slips.length}장</p></div><p class="front-hint">눌러서 꺼내기</p></div>
+    <div class="shade"></div>`
+}
+function build() {
+  backcover = document.createElement('div')
+  backcover.className = 'pocket backcover'
+  backcover.style.setProperty('--c', '#c49a68')
+  backcover.innerHTML = '<div class="back"></div><p class="end">— 마지막 칸 —</p><div class="shade"></div>'
+  file.append(backcover)
+  LISTS.forEach((l, i) => {
+    const p = document.createElement('div')
+    p.className = 'pocket'
+    p.dataset.i = i
+    p.style.setProperty('--c', l.c)
+    p.style.setProperty('--on', l.on)
+    p.innerHTML = pocketInner(l, i)
+    file.append(p)
+    POCKETS.push(p)
+  })
+  cover = document.createElement('div')
+  cover.className = 'pocket cover'
+  cover.style.setProperty('--c', '#c49a68')
+  cover.innerHTML = `<div class="back"></div><div class="front"><div class="cover-label"><h1>kanqaroo</h1><p>남의 플레이리스트 ${N}칸</p></div><p class="cover-pen">↑ 눌러서 열기</p></div><div class="flap"></div><div class="band"></div><div class="shade"></div>`
+  file.append(cover)
+}
+
+/* ════════ 상태 · 물리 ════════ */
+let f = 0, vel = 0, target = 0
+let O = 0, Ov = 0, Otarget = 0
+let fileOpen = false, dragging = false, raf = 0, last = 0
+let lastCell = 0, flips = 0
+const bumps = new Array(N + 2).fill(0)
+let openIdx = null, myName = ''
+let G = { sw: 360, sh: 640, W: 320, H: 420, hinge: 560, step: 70 }
+
+function measure() {
+  const r = stage.getBoundingClientRect()
+  const W = Math.min(r.width - 44, 430)
+  const H = Math.min(r.height * 0.6, 520, W * 1.3)
+  G = { sw: r.width, sh: r.height, W, H, hinge: r.height * 0.87, step: clamp(r.height * 0.1, 54, 88) }
+  file.style.setProperty('--W', `${W}px`)
+  file.style.setProperty('--H', `${H}px`)
+  file.style.setProperty('--hingeB', `${r.height - G.hinge}px`)
+  const svg = $('#gusset')
+  svg.setAttribute('viewBox', `0 0 ${r.width} ${r.height}`)
+}
+
+/* d = 칸 번호 − 지금 보는 위치. 0이면 똑바로 선 칸, 양수는 뒤에 기대 선 칸, 음수는 앞으로 넘어간 칸 */
+const FLAT = -84
+function pose(d) {
+  let rot, ty, tz, shade, op = 1
+  if (d >= 0) {
+    const k = Math.min(d, 9)
+    rot = 3 + k * 1.3; ty = -k * 17; tz = -k * 34; shade = Math.min(0.55, k * 0.07)
+    if (d > 8) op = Math.max(0, 9 - d)
+  } else if (d > -1) {
+    const t = ease(-d)
+    rot = 3 + (FLAT - 3) * t; ty = 8 * t; tz = 20 * t; shade = 0.38 * t
+  } else {
+    const k = Math.min(-d - 1, 6)
+    rot = FLAT - k * 1.2; ty = 8 + k * 5; tz = 20 + k * 3; shade = 0.42 + k * 0.03
+    if (-d > 6) op = Math.max(0, 7 + d)
+  }
+  return { rot, ty, tz, shade, op }
+}
+function place(el, i, p) {
+  const b = bumps[i + 1] || 0
+  const rot = p.rot * O - b * 5
+  const ty = p.ty * O + b * 6
+  const tz = p.tz * O - (i + 1) * (1 - Math.min(1, O)) * 1.5
+  el.style.transform = `translate3d(0,${ty.toFixed(2)}px,${tz.toFixed(2)}px) rotateX(${rot.toFixed(2)}deg)`
+  el.style.opacity = p.op
+  el.style.visibility = p.op < 0.01 ? 'hidden' : ''
+  el.style.setProperty('--shade', (p.shade * clamp(O, 0, 1)).toFixed(3))
+  const back = rot < -70
+  if (el._back !== back) { el._back = back; el.classList.toggle('is-back', back) }
+}
+function layout() {
+  const cell = Math.round(f)
+  const settled = Math.abs(f - cell) < 0.18 && O > 0.9
+  for (let i = 0; i < N; i++) {
+    const el = POCKETS[i]
+    const d = i - f
+    place(el, i, pose(d))
+    el.style.zIndex = d >= 0 ? 500 - Math.round(d * 10) : 600 + i
+    const focus = settled && i === cell
+    if (el._focus !== focus) { el._focus = focus; el.classList.toggle('is-focus', focus) }
+  }
+  const dc = -1 - f
+  place(cover, -1, pose(dc))
+  cover.style.zIndex = 599
+  const pb = pose(Math.min(N - f, 8.6))
+  pb.rot += 5; pb.shade = 0.3; pb.op = 1
+  place(backcover, N, pb)
+  backcover.style.zIndex = 1
+  file.style.setProperty('--tabop', clamp(O * 1.6 - 0.3, 0, 1).toFixed(3))
+  drawGussets()
+}
+function drawGussets() {
+  const { sw, W, H, hinge } = G
+  const o = clamp(O, 0, 1.15)
+  const frac = f - Math.floor(f)
+  const amp = Math.max(0, o * (9 + 15 * Math.sin(Math.PI * frac)) + Math.min(12, Math.abs(vel) * 2.5))
+  const h = H * (0.3 + 0.6 * clamp(O, 0, 1))
+  const n = 10
+  const L = (sw - W) / 2 - 1, R = (sw + W) / 2 + 1
+  let a1 = '', a2 = '', b1 = '', b2 = ''
+  for (let k = 0; k < n; k++) {
+    const y0 = (hinge - (k * h) / n).toFixed(1), y1 = (hinge - ((k + 1) * h) / n).toFixed(1)
+    const lo = (L - amp).toFixed(1), ro = (R + amp).toFixed(1)
+    if (k % 2 === 0) {
+      a1 += `M${L} ${y0}L${lo} ${y1}L${L} ${y1}Z`
+      b1 += `M${R} ${y0}L${ro} ${y1}L${R} ${y1}Z`
+    } else {
+      a2 += `M${L} ${y0}L${lo} ${y0}L${L} ${y1}Z`
+      b2 += `M${R} ${y0}L${ro} ${y0}L${R} ${y1}Z`
+    }
+  }
+  $('#gl1').setAttribute('d', a1); $('#gl2').setAttribute('d', a2)
+  $('#gr1').setAttribute('d', b1); $('#gr2').setAttribute('d', b2)
+}
+function crossing() {
+  const cell = clamp(Math.round(f), 0, N - 1)
+  if (cell === lastCell) return
+  const n = Math.abs(cell - lastCell)
+  lastCell = cell
+  for (let k = 0; k < Math.min(n, 4); k++) setTimeout(() => flick(0.8 + Math.random() * 0.4), k * 24)
+  countEl.textContent = `${pad(cell + 1)} / ${pad(N)}`
+  flips += n
+  if (flips >= 3) hint.classList.add('gone')
+}
+function tick(t) {
+  raf = 0
+  const dt = last ? Math.min(0.033, (t - last) / 1000) : 0.016
+  last = t
+  if (!dragging) {
+    if (RM) { f = target; vel = 0 }
+    else {
+      vel += ((target - f) * 230 - vel * 27) * dt
+      f += vel * dt
+      if (Math.abs(target - f) < 0.0008 && Math.abs(vel) < 0.003) { f = target; vel = 0 }
+    }
+  }
+  if (RM) { O = Otarget; Ov = 0 }
+  else {
+    Ov += ((Otarget - O) * 70 - Ov * 11) * dt
+    O += Ov * dt
+    if (Math.abs(Otarget - O) < 0.001 && Math.abs(Ov) < 0.003) { O = Otarget; Ov = 0 }
+  }
+  for (let i = 0; i < bumps.length; i++) if (bumps[i]) { bumps[i] *= Math.exp(-dt * 7); if (bumps[i] < 0.002) bumps[i] = 0 }
+  crossing()
+  layout()
+  if (!fileOpen && O < 0.04 && cover.classList.contains('unflapped')) cover.classList.remove('unflapped', 'unbanded')
+  const busy = dragging || f !== target || O !== Otarget || bumps.some(Boolean)
+  if (busy) kick()
+  else last = 0
+}
+function kick() { if (!raf) raf = requestAnimationFrame(tick) }
+
+/* ════════ 열기 · 닫기 · 넘기기 ════════ */
+function openFile() {
+  if (fileOpen) return
+  fileOpen = true
+  ac()
+  snapSound()
+  cover.classList.add('unbanded')
+  hint.textContent = '↑ 위로 쓸어 넘겨 보세요'
+  setTimeout(() => cover.classList.add('unflapped'), RM ? 0 : 150)
+  setTimeout(() => {
+    Otarget = 1
+    kick()
+    for (let k = 0; k < Math.min(N, 8); k++) setTimeout(() => flick(0.5 + k * 0.06), k * 38)
+    countEl.textContent = `${pad(Math.round(f) + 1)} / ${pad(N)}`
+    $('#close-file').hidden = false
+  }, RM ? 0 : 330)
+}
+function closeFile() {
+  if (!fileOpen) return
+  closeSheet()
+  fileOpen = false
+  Otarget = 0
+  kick()
+  tone(300, 180, 0.12, 0.12, 'triangle')
+  setTimeout(() => { if (!fileOpen) { snapSound(); cover.classList.remove('unflapped', 'unbanded') } }, RM ? 0 : 520)
+  countEl.textContent = '닫힘'
+  hint.textContent = '고무줄을 눌러서 열어 보세요'
+  hint.classList.remove('gone')
+  flips = 0
+  $('#close-file').hidden = true
+}
+function goTo(i) { target = clamp(i, 0, N - 1); kick() }
+
+/* 끌어서 넘기기 */
+let down = null, samples = []
+stage.addEventListener('pointerdown', (e) => {
+  if (e.button !== 0 || openIdx != null) return
+  ac()
+  down = { x: e.clientX, y: e.clientY, f0: f, moved: false }
+  samples = [{ y: e.clientY, t: performance.now() }]
+  stage.setPointerCapture(e.pointerId)
+})
+stage.addEventListener('pointermove', (e) => {
+  if (!down) return
+  const dy = e.clientY - down.y
+  if (!down.moved && Math.hypot(dy, e.clientX - down.x) > 6) {
+    down.moved = true
+    if (fileOpen) { dragging = true; stage.classList.add('dragging'); vel = 0 }
+  }
+  if (!dragging) return
+  let nf = down.f0 - dy / G.step
+  if (nf < 0) nf *= 0.35
+  if (nf > N - 1) nf = N - 1 + (nf - (N - 1)) * 0.35
+  f = nf
+  const now = performance.now()
+  samples.push({ y: e.clientY, t: now })
+  while (samples.length > 2 && now - samples[0].t > 110) samples.shift()
+  kick()
+})
+function endDrag(e, cancelled) {
+  if (!down) return
+  const d = down
+  down = null
+  if (!d.moved) { if (!cancelled) tap(e.clientX, e.clientY); return }
+  if (!dragging) return
+  dragging = false
+  stage.classList.remove('dragging')
+  const a = samples[0], b = samples[samples.length - 1]
+  const dt = Math.max(0.016, (b.t - a.t) / 1000)
+  const v = -((b.y - a.y) / dt) / G.step
+  vel = clamp(v, -40, 40)
+  target = clamp(Math.round(f + vel * 0.17), 0, N - 1)
+  kick()
+}
+stage.addEventListener('pointerup', (e) => endDrag(e, false))
+stage.addEventListener('pointercancel', (e) => endDrag(e, true))
+function tap(x, y) {
+  if (!fileOpen) { openFile(); return }
+  const el = document.elementFromPoint(x, y)
+  const pocket = el?.closest('.pocket[data-i]')
+  if (!pocket) return
+  const i = Number(pocket.dataset.i)
+  const cell = Math.round(target)
+  if (i === cell && Math.abs(f - target) < 0.08) openSheet(i)
+  else goTo(i)
+}
+
+/* 휠 · 키보드 */
+let wheelAcc = 0
+stage.addEventListener('wheel', (e) => {
+  e.preventDefault()
+  if (!fileOpen || openIdx != null) return
+  wheelAcc += e.deltaMode === 1 ? e.deltaY * 30 : e.deltaY
+  while (Math.abs(wheelAcc) >= 55) {
+    const s = Math.sign(wheelAcc)
+    target = clamp(target + s, 0, N - 1)
+    wheelAcc -= s * 55
+  }
+  kick()
+}, { passive: false })
+window.addEventListener('keydown', (e) => {
+  if (openIdx != null) {
+    if (e.key === 'Escape') { e.preventDefault(); if (!$('#slip-form')?.hidden) toggleForm(false); else closeSheet() }
+    return
+  }
+  if (e.target.closest?.('input, button')) return
+  if (!fileOpen) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openFile() } return }
+  if (['ArrowDown', 'ArrowRight', 'j', 'PageDown'].includes(e.key)) { e.preventDefault(); goTo(target + 1) }
+  else if (['ArrowUp', 'ArrowLeft', 'k', 'PageUp'].includes(e.key)) { e.preventDefault(); goTo(target - 1) }
+  else if (e.key === 'Enter') { e.preventDefault(); if (Math.abs(f - target) < 0.08) openSheet(Math.round(target)) }
+  else if (e.key === 'Escape') closeFile()
+})
+
+/* ════════ 꺼낸 시트 ════════ */
+const layer = $('#layer'), card = $('#card'), backdrop = $('#backdrop')
+function cardHTML(l) {
+  const slips = l.songs.filter((s) => s.by).length
+  return `<div class="card-head"><h2 class="card-title" id="card-title">${esc(l.title)}</h2><button class="put-back" data-act="close-sheet">다시 꽂기</button></div>
+    <div class="card-body">
+      <p class="card-who">${esc(l.owner)}님의 플레이리스트 · ${l.songs.length}곡 · 쪽지 ${slips}장</p>
+      <ol class="lines">${l.songs.map((s, i) => s.by
+        ? `<li class="slip" style="--r:${slipTilt(s)}deg;--sc:${slipColor(s.by)}"><span class="n">${pad(i + 1)}</span><span class="s"><b>${esc(s.t)}</b><i>${esc(s.a)}</i></span><span class="pen">${esc(s.by)}님이 넣음</span></li>`
+        : `<li><span class="n">${pad(i + 1)}</span><span class="s"><b>${esc(s.t)}</b><i>${esc(s.a)}</i></span><span></span></li>`).join('')}</ol>
+    </div>
+    <div class="card-foot" id="card-foot"><button class="add" data-act="slip-form">쪽지 넣기</button></div>
+    <form class="slip-form" id="slip-form" novalidate hidden>
+      <p class="pen-h">쪽지에 적어 주세요</p>
+      <input id="sf-title" placeholder="노래 제목" maxlength="60" autocomplete="off" aria-label="노래 제목">
+      <input id="sf-artist" placeholder="가수" maxlength="40" autocomplete="off" aria-label="가수">
+      <input id="sf-name" placeholder="내 이름" maxlength="10" autocomplete="off" aria-label="내 이름" value="${esc(myName)}">
+      <p class="sf-err" id="sf-err" role="alert"></p>
+      <div class="sf-row"><button type="button" class="sf-cancel" data-act="slip-cancel">그만두기</button><button type="submit" class="sf-go">쏙 넣기</button></div>
+    </form>`
+}
+function openSheet(i) {
+  if (openIdx != null) return
+  openIdx = i
+  const l = LISTS[i]
+  card.style.setProperty('--c', l.c)
+  card.style.setProperty('--on', l.on)
+  card.innerHTML = cardHTML(l)
+  layer.hidden = false
+  const p = POCKETS[i]
+  const from = p.querySelector('.paper').getBoundingClientRect()
+  p.classList.add('pulled')
+  swish()
+  if (!RM) {
+    const to = card.getBoundingClientRect()
+    card.animate([
+      { transform: `translate(${from.left - to.left}px,${from.top - to.top}px) scale(${from.width / to.width},${from.height / to.height})` },
+      { transform: 'translate(0,-10px) scale(1.01)', offset: 0.75 },
+      { transform: 'none' },
+    ], { duration: 520, easing: 'cubic-bezier(.2,.8,.2,1)' })
+    backdrop.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300 })
+  }
+  $('.put-back', card).focus({ preventScroll: true })
+}
+function closeSheet(after) {
+  if (openIdx == null) { after?.(); return }
+  const i = openIdx
+  const p = POCKETS[i]
+  const finish = () => {
+    card.getAnimations().forEach((a) => a.cancel())
+    backdrop.getAnimations().forEach((a) => a.cancel())
+    layer.hidden = true
+    card.innerHTML = ''
+    p.classList.remove('pulled')
+    openIdx = null
+    stage.focus({ preventScroll: true })
+    after?.()
+  }
+  if (RM) { finish(); return }
+  const to = p.querySelector('.paper').getBoundingClientRect()
+  const from = card.getBoundingClientRect()
+  swish(true)
+  card.animate([
+    { transform: 'none' },
+    { transform: `translate(${to.left - from.left}px,${to.top - from.top}px) scale(${to.width / from.width},${to.height / from.height})` },
+  ], { duration: 360, easing: 'cubic-bezier(.55,0,.75,.2)', fill: 'forwards' }).finished.then(finish, finish)
+  backdrop.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 360, fill: 'forwards' })
+}
+function toggleForm(on) {
+  const form = $('#slip-form'), foot = $('#card-foot')
+  form.hidden = !on
+  foot.hidden = on
+  if (on) {
+    $('#sf-err').textContent = ''
+    $('#sf-title').focus({ preventScroll: true })
+    form.scrollIntoView({ block: 'nearest' })
+    if (!RM) form.animate([{ transform: 'translateY(40px) rotate(4deg)', opacity: 0 }, { transform: 'rotate(-1deg)', opacity: 1 }], { duration: 320, easing: 'cubic-bezier(.3,1.4,.5,1)' })
+  } else $('.add', card)?.focus({ preventScroll: true })
+}
+function submitSlip() {
+  const title = $('#sf-title').value.trim()
+  const artist = $('#sf-artist').value.trim()
+  const name = $('#sf-name').value.trim().replace(/님$/, '')
+  const err = !title ? '노래 제목을 적어 주세요' : !name ? '이름을 적어 주세요. 주인에게 ‘○○님이 넣음’으로 보여요' : ''
+  if (err) { $('#sf-err').textContent = err; return }
+  const i = openIdx
+  const from = $('#slip-form').getBoundingClientRect()
+  myName = name
+  LISTS[i].songs.push(S(title, artist || '모르는 가수', name))
+  closeSheet(() => flySlip(from, i, title, name))
+}
+function flySlip(from, i, title, name) {
+  const p = POCKETS[i]
+  const arrive = () => {
+    thud()
+    bumps[i + 1] = 1
+    p.innerHTML = pocketInner(LISTS[i], i, true)
+    kick()
+    const fr = p.querySelector('.front').getBoundingClientRect()
+    const pop = document.createElement('p')
+    pop.className = 'pop'
+    pop.textContent = '쏙!'
+    pop.style.left = `${fr.left + fr.width / 2 - 24}px`
+    pop.style.top = `${fr.top - 70}px`
+    document.body.append(pop)
+    if (RM) setTimeout(() => pop.remove(), 600)
+    else pop.animate([{ transform: 'translateY(10px) scale(.6)', opacity: 0 }, { transform: 'translateY(-8px) scale(1.1)', opacity: 1, offset: 0.35 }, { transform: 'translateY(-26px) scale(1)', opacity: 0 }], { duration: 900, easing: 'ease-out' }).finished.then(() => pop.remove())
+  }
+  if (RM) { arrive(); return }
+  const fr = p.querySelector('.front').getBoundingClientRect()
+  const w = 168, h = 92
+  const x0 = from.left + from.width / 2 - w / 2, y0 = from.top + from.height / 2 - h / 2
+  const x1 = fr.left + fr.width / 2 - w / 2, y1 = fr.top - h * 0.62
+  const fl = document.createElement('div')
+  fl.className = 'flyer'
+  fl.style.background = slipColor(name)
+  fl.innerHTML = `<b>${esc(title)}</b><span>${esc(name)}</span>`
+  document.body.append(fl)
+  fl.animate([
+    { transform: `translate(${x0}px,${y0}px) rotate(-4deg) scale(1)` },
+    { transform: `translate(${(x0 + x1) / 2}px,${Math.min(y0, y1) - 90}px) rotate(12deg) scale(.82)`, offset: 0.45 },
+    { transform: `translate(${x1}px,${y1}px) rotate(-3deg) scale(.6)`, offset: 0.8 },
+    { transform: `translate(${x1}px,${y1 + 50}px) rotate(0deg) scale(.55)`, opacity: 0 },
+  ], { duration: 820, easing: 'cubic-bezier(.3,.7,.4,1)', fill: 'forwards' }).finished.then(() => fl.remove())
+  setTimeout(arrive, 650)
+}
+
+/* ════════ 이벤트 ════════ */
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('[data-act]')
+  if (!a) return
+  const act = a.dataset.act
+  if (act === 'close-sheet') closeSheet()
+  else if (act === 'slip-form') toggleForm(true)
+  else if (act === 'slip-cancel') toggleForm(false)
+})
+document.addEventListener('submit', (e) => {
+  if (e.target.id !== 'slip-form') return
+  e.preventDefault()
+  submitSlip()
+})
+$('#sound').addEventListener('click', (e) => {
+  soundOn = !soundOn
+  e.currentTarget.setAttribute('aria-pressed', String(soundOn))
+  e.currentTarget.textContent = soundOn ? '소리 켬' : '소리 끔'
+  if (soundOn) flick()
+})
+$('#close-file').addEventListener('click', closeFile)
+window.addEventListener('resize', () => { measure(); layout() })
+
+build()
+measure()
+layout()
+</script>
