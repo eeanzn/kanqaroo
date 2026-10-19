@@ -5,3 +5,4 @@ package-lock.json
 
 # 프로토타입 원본은 게시본과 바이트 단위로 같게 유지
 prototype/src.html
+prototype/folder.html

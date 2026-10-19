@@ -1,0 +1,922 @@
+<title>Kanqaroo 폴더 시안</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<style>
+/* Layout: 한 줄(최대 30rem) 서랍. 플레이리스트 = 종이 폴더, 노래 = 시트의 줄, 친구가 넣은 노래 = 끼운 쪽지.
+   인터랙션 언어: 꽂혀 있음 → 꺼내기(폴더가 들려 올라와 펼쳐짐) → 끼우기(줄이 벌어지고 쪽지가 들어옴) → 다시 꽂기.
+   색은 v2 토큰 그대로(흰 바탕 + 오렌지 하나 + 무채색). 다크 모드는 아직 안 함(라이트 단일 테마로 고정) */
+:root {
+  color-scheme: light;
+  --bg: #ffffff;
+  --fg: #ed692c;
+  --fg-dim: #b8460f;
+  --fg-light: #fdede6;
+  --ink: #141414;
+  --ink-2: #5c5c5c;
+  --ink-3: #9b9b9b;
+  --line: #ececec;
+  --line-2: #dcdcdc;
+  --surface: #f6f6f6;
+  /* 종이 세 겹: 폴더(회색) → 시트(흰 종이) → 쪽지(라이트 오렌지 + 오렌지 가장자리) */
+  --folder: var(--surface);
+  --sheet: var(--bg);
+  --slip: var(--fg-light);
+  --slip-edge: var(--fg);
+  --tab-off: var(--line);
+  --font: 'Pretendard', system-ui, -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+  --gutter-l: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+  --header-h: 56px;
+  --tab-h: 34px;
+  --tab-h-open: 52px;
+  --btn-h: 44px;
+  --btn-px: 18px;
+  --btn-fs: 15px;
+  --btn-fw: 700;
+  --r: 12px;
+  --r-box: 18px;
+  --r-folder: 14px;
+  --r-sheet: 6px;
+  --ease: cubic-bezier(.2, .7, .2, 1);
+}
+@font-face { font-family: 'Pretendard'; font-weight: 400; font-display: swap; src: url(data:font/woff2;base64,__FONT_400__) format('woff2'); }
+@font-face { font-family: 'Pretendard'; font-weight: 600; font-display: swap; src: url(data:font/woff2;base64,__FONT_600__) format('woff2'); }
+@font-face { font-family: 'Pretendard'; font-weight: 700; font-display: swap; src: url(data:font/woff2;base64,__FONT_700__) format('woff2'); }
+@font-face { font-family: 'Pretendard'; font-weight: 800; font-display: swap; src: url(data:font/woff2;base64,__FONT_800__) format('woff2'); }
+
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { scrollbar-gutter: stable; }
+html.locked { overflow: hidden; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.5; word-break: keep-all; -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+button, input, textarea { font: inherit; color: inherit; }
+a { color: inherit; }
+h1, h2, p { margin: 0; }
+ol, ul { margin: 0; padding: 0; list-style: none; }
+:focus-visible { outline: 2px solid var(--fg); outline-offset: 2px; border-radius: 4px; }
+.sr-only { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; }
+.wrap { max-width: 30rem; margin: 0 auto; padding-left: var(--gutter-l); padding-right: var(--gutter-r); }
+
+/* ── 헤더 ── */
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+header.top .wrap { display: flex; align-items: center; justify-content: space-between; height: var(--header-h); }
+.logo { display: inline-flex; align-items: center; gap: 6px; font-size: 17px; font-weight: 800; letter-spacing: -0.02em; text-decoration: none; }
+.logo svg { width: 26px; height: 26px; }
+footer.site { padding-block: 8px 40px; font-size: 12px; color: var(--ink-3); line-height: 1.6; }
+
+/* ── 공통 ── */
+.stack-md { display: flex; flex-direction: column; gap: 18px; }
+.stack-sm { display: flex; flex-direction: column; gap: 10px; }
+.eyebrow { font-size: 13px; font-weight: 700; color: var(--fg-dim); letter-spacing: 0.02em; }
+.h2 { font-size: 16px; font-weight: 700; }
+.label { font-size: 13px; font-weight: 700; }
+.small { font-size: 13px; color: var(--ink-2); line-height: 1.55; }
+.tiny { font-size: 12px; color: var(--ink-3); line-height: 1.55; }
+.err { font-size: 13px; color: var(--fg-dim); font-weight: 600; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; height: var(--btn-h); padding: 0 var(--btn-px); border-radius: 999px; border: 1px solid transparent; font-size: var(--btn-fs); font-weight: var(--btn-fw); line-height: 1; cursor: pointer; text-decoration: none; white-space: nowrap; flex: none; }
+.btn svg { width: 14px; height: 14px; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-primary { background: var(--fg); border-color: var(--fg); color: var(--ink); }
+.btn-primary:hover:not(:disabled) { box-shadow: inset 0 0 0 999px rgb(0 0 0 / 0.07); }
+.btn-secondary { background: var(--bg); border-color: var(--line-2); color: var(--ink); }
+.btn-secondary:hover:not(:disabled) { background: var(--surface); }
+.btn-block { width: 100%; }
+.btn-row { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; }
+.btn-row .btn { width: 100%; }
+.icon-btn { display: grid; place-items: center; flex: none; width: var(--btn-h); height: var(--btn-h); border-radius: 999px; border: 0; background: none; color: var(--ink-2); cursor: pointer; text-decoration: none; }
+.icon-btn:hover { background: var(--surface); color: var(--ink); }
+.icon-btn svg { width: 16px; height: 16px; }
+.icon-btn.play { color: var(--fg-dim); }
+.icon-btn:disabled { opacity: 0.35; cursor: default; background: none; }
+.input { width: 100%; height: var(--btn-h); padding: 0 14px; border: 1px solid var(--line-2); border-radius: var(--r); background: var(--bg); font-size: 15px; }
+textarea.input { height: auto; min-height: 120px; padding: 12px 14px; line-height: 1.6; resize: vertical; }
+.input::placeholder { color: var(--ink-3); }
+.input:focus { outline: none; border-color: var(--fg); }
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > label { font-size: 13px; font-weight: 700; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; }
+.box { border-radius: var(--r-box); padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+.box.tint { background: var(--fg-light); }
+.box.gray { background: var(--surface); }
+.box.line { border: 1px solid var(--line-2); background: var(--bg); }
+.seg { display: flex; gap: 4px; background: var(--surface); border-radius: 999px; padding: 4px; }
+.seg button { flex: 1; height: 36px; border: 0; border-radius: 999px; background: transparent; font-size: 14px; font-weight: 700; color: var(--ink-2); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--bg); color: var(--ink); box-shadow: 0 1px 3px rgb(0 0 0 / 0.08); }
+.fbody .seg { background: var(--line); }
+.badge { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--fg); color: var(--ink); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.link-field { min-width: 0; display: flex; align-items: center; background: var(--bg); border: 1px solid var(--line-2); border-radius: var(--r); padding: 0 12px; height: var(--btn-h); }
+.link-field code { flex: 1; min-width: 0; font-family: var(--mono); font-size: 12px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.link-row { display: flex; gap: 8px; }
+.link-row .link-field { flex: 1; }
+.guide ol { list-style: decimal; padding-left: 20px; font-size: 14px; display: flex; flex-direction: column; gap: 2px; }
+
+/* ── 탭: 언제나 종이 인덱스 탭 (서랍 탭, 시트 칸막이 탭 모두) ── */
+.drawer { display: flex; align-items: flex-end; gap: 6px; padding-top: 16px; margin-bottom: 22px; border-bottom: 1px solid var(--line-2); }
+.itabs { display: flex; align-items: flex-end; gap: 4px; padding-left: 10px; position: relative; z-index: 1; }
+.itab { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 16px; margin-bottom: -1px; border: 1px solid var(--line-2); border-bottom: 0; border-radius: 10px 10px 0 0; background: var(--tab-off); color: var(--ink-3); font-size: 15px; font-weight: 700; text-decoration: none; cursor: pointer; white-space: nowrap; }
+.itab[aria-selected="true"] { height: 44px; background: var(--bg); color: var(--ink); border-bottom: 1px solid var(--bg); }
+.itabs .itab { height: 36px; padding: 0 14px; font-size: 14px; }
+.itabs .itab[aria-selected="true"] { height: 40px; background: var(--sheet); border-bottom-color: var(--sheet); }
+
+/* ── 폴더 (서랍에 꽂힌 상태) ── */
+.stack { position: relative; z-index: 0; isolation: isolate; display: flex; flex-direction: column; padding-bottom: 32px; }
+.folder { position: relative; display: block; isolation: isolate; padding-top: var(--tab-h); color: inherit; text-decoration: none; -webkit-tap-highlight-color: transparent; }
+.folder + .folder { margin-top: -10px; }
+.ftab { position: absolute; top: 0; z-index: 2; display: flex; align-items: center; gap: 8px; max-width: 64%; height: calc(var(--tab-h) + 1px); padding: 0 14px; background: var(--folder); border: 1px solid var(--line-2); border-bottom: 0; border-radius: 10px 10px 0 0; }
+.pos-0 > .ftab { left: 0; }
+.pos-1 > .ftab { left: 50%; transform: translateX(-50%); }
+.pos-2 > .ftab { right: 0; }
+.ftab-title { font-size: 15px; font-weight: 800; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dot { flex: none; width: 8px; height: 8px; border-radius: 999px; background: var(--fg); }
+.fbody { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 4px; padding: 14px 16px 24px; background: var(--folder); border: 1px solid var(--line-2); border-radius: var(--r-folder); }
+.pos-0 > .fbody { border-top-left-radius: 0; }
+.pos-2 > .fbody { border-top-right-radius: 0; }
+.fmeta { display: block; font-size: 14px; color: var(--ink-2); }
+.fmeta b { color: var(--ink); font-weight: 700; }
+.flast { display: block; font-size: 13px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.flast .who { color: var(--fg-dim); font-weight: 700; }
+.folder:hover > .fbody, .folder:hover > .ftab { border-color: var(--ink-3); }
+.folder:focus-visible { outline: none; }
+.folder:focus-visible > .fbody { outline: 2px solid var(--fg); outline-offset: 2px; }
+/* 최근에 끼운 쪽지가 폴더 위로 삐져나옴 = 활동 신호 */
+.peek { position: absolute; z-index: 0; width: 52px; height: 20px; background: var(--slip); border: 1px solid var(--slip-edge); border-bottom: 0; border-radius: 3px 3px 0 0; }
+.folder.ghost > .ftab { background: var(--bg); border-style: dashed; }
+.folder.ghost > .fbody { background: transparent; border-style: dashed; padding-block: 12px 20px; }
+.folder.ghost .ftab-title { color: var(--ink-2); }
+.folder.filed { animation: filed .55s var(--ease); }
+.folder.filed > .ftab, .folder.filed > .fbody { border-color: var(--fg); transition: border-color .6s .6s; }
+@keyframes filed { 0% { transform: translateY(-16px); } 60% { transform: translateY(2px); } 100% { transform: none; } }
+
+/* ── 꺼낸 폴더 (펼친 상태) ── */
+.layer { position: fixed; z-index: 15; left: 0; right: 0; bottom: 0; top: calc(env(safe-area-inset-top, 0px) + var(--header-h) + 1px); overflow-y: auto; overscroll-behavior: contain; background: var(--bg); }
+.layer-inner { padding-block: 16px calc(40px + env(safe-area-inset-bottom, 0px)); }
+.ofolder { position: relative; padding-top: var(--tab-h-open); }
+.ofolder > .ftab { height: calc(var(--tab-h-open) + 1px); max-width: 86%; padding: 0 18px; }
+.otitle { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ofolder > .fbody { gap: 14px; padding: 12px 16px 20px; min-height: calc(100vh - var(--header-h) - var(--tab-h-open) - 72px); min-height: calc(100dvh - var(--header-h) - var(--tab-h-open) - 72px); }
+.ohead { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-right: -10px; min-height: var(--btn-h); }
+.ohead .eyebrow { min-width: 0; }
+.tab-input { width: 100%; min-width: 0; border: 0; background: transparent; padding: 0; font-size: 22px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2; color: var(--ink); outline: none; }
+.tab-input::placeholder { color: var(--ink-3); }
+.ftab.edit { width: 86%; }
+.ftab.edit:focus-within { border-color: var(--fg); }
+.visitor-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; padding: 10px 10px 10px 16px; border-radius: var(--r-box); background: var(--surface); }
+
+/* ── 시트 (흰 종이) ── */
+.sheet-wrap { display: flex; flex-direction: column; }
+.sheet { position: relative; background: var(--sheet); border: 1px solid var(--line-2); border-radius: var(--r-sheet); padding: 4px 14px; }
+.itabs + .sheet { border-top-left-radius: 0; }
+.sheet.ruled::before { content: ""; position: absolute; top: 0; bottom: 0; left: calc(14px + 28px + 5px); width: 1px; background: var(--fg-light); }
+.sheet.padded { padding: 16px 14px; }
+.tracks { display: flex; flex-direction: column; }
+.row { position: relative; display: flex; align-items: center; gap: 12px; min-height: 60px; padding: 8px 0; border-bottom: 1px solid var(--line); }
+.tracks:not(.draft) > .row:nth-last-child(2), .tracks.draft > .row:last-child { border-bottom-color: transparent; }
+.num { flex: none; width: 28px; font-size: 14px; font-weight: 700; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+.meta { flex: 1; min-width: 0; }
+.t { font-weight: 600; line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.a { font-size: 14px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tag { display: inline-block; margin-top: 2px; font-size: 12px; font-weight: 700; color: var(--fg-dim); }
+.acts { flex: none; display: flex; align-items: center; margin-right: -10px; }
+/* 쪽지: 시트 왼쪽 끝에서 시작해 오른쪽으로 살짝 삐져나옴 */
+.row.slip, .slip-form, .act { margin: 0 -24px 0 -14px; padding-left: 11px; padding-right: 24px; border-left: 3px solid var(--slip-edge); border-radius: 0 6px 6px 0; background: var(--slip); }
+.row.slip { border-bottom-color: var(--bg); }
+.row.slip .num { color: var(--fg); }
+.row.fresh { animation: settle .7s var(--ease); }
+@keyframes settle { from { transform: translateX(28px); background: color-mix(in srgb, var(--fg) 35%, var(--fg-light)); } }
+.row .meta.edit { display: flex; flex-direction: column; gap: 6px; padding-block: 4px; }
+.bars { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; }
+.bars i { width: 3px; height: 8px; border-radius: 1px; background: var(--fg); animation: bar .9s ease-in-out infinite; }
+.bars i:nth-child(2) { animation-delay: -.3s; }
+.bars i:nth-child(3) { animation-delay: -.6s; }
+@keyframes bar { 0%, 100% { height: 4px; } 50% { height: 14px; } }
+.empty { padding: 28px 4px; text-align: center; color: var(--ink-2); font-size: 15px; }
+
+/* 끼울 자리: 넣기 모드에서만 줄 사이가 벌어짐 */
+.gap { position: relative; height: 0; overflow: hidden; transition: height .22s var(--ease); }
+.gaps-on .gap { height: 38px; }
+.gap button { display: flex; align-items: center; gap: 10px; width: 100%; height: 38px; padding: 0; border: 0; background: none; cursor: pointer; font-size: 13px; font-weight: 700; color: var(--fg-dim); }
+.gap .bar { flex: none; width: 28px; height: 2px; border-radius: 2px; background: var(--fg); }
+.gap .rule { flex: 1; border-top: 1px dashed var(--fg); }
+.gap button:hover, .gap button:focus-visible { color: var(--ink); }
+.slot { position: relative; padding-block: 6px; }
+.slip-form { display: flex; flex-direction: column; gap: 10px; padding-top: 14px; padding-bottom: 16px; }
+.slip-form .head { font-size: 14px; font-weight: 800; }
+
+/* 활동 = 끼워진 쪽지 목록 */
+.acts-list { display: flex; flex-direction: column; gap: 8px; padding-block: 12px; }
+.act { position: relative; display: flex; align-items: center; gap: 10px; padding-top: 12px; padding-bottom: 12px; }
+.act:not(.unseen) { background: var(--bg); border-left-color: var(--line-2); }
+.act .body { flex: 1; min-width: 0; }
+.act .what { font-size: 15px; line-height: 1.45; }
+.act .what b { font-weight: 700; }
+.act .song-name { font-size: 14px; color: var(--ink-2); overflow-wrap: anywhere; }
+.act .acts { gap: 2px; margin-right: 0; }
+
+/* 플레이어 (예정 기능 자리) */
+.player { position: sticky; top: 0; z-index: 5; margin: -16px calc(-1 * var(--gutter-r)) 16px calc(-1 * var(--gutter-l)); background: var(--bg); border-bottom: 1px solid var(--line); }
+.video { display: grid; place-content: center; gap: 4px; width: 100%; aspect-ratio: 16 / 9; min-height: 200px; background: var(--ink); color: var(--bg); text-align: center; font-weight: 700; }
+.video .tiny { color: var(--ink-3); font-weight: 400; }
+.now { display: flex; align-items: center; gap: 12px; padding: 10px var(--gutter-r) 0 var(--gutter-l); }
+.pctl { display: flex; align-items: center; gap: 2px; padding: 4px var(--gutter-r) 10px calc(var(--gutter-l) - 10px); }
+.pctl .btn { margin-left: auto; }
+
+/* 캡처 읽기 */
+.drop { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 18px; border: 1px dashed var(--line-2); border-radius: var(--r); background: var(--bg); text-align: center; cursor: pointer; }
+.drop.is-reading, .drop.is-done { cursor: default; align-items: stretch; text-align: left; }
+.progress { height: 6px; border-radius: 999px; background: var(--surface); overflow: hidden; }
+.progress i { display: block; height: 100%; border-radius: inherit; background: var(--fg); transition: width .2s linear; }
+
+.toast-action { border: 0; background: none; padding: 0 0 0 10px; font: inherit; font-weight: var(--btn-fw); color: var(--fg); cursor: pointer; }
+.toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 50; background: var(--ink); color: var(--bg); padding: 12px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; max-width: calc(100% - 32px); text-align: center; animation: rise .18s ease-out; }
+@keyframes rise { from { opacity: 0; transform: translate(-50%, 8px); } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .bars i:nth-child(1) { height: 6px; } .bars i:nth-child(2) { height: 12px; } .bars i:nth-child(3) { height: 9px; }
+}
+</style>
+
+<header class="top"><div class="wrap">
+  <a class="logo" href="#browse" aria-label="Kanqaroo 둘러보기"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 11c0-2.2 1.8-4 4-4h12c2.2 0 4 1.8 4 4v5c0 6.1-4.9 11-11 11h-.1C9.4 27 6 23.6 6 19.1V11Z" fill="var(--fg)"/><path d="M9 13.5c2.2 1.4 4.5 2 7 2s4.8-.6 7-2" stroke="var(--bg)" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="14" cy="21.5" r="2.2" fill="var(--bg)"/><path d="M16.2 21.5V15.8l3.6-1" stroke="var(--bg)" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>kanqaroo</a>
+  <button class="btn btn-secondary" data-act="new">새 플레이리스트</button>
+</div></header>
+
+<main class="wrap">
+  <nav class="drawer" role="tablist" aria-label="플레이리스트 보기">
+    <a class="itab" role="tab" href="#browse" data-tab="browse" aria-selected="true">둘러보기</a>
+    <a class="itab" role="tab" href="#mine" data-tab="mine" aria-selected="false">내 플레이리스트 <span class="badge" id="mine-badge" hidden></span></a>
+  </nav>
+  <section id="stack" class="stack" aria-label="플레이리스트 폴더"></section>
+</main>
+<footer class="site"><div class="wrap">음악은 유튜브에서 들어요. Kanqaroo는 곡 목록과 링크만 보여줘요.<br>시안 · 예시 데이터로만 움직이고, 새로고침하면 처음으로 돌아가요.</div></footer>
+
+<div class="layer" id="layer" hidden><div class="wrap layer-inner" id="layer-inner"></div></div>
+<div id="toast-slot"></div>
+
+<script>
+'use strict'
+
+/* ════════ 유틸 ════════ */
+const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+const EASE = 'cubic-bezier(.2,.7,.2,1)'
+const $ = (s, r = document) => r.querySelector(s)
+const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+const pad = (n) => String(n).padStart(2, '0')
+const MIN = 60e3, HOUR = 60 * MIN, DAY = 24 * HOUR
+const T0 = Date.now()
+let seq = 0
+const newId = () => (++seq).toString(36) + Math.random().toString(36).slice(2, 6)
+function rel(at) {
+  const d = Date.now() - at
+  if (d < MIN) return '방금'
+  if (d < HOUR) return `${Math.floor(d / MIN)}분 전`
+  if (d < DAY) return `${Math.floor(d / HOUR)}시간 전`
+  return `${Math.floor(d / DAY)}일 전`
+}
+function ytId(s) {
+  const m = String(s || '').match(/(?:youtube\.com\/(?:watch\?(?:[^#\s]*&)?v=|shorts\/|embed\/|live\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/)
+  return m ? m[1] : null
+}
+const ytUrl = (s) => s.yt ? `https://www.youtube.com/watch?v=${s.yt}` : `https://www.youtube.com/results?search_query=${encodeURIComponent(`${s.artist} ${s.title}`.trim())}`
+function parseLines(text) {
+  return String(text || '').split('\n').map((l) => l.trim()).filter(Boolean).slice(0, 100).map((line) => {
+    const yt = ytId(line)
+    const rest = line.replace(/https?:\/\/\S+/g, '').replace(/^\d+[.)]\s*/, '').trim()
+    const parts = rest.split(/\s+[-–—]\s+/)
+    if (parts.length >= 2) return { artist: parts[0].trim(), title: parts.slice(1).join(' - ').trim(), yt }
+    return { artist: '', title: rest, yt }
+  }).filter((s) => s.title)
+}
+function positionFor(songs, i) {
+  if (!songs.length) return 1
+  if (i <= 0) return songs[0].pos - 1
+  if (i >= songs.length) return songs[songs.length - 1].pos + 1
+  return (songs[i - 1].pos + songs[i].pos) / 2
+}
+
+/* ════════ 예시 데이터 ════════ */
+function song(title, artist, by = null, ago = null) {
+  return { id: newId(), title, artist, yt: null, by, byMe: false, at: ago == null ? T0 - 40 * DAY : T0 - ago, pos: 0 }
+}
+function playlist(id, title, owner, songs, opts = {}) {
+  songs.forEach((s, i) => { s.pos = i + 1 })
+  return { id, title, owner, songs, mine: !!opts.mine, public: opts.public ?? true, seenAt: opts.seenAt ?? T0 }
+}
+const me = { name: '' }
+const lists = [
+  playlist('mine1', '요즘 듣는 거', null, [
+    song('Ivy', 'Frank Ocean'), song('Hollywood', '검정치마'), song('Motion Sickness', 'Phoebe Bridgers', '지우', HOUR),
+    song('Panda Bear', '혁오'), song('Everything', '검정치마', '민지', 10 * MIN), song('0310', '백예린'),
+  ], { mine: true, seenAt: T0 - 2 * HOUR }),
+  playlist('mine2', '작업할 때', null, [
+    song('Self Control', 'Frank Ocean'), song('Pink + White', 'Frank Ocean', '준호', 2 * DAY), song('Comes and Goes', '혁오'),
+  ], { mine: true, public: false }),
+  playlist('dawn', '새벽 운전', '지우', [
+    song('Nights', 'Frank Ocean'), song('Kyoto', 'Phoebe Bridgers', '민지', 2 * HOUR), song('Square (2017)', '백예린'),
+    song('Antifreeze', '검정치마'), song('Plastic Love', '竹内まりや', '민준', 20 * MIN), song('Space Song', 'Beach House'), song('밤편지', '아이유'),
+  ]),
+  playlist('gym', '헬스장 금지곡', '도윤', [
+    song('Lose Yourself', 'Eminem'), song('Stronger', 'Kanye West'), song('Numb', 'Linkin Park'),
+    song('말달리자', '크라잉넛', '서준', DAY), song('낭만고양이', '체리필터', '유나', 3 * HOUR), song('고백 (Go Back)', '다이나믹 듀오'),
+  ]),
+  playlist('rain', '비 오는 날 작업용', '민지', [
+    song('No Surprises', 'Radiohead'), song('Weird Fishes/Arpeggi', 'Radiohead'), song('Chamber of Reflection', 'Mac DeMarco', '하늘', 2 * DAY),
+    song('기억을 걷는 시간', '넬'), song('바람이 분다', '이소라'), song('산책', '백예린', '지우', 5 * HOUR),
+  ]),
+  playlist('room', '첫 자취방', '준호', [
+    song('별일 없이 산다', '장기하와 얼굴들'), song('위잉위잉', '혁오'), song('난춘', '새소년', '민지', 40 * MIN),
+    song('NO PAIN', '실리카겔'), song('주저하는 연인들을 위해', '잔나비'),
+  ]),
+  playlist('summer', '여름 끝물', '하늘', [
+    song('Maria También', 'Khruangbin'), song('The Less I Know The Better', 'Tame Impala'), song('TOMBOY', '혁오'),
+    song('Ditto', 'NewJeans', '서연', 6 * DAY), song('Get Lucky', 'Daft Punk'),
+  ]),
+  playlist('commute', '출근길 30분', '서연', [
+    song('Blinding Lights', 'The Weeknd'), song('Hype Boy', 'NewJeans'), song('우주를 줄게', '볼빨간사춘기'),
+    song('Yellow', 'Coldplay', '도윤', 4 * DAY), song('봄이 좋냐??', '10cm'),
+  ]),
+]
+const CAPTURE_SAMPLE = [
+  { title: 'Nights', artist: 'Frank Ocean' }, { title: 'Squre (2O17)', artist: '백예린', flag: true },
+  { title: 'Antifreeze', artist: '검정치마' }, { title: '밤편지', artist: '아이유' },
+  { title: 'Space Snog', artist: 'Beach Hause', flag: true }, { title: 'Plastic Love', artist: '竹内まりや' },
+]
+
+const getList = (id) => lists.find((l) => l.id === id)
+// 둘러보기 순서는 처음 열 때 한 번만 정한다 (넣고 닫았을 때 폴더가 제자리로 돌아가도록)
+let feedOrder = null
+const ordered = (l) => [...l.songs].sort((a, b) => a.pos - b.pos)
+const addedBy = (l) => l.songs.filter((s) => s.by).sort((a, b) => b.at - a.at)
+const lastAt = (l) => Math.max(0, ...addedBy(l).map((s) => s.at))
+const unseenCount = (l) => (l.mine ? addedBy(l).filter((s) => s.at > l.seenAt).length : 0)
+const ownerName = (l) => (l.mine ? (me.name || '하린') : l.owner)
+const addLink = (l) => `https://kanqaroo.example/a/${l.id}`
+const manageLink = (l) => `https://kanqaroo.example/m/${l.id}-x7Kq2pVt9aRm`
+
+/* ════════ 화면 상태 ════════ */
+const state = { tab: 'browse' }
+let open = null          // 꺼낸 폴더: { kind: 'folder'|'new', id, pos, view, inserting, insertAt, visitor, ... }
+let player = null        // { listId, sid, paused }
+let draft = null         // 새 플레이리스트 초안
+let animGaps = false
+let pendingFlash = null
+let lastDeleted = null
+let busy = false
+
+/* ════════ 아이콘 ════════ */
+const I = {
+  play: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 2.8v10.4c0 .6.7 1 1.2.6l8-5.2c.5-.3.5-1 0-1.3l-8-5.2c-.5-.3-1.2 0-1.2.7Z" fill="currentColor"/></svg>',
+  pause: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4.5 3h2.2v10H4.5zM9.3 3h2.2v10H9.3z" fill="currentColor"/></svg>',
+  prev: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 3h1.7v10H3.5zM13 3.6v8.8c0 .5-.6.8-1 .5L6.2 8.5a.6.6 0 0 1 0-1L12 3.1c.4-.3 1 0 1 .5Z" fill="currentColor"/></svg>',
+  next: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M10.8 3h1.7v10h-1.7zM3 3.6v8.8c0 .5.6.8 1 .5l5.8-4.4a.6.6 0 0 0 0-1L4 3.1c-.4-.3-1 0-1 .5Z" fill="currentColor"/></svg>',
+  x: '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
+}
+
+/* ════════ 토스트 ════════ */
+function toast(msg, undo = false) {
+  const slot = $('#toast-slot')
+  slot.innerHTML = `<div class="toast" role="status">${esc(msg)}${undo ? ' <button class="toast-action" data-act="undo">되돌리기</button>' : ''}</div>`
+  clearTimeout(toast.t)
+  toast.t = setTimeout(() => { slot.innerHTML = ''; if (undo) lastDeleted = null }, undo ? 5000 : 2600)
+}
+function copyText(text, done = '링크를 복사했어요') {
+  if (navigator.clipboard?.writeText) navigator.clipboard.writeText(text).then(() => toast(done), () => toast('복사가 안 돼요. 링크를 길게 눌러 복사해 주세요'))
+  else toast('복사가 안 돼요. 링크를 길게 눌러 복사해 주세요')
+}
+
+/* ════════ 서랍 (폴더 더미) ════════ */
+function cardHTML(l, i) {
+  const pos = i % 3
+  const by = addedBy(l)
+  const people = new Set(by.map((s) => s.by)).size
+  const recent = Math.min(3, by.filter((s) => Date.now() - s.at < 3 * DAY).length)
+  const unseen = unseenCount(l)
+  const side = pos === 2 ? 'left' : 'right'
+  const peeks = Array.from({ length: recent }, (_, k) => `<i class="peek" aria-hidden="true" style="${side}:${16 + k * 26}px;top:calc(var(--tab-h) - ${10 + (k % 2) * 4}px)"></i>`).join('')
+  const who = l.mine ? '내 플레이리스트' : `${esc(l.owner)}님`
+  const meta = `<b>${who}</b> · ${l.songs.length}곡${people ? ` · ${people}명이 넣음` : ''}${l.mine && !l.public ? ' · 링크로만 공개' : ''}`
+  const last = by[0]
+  const lastLine = unseen ? `<span class="flast"><span class="who">새로 넣은 곡 ${unseen}개</span> · ${esc(last.title)} — ${esc(last.by)}님</span>`
+    : last ? `<span class="flast">최근에 넣은 곡 · ${esc(last.title)} — <span class="who">${esc(last.by)}님</span> · ${rel(last.at)}</span>`
+    : `<span class="flast">아직 넣은 노래가 없어요</span>`
+  const label = `${l.title}, ${l.mine ? '내 플레이리스트' : `${l.owner}님의 플레이리스트`} 열기`
+  return `<a class="folder pos-${pos}" href="#p-${l.id}" data-card="${l.id}" data-pos="${pos}" style="z-index:${i + 1}" aria-label="${esc(label)}">
+    ${peeks}
+    <span class="ftab"><span class="ftab-title">${esc(l.title)}</span>${unseen ? '<span class="dot" aria-hidden="true"></span>' : ''}</span>
+    <span class="fbody"><span class="fmeta">${meta}</span>${lastLine}</span>
+  </a>`
+}
+function ghostHTML() {
+  return `<a class="folder ghost pos-0" href="#new" data-card="new" data-pos="0" style="z-index:1" aria-label="새 플레이리스트 만들기">
+    <span class="ftab"><span class="ftab-title">+ 새 플레이리스트</span></span>
+    <span class="fbody"><span class="fmeta">빈 폴더에 이름을 붙이고 곡을 담아요</span></span>
+  </a>`
+}
+function renderStack() {
+  document.querySelectorAll('.drawer .itab').forEach((t) => t.setAttribute('aria-selected', String(t.dataset.tab === state.tab)))
+  const unseen = lists.filter((l) => l.mine).reduce((n, l) => n + unseenCount(l), 0)
+  const badge = $('#mine-badge')
+  badge.hidden = !unseen
+  badge.textContent = unseen
+  feedOrder ??= lists.filter((l) => !l.mine && l.public).sort((a, b) => lastAt(b) - lastAt(a)).map((l) => l.id)
+  const items = state.tab === 'browse' ? feedOrder.map(getList) : lists.filter((l) => l.mine)
+  const offset = state.tab === 'mine' ? 1 : 0
+  $('#stack').innerHTML = (offset ? ghostHTML() : '') + items.map((l, i) => cardHTML(l, i + offset)).join('')
+}
+
+/* ════════ 꺼낸 폴더 ════════ */
+function songRow(l, s, i, { canRemove }) {
+  const playing = player && player.listId === l.id && player.sid === s.id
+  const tag = s.byMe ? '내가 넣음' : s.by ? `${esc(s.by)}님이 넣음` : ''
+  const removable = canRemove || s.byMe
+  return `<li class="row ${s.by ? 'slip' : ''} ${open.fresh === s.id ? 'fresh' : ''}" data-sid="${s.id}">
+    <span class="num">${playing ? '<span class="bars" aria-label="재생 중"><i></i><i></i><i></i></span>' : pad(i + 1)}</span>
+    <div class="meta"><p class="t">${esc(s.title)}</p>${s.artist ? `<p class="a">${esc(s.artist)}</p>` : ''}${tag ? `<span class="tag">${tag}</span>` : ''}</div>
+    <div class="acts">
+      <button class="icon-btn play" data-act="play" data-sid="${s.id}" aria-label="${esc(s.title)} 재생">${I.play}</button>
+      ${removable ? `<button class="icon-btn" data-act="remove" data-sid="${s.id}" aria-label="${esc(s.title)} 빼기">${I.x}</button>` : ''}
+    </div></li>`
+}
+function insertForm(i, total, askName) {
+  const where = total === 0 ? '' : i === 0 ? ' (맨 앞)' : i === total ? ' (맨 뒤)' : ''
+  return `<li class="slot"><form class="slip-form" data-form="insert" data-i="${i}" novalidate>
+    <p class="head">${i + 1}번째 자리에 들어가요${where}</p>
+    <div class="grid2">
+      <input class="input" id="f-title" name="title" maxlength="100" placeholder="노래 제목" aria-label="노래 제목" autocomplete="off">
+      <input class="input" id="f-artist" name="artist" maxlength="60" placeholder="가수 (선택)" aria-label="가수" autocomplete="off">
+    </div>
+    <input class="input" id="f-yt" name="yt" inputmode="url" placeholder="유튜브 링크 (선택)" aria-label="유튜브 링크" autocomplete="off">
+    ${askName ? `<input class="input" id="f-name" name="name" maxlength="12" placeholder="내 이름 (예: 민지)" aria-label="내 이름" value="${esc(me.name)}" autocomplete="off">` : ''}
+    ${open.formError ? `<p class="err" role="alert">${esc(open.formError)}</p>` : ''}
+    <div class="btn-row"><button type="button" class="btn btn-secondary" data-act="cancel-insert">취소</button><button type="submit" class="btn btn-primary">넣기</button></div>
+  </form></li>`
+}
+function trackList(l, asOwner) {
+  const songs = ordered(l)
+  const parts = []
+  const gap = (i) => open.insertAt === i
+    ? insertForm(i, songs.length, !asOwner)
+    : `<li class="gap"><button type="button" data-act="slot" data-i="${i}" tabindex="${open.inserting ? 0 : -1}" aria-label="${i + 1}번째 자리에 넣기"><span class="bar"></span>여기에 넣기<span class="rule"></span></button></li>`
+  songs.forEach((s, i) => { parts.push(gap(i)); parts.push(songRow(l, s, i, { canRemove: asOwner })) })
+  parts.push(gap(songs.length))
+  const gapsOn = open.inserting && !animGaps
+  return `<ol class="tracks ${gapsOn ? 'gaps-on' : ''}" id="tracks">${parts.join('')}</ol>${songs.length ? '' : '<p class="empty">아직 곡이 없어요</p>'}`
+}
+function activityList(l) {
+  const songs = ordered(l)
+  const items = addedBy(l)
+  if (!items.length) return '<p class="empty">아직 넣은 사람이 없어요. 공유 탭에서 링크를 보내 보세요.</p>'
+  const since = open.dotsSince ?? l.seenAt
+  return `<ul class="acts-list">${items.map((s) => {
+    const idx = songs.findIndex((x) => x.id === s.id)
+    return `<li class="act ${s.at > since ? 'unseen' : ''}" data-sid="${s.id}">
+      <div class="body"><p class="what"><b>${esc(s.by)}님</b>이 ${idx + 1}번째 자리에 넣었어요</p><p class="song-name">${esc(s.title)}${s.artist ? ` · ${esc(s.artist)}` : ''}</p><p class="tiny">${rel(s.at)}</p></div>
+      <div class="acts"><button class="icon-btn play" data-act="play" data-sid="${s.id}" aria-label="${esc(s.title)} 재생">${I.play}</button><button class="btn btn-secondary" data-act="remove" data-sid="${s.id}">빼기</button></div>
+    </li>`
+  }).join('')}</ul>`
+}
+function sharePanel(l) {
+  const link = addLink(l)
+  return `<div class="stack-md">
+    <section class="box tint">
+      <div><p class="h2">추가 링크 · 친구에게 보내기</p><p class="small">이 링크로는 노래를 넣기만 할 수 있어요. 빼거나 고치지는 못해요.</p></div>
+      <div class="link-field"><code>${esc(link)}</code></div>
+      <button class="btn btn-primary btn-block" data-act="copy" data-text="${esc(link)}">링크 복사</button>
+      <div class="btn-row"><button class="btn btn-secondary" data-act="ig">인스타 스토리</button><button class="btn btn-secondary" data-act="x">X에 올리기</button></div>
+      ${open.igGuide ? `<div class="box line guide"><p class="h2" style="font-size:14px">추가 링크를 복사했어요</p><ol><li>인스타그램에서 스토리를 열어요</li><li>스티커에서 <b>링크</b>를 골라 붙여 넣어요</li></ol><p class="tiny">웹에서는 스토리에 링크를 바로 넣을 수 없어서(인스타그램 정책) 링크 스티커로 붙여요.</p></div>` : ''}
+    </section>
+    <section class="stack-sm">
+      <p class="label">둘러보기에 보이기</p>
+      <div class="seg" role="group" aria-label="공개 범위">
+        <button type="button" data-act="visibility" data-v="public" aria-pressed="${l.public}">공개</button>
+        <button type="button" data-act="visibility" data-v="link" aria-pressed="${!l.public}">링크 있는 사람만</button>
+      </div>
+      <p class="tiny">${l.public ? '둘러보기에 이 플레이리스트가 보이고, 누구나 노래를 넣을 수 있어요.' : '추가 링크를 받은 사람만 보고 넣을 수 있어요.'}</p>
+    </section>
+    <button class="btn btn-secondary btn-block" data-act="visitor">다른 사람에게 보이는 화면 보기</button>
+    <section class="box gray">
+      <div><p class="h2">관리 링크 · 나만 보관</p><p class="small">이 링크가 있으면 다른 기기에서도 곡을 뺄 수 있어요. 잃어버리면 다시 찾을 수 없으니 메모나 북마크에 저장해 두세요.</p></div>
+      <div class="link-row"><div class="link-field"><code>${esc(manageLink(l))}</code></div><button class="btn btn-secondary" data-act="copy" data-text="${esc(manageLink(l))}" data-done="관리 링크를 복사했어요">복사</button></div>
+    </section>
+  </div>`
+}
+function playerHTML(l) {
+  const songs = ordered(l)
+  const i = songs.findIndex((s) => s.id === player.sid)
+  const s = songs[i]
+  if (!s) return ''
+  return `<div class="player">
+    <div class="video" role="img" aria-label="유튜브 플레이어 자리">유튜브 플레이어<span class="tiny">배포판에서는 여기서 바로 재생돼요</span></div>
+    <div class="now"><span class="num" style="color:var(--fg)">${pad(i + 1)}</span><div class="meta"><p class="t">${esc(s.title)}</p><p class="a">${esc(s.artist)}</p></div></div>
+    <div class="pctl">
+      <button class="icon-btn" data-act="p-prev" aria-label="이전 곡" ${i === 0 ? 'disabled' : ''}>${I.prev}</button>
+      <button class="icon-btn" data-act="p-toggle" aria-label="${player.paused ? '재생' : '일시정지'}">${player.paused ? I.play : I.pause}</button>
+      <button class="icon-btn" data-act="p-next" aria-label="다음 곡" ${i === songs.length - 1 ? 'disabled' : ''}>${I.next}</button>
+      <button class="icon-btn" data-act="p-close" aria-label="플레이어 닫기">${I.x}</button>
+      <a class="btn btn-secondary" href="${esc(ytUrl(s))}" target="_blank" rel="noopener noreferrer">유튜브에서 열기</a>
+    </div>
+  </div>`
+}
+function folderHTML() {
+  const l = getList(open.id)
+  const asOwner = l.mine && !open.visitor
+  const people = new Set(addedBy(l).map((s) => s.by)).size
+  const head = `${asOwner ? '내 플레이리스트' : `${esc(ownerName(l))}님의 플레이리스트`} · ${l.songs.length}곡${people ? ` · ${people}명이 넣음` : ''}`
+  const view = asOwner ? open.view : 'list'
+  const tabs = asOwner ? `<div class="itabs" role="tablist" aria-label="플레이리스트 칸">${[['list', '목록'], ['activity', '활동'], ['share', '공유']].map(([v, label]) => {
+    const u = v === 'activity' ? unseenCount(l) : 0
+    return `<button class="itab" role="tab" data-act="view" data-v="${v}" aria-selected="${view === v}">${label}${u ? `<span class="badge">${u}</span>` : ''}</button>`
+  }).join('')}</div>` : ''
+  const body = view === 'activity' ? `<div class="sheet padded">${activityList(l)}</div>`
+    : view === 'share' ? `<div class="sheet padded">${sharePanel(l)}</div>`
+    : `<div class="sheet ruled">${trackList(l, asOwner)}</div>`
+  return `${player && player.listId === l.id ? playerHTML(l) : ''}
+    ${open.visitor ? '<div class="visitor-bar"><p class="small">다른 사람에게 보이는 화면이에요</p><button class="btn btn-secondary" data-act="visitor-off">돌아가기</button></div>' : ''}
+    <section class="ofolder pos-${open.pos}" aria-label="${esc(l.title)}">
+      <div class="ftab"><h1 class="otitle">${esc(l.title)}</h1></div>
+      <div class="fbody">
+        <div class="ohead"><p class="eyebrow">${head}</p><button class="icon-btn" data-act="close" aria-label="폴더 닫기">${I.x}</button></div>
+        ${view === 'list' ? `<button class="btn ${open.inserting ? 'btn-secondary' : 'btn-primary'} btn-block" data-act="toggle-insert">${open.inserting ? '자리 고르기 끝내기' : '노래 넣기'}</button>${open.inserting && open.insertAt == null ? '<p class="small" style="margin-top:-6px">줄 사이 원하는 자리를 눌러 주세요</p>' : ''}` : ''}
+        <div class="sheet-wrap">${tabs}${body}</div>
+        ${view === 'list' && l.songs.length ? `<button class="btn btn-secondary btn-block" data-act="play-all">${I.play} 처음부터 이어 듣기</button>` : ''}
+      </div>
+    </section>`
+}
+function newHTML() {
+  const d = draft
+  const e = d.errors
+  const shown = (document.getElementById('nf-name')?.value ?? me.name).trim() || '하린'
+  const cap = d.capture
+  const capture = cap.status === 'idle'
+    ? `<label class="drop" for="nf-shot"><span class="h2">플레이리스트 화면 캡처 올리기</span><span class="small">멜론·스포티파이·유튜브 뮤직 등 어떤 앱이든 돼요.</span><span class="tiny">사진은 서버로 보내지 않고 이 기기에서 읽어요.</span><input type="file" id="nf-shot" class="sr-only" accept="image/*"></label>
+       <button type="button" class="btn btn-secondary btn-block" data-act="fake-shot">예시 캡처로 해보기</button>`
+    : cap.status === 'reading'
+    ? `<div class="drop is-reading" role="status"><div class="progress"><i id="cap-bar" style="width:${cap.progress}%"></i></div><p class="small" id="cap-msg">캡처에서 곡 이름을 읽고 있어요… ${cap.progress}%</p><p class="tiny">처음 한 번은 조금 오래 걸려요.</p></div>`
+    : `<div class="drop is-done"><p class="small">${cap.count}곡을 읽었어요. 틀린 곡은 고치거나 빼 주세요.</p><p class="tiny">시안이라 실제로 읽지 않고 예시 결과를 보여줘요.</p><label class="btn btn-secondary" for="nf-shot">다른 캡처 올리기</label><input type="file" id="nf-shot" class="sr-only" accept="image/*"></div>`
+  const rows = d.songs.map((s, i) => s.flag
+    ? `<li class="row"><span class="num">${pad(i + 1)}</span><div class="meta edit"><div class="grid2"><input class="input" id="d-${s.key}-t" data-draft="${i}" data-k="title" value="${esc(s.title)}" aria-label="${i + 1}번 노래 제목"><input class="input" id="d-${s.key}-a" data-draft="${i}" data-k="artist" value="${esc(s.artist)}" aria-label="${i + 1}번 가수"></div><span class="tag">확인해 주세요</span></div><div class="acts"><button type="button" class="icon-btn" data-act="draft-remove" data-i="${i}" aria-label="${i + 1}번 빼기">${I.x}</button></div></li>`
+    : `<li class="row"><span class="num">${pad(i + 1)}</span><div class="meta"><p class="t">${esc(s.title)}</p>${s.artist ? `<p class="a">${esc(s.artist)}</p>` : ''}${s.yt ? '<span class="tag">유튜브 링크 있음</span>' : ''}</div><div class="acts"><button type="button" class="icon-btn" data-act="draft-remove" data-i="${i}" aria-label="${esc(s.title)} 빼기">${I.x}</button></div></li>`).join('')
+  return `<section class="ofolder pos-0" aria-label="새 플레이리스트">
+    <div class="ftab edit"><input class="tab-input" id="nf-title" maxlength="40" placeholder="플레이리스트 이름" aria-label="플레이리스트 이름" autocomplete="off"></div>
+    <div class="fbody">
+      <div class="ohead"><p class="eyebrow">새 플레이리스트</p><button class="icon-btn" data-act="close" aria-label="폴더 닫기">${I.x}</button></div>
+      ${e.title ? `<p class="err" role="alert">${esc(e.title)}</p>` : ''}
+      <form class="stack-md nf-body" data-form="create" novalidate>
+        <div class="field"><label for="nf-name">내 이름</label><input class="input" id="nf-name" maxlength="12" placeholder="예: 하린" value="${esc(me.name)}" autocomplete="off"><p class="tiny" id="nf-hint">다른 사람에게는 ‘${esc(shown)}님의 플레이리스트’로 보여요</p>${e.name ? `<p class="err">${esc(e.name)}</p>` : ''}</div>
+        <div class="stack-sm">
+          <p class="label">곡 가져오기 <span class="tiny">(나중에 넣어도 돼요)</span></p>
+          <div class="seg" role="group" aria-label="곡 가져오는 방법">
+            <button type="button" data-act="method" data-v="manual" aria-pressed="${d.method === 'manual'}">한 줄씩 적기</button>
+            <button type="button" data-act="method" data-v="capture" aria-pressed="${d.method === 'capture'}">캡처로 가져오기</button>
+          </div>
+          ${d.method === 'manual'
+            ? `<textarea class="input" id="nf-lines" placeholder="가수 - 제목 (한 줄에 한 곡)&#10;Frank Ocean - Nights&#10;백예린 - Square (2017)"></textarea><button type="button" class="btn btn-secondary btn-block" data-act="add-lines">목록에 추가</button>`
+            : capture}
+        </div>
+        ${d.songs.length ? `<div class="stack-sm"><p class="label">담을 곡 ${d.songs.length}개</p><div class="sheet ruled"><ol class="tracks draft">${rows}</ol></div></div>` : ''}
+        <div class="stack-sm">
+          <p class="label">둘러보기에 보이기</p>
+          <div class="seg" role="group" aria-label="공개 범위">
+            <button type="button" data-act="visibility" data-v="public" aria-pressed="${d.public}">공개</button>
+            <button type="button" data-act="visibility" data-v="link" aria-pressed="${!d.public}">링크 있는 사람만</button>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" type="submit">만들기</button>
+      </form>
+    </div>
+  </section>`
+}
+function renderLayer() {
+  const inner = $('#layer-inner')
+  const kept = new Map()
+  for (const el of inner.querySelectorAll('input:not([type=file]), textarea')) {
+    if (el.id) kept.set(el.id, { v: el.value, f: document.activeElement === el, s: el.selectionStart, e: el.selectionEnd })
+  }
+  inner.innerHTML = open.kind === 'new' ? newHTML() : folderHTML()
+  for (const [id, k] of kept) {
+    const el = document.getElementById(id)
+    if (!el) continue
+    el.value = k.v
+    if (k.f) { el.focus({ preventScroll: true }); try { el.setSelectionRange(k.s, k.e) } catch { /* 일부 타입 미지원 */ } }
+  }
+  if (animGaps) {
+    animGaps = false
+    requestAnimationFrame(() => $('#tracks')?.classList.add('gaps-on'))
+  }
+}
+
+/* ════════ 모션: 꺼내기 · 다시 꽂기 ════════ */
+const FULL = 'inset(0px 0px 0px 0px round 0px)'
+function clipFor(r, lr) {
+  return `inset(${Math.max(0, r.top - lr.top)}px ${Math.max(0, lr.right - r.right)}px ${Math.max(0, lr.bottom - r.bottom)}px ${Math.max(0, r.left - lr.left)}px round 14px)`
+}
+function visible(el) {
+  if (!el?.isConnected) return false
+  const r = el.getBoundingClientRect()
+  return r.bottom > 60 && r.top < window.innerHeight
+}
+function lock(on) { document.documentElement.classList.toggle('locked', on) }
+async function animateOpen(origin) {
+  const layer = $('#layer'), inner = $('#layer-inner')
+  layer.hidden = false
+  layer.scrollTop = 0
+  lock(true)
+  if (RM) return
+  const lr = layer.getBoundingClientRect()
+  const folder = $('.ofolder', inner)
+  const sheet = $('.sheet-wrap, .nf-body', inner)
+  const opts = { duration: 420, easing: EASE }
+  let main
+  if (visible(origin) && folder) {
+    const r = origin.getBoundingClientRect()
+    const dy = r.top - folder.getBoundingClientRect().top
+    main = layer.animate([{ clipPath: clipFor(r, lr) }, { clipPath: FULL }], opts)
+    inner.animate([{ transform: `translateY(${dy}px)` }, { transform: 'none' }], opts)
+  } else {
+    main = layer.animate([{ transform: 'translateY(24px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 280, easing: EASE })
+  }
+  sheet?.animate([{ transform: 'translateY(28px)', opacity: 0 }, { transform: 'none', opacity: 1 }], { duration: 300, delay: 160, easing: EASE, fill: 'backwards' })
+  await main.finished.catch(() => {})
+}
+async function animateClose(origin) {
+  const layer = $('#layer'), inner = $('#layer-inner')
+  if (!RM) {
+    const lr = layer.getBoundingClientRect()
+    const folder = $('.ofolder', inner)
+    const sheet = $('.sheet-wrap, .nf-body', inner)
+    sheet?.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateY(24px)', opacity: 0 }], { duration: 160, easing: 'ease-in', fill: 'forwards' })
+    if (visible(origin) && folder) {
+      const r = origin.getBoundingClientRect()
+      const dy = r.top - folder.getBoundingClientRect().top
+      const opts = { duration: 360, delay: 90, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' }
+      const a = layer.animate([{ clipPath: FULL }, { clipPath: clipFor(r, lr) }], opts)
+      inner.animate([{ transform: 'none' }, { transform: `translateY(${dy}px)` }], opts)
+      await a.finished.catch(() => {})
+    } else {
+      await layer.animate([{ opacity: 1 }, { opacity: 0, transform: 'translateY(24px)' }], { duration: 220, easing: 'ease-in', fill: 'forwards' }).finished.catch(() => {})
+    }
+  }
+  layer.hidden = true
+  lock(false)
+  layer.getAnimations().forEach((a) => a.cancel())
+  inner.getAnimations({ subtree: true }).forEach((a) => a.cancel())
+  inner.innerHTML = ''
+}
+async function animateSlipIn() {
+  const li = $('.slot')
+  if (!li) return
+  $('#f-title')?.focus({ preventScroll: true })
+  li.scrollIntoView({ block: 'nearest', behavior: RM ? 'auto' : 'smooth' })
+  if (RM) return
+  const h = li.offsetHeight
+  li.style.overflow = 'hidden'
+  li.animate([{ height: '0px' }, { height: `${h}px` }], { duration: 240, easing: EASE })
+  await li.firstElementChild.animate([{ transform: 'translateX(40px)', opacity: 0.3 }, { transform: 'none', opacity: 1 }], { duration: 280, easing: EASE }).finished.catch(() => {})
+  li.style.overflow = ''
+}
+async function animateSlipOut(el) {
+  if (!el || RM) return
+  el.style.overflow = 'hidden'
+  await el.animate([{ transform: 'none', opacity: 1 }, { transform: 'translateX(56px)', opacity: 0 }], { duration: 180, easing: 'ease-in', fill: 'forwards' }).finished.catch(() => {})
+  await el.animate([{ height: `${el.offsetHeight}px`, minHeight: '0px' }, { height: '0px', minHeight: '0px', paddingTop: '0px', paddingBottom: '0px' }], { duration: 160, easing: 'ease-in', fill: 'forwards' }).finished.catch(() => {})
+}
+
+/* ════════ 길찾기 (#browse · #mine · #p-아이디 · #new) ════════ */
+function canon(h) {
+  if (h === 'new' || h === 'mine') return h
+  const m = h.match(/^p-([a-z0-9]+)$/)
+  return m && getList(m[1]) ? h : 'browse'
+}
+const currentHash = () => (open ? (open.kind === 'new' ? 'new' : `p-${open.id}`) : state.tab)
+async function route() {
+  if (busy) return
+  busy = true
+  const h = canon(location.hash.slice(1))
+  try {
+    if (h === 'new') await openNew()
+    else if (h.startsWith('p-')) await openFolder(h.slice(2))
+    else await toTab(h)
+  } finally { busy = false }
+  if (canon(location.hash.slice(1)) !== currentHash()) route()
+}
+async function toTab(tab) {
+  if (state.tab !== tab) { state.tab = tab; renderStack(); if (!open) window.scrollTo(0, 0) }
+  if (open) await closeLayer()
+}
+async function openFolder(id) {
+  const l = getList(id)
+  if (open?.kind === 'folder' && open.id === id) return
+  const tab = l.mine ? 'mine' : 'browse'
+  if (state.tab !== tab) { state.tab = tab; renderStack() }
+  const card = document.querySelector(`[data-card="${id}"]`)
+  const wasOpen = !!open
+  open = { kind: 'folder', id, pos: Number(card?.dataset.pos ?? 0), view: 'list', inserting: false, insertAt: null, visitor: false }
+  if (player && player.listId !== id) player = null
+  renderLayer()
+  if (!wasOpen) await animateOpen(card)
+  else $('#layer').scrollTop = 0
+}
+async function openNew() {
+  if (state.tab !== 'mine') { state.tab = 'mine'; renderStack() }
+  const wasOpen = !!open
+  if (!wasOpen) window.scrollTo(0, 0)
+  const ghost = document.querySelector('[data-card="new"]')
+  open = { kind: 'new', pos: 0 }
+  draft = { method: 'manual', songs: [], capture: { status: 'idle', progress: 0 }, public: true, errors: {} }
+  player = null
+  renderLayer()
+  if (!wasOpen) await animateOpen(ghost)
+  else $('#layer').scrollTop = 0
+  $('#nf-title')?.focus({ preventScroll: true })
+}
+async function closeLayer() {
+  clearInterval(capTimer)
+  const id = open.kind === 'folder' ? open.id : pendingFlash || 'new'
+  if (player) { player = null; renderLayer() }
+  renderStack()
+  await animateClose(document.querySelector(`[data-card="${id}"]`))
+  open = null
+  if (pendingFlash) {
+    const card = document.querySelector(`[data-card="${pendingFlash}"]`)
+    pendingFlash = null
+    if (card) { card.classList.add('filed'); setTimeout(() => card.classList.remove('filed'), 1400) }
+  }
+}
+
+/* ════════ 동작 ════════ */
+let capTimer = null
+function startCapture() {
+  draft.method = 'capture'
+  draft.capture = { status: 'reading', progress: 0 }
+  renderLayer()
+  clearInterval(capTimer)
+  capTimer = setInterval(() => {
+    const c = draft.capture
+    c.progress = Math.min(100, c.progress + 7 + Math.round(Math.random() * 6))
+    const bar = $('#cap-bar'), msg = $('#cap-msg')
+    if (bar) bar.style.width = `${c.progress}%`
+    if (msg) msg.textContent = `캡처에서 곡 이름을 읽고 있어요… ${c.progress}%`
+    if (c.progress >= 100) {
+      clearInterval(capTimer)
+      const rows = CAPTURE_SAMPLE.map((s) => ({ ...s, yt: null, key: newId() }))
+      draft.songs = [...draft.songs, ...rows].slice(0, 100)
+      draft.capture = { status: 'done', count: rows.length }
+      renderLayer()
+    }
+  }, 120)
+}
+
+const ACTIONS = {
+  new() { location.hash = 'new' },
+  close() { location.hash = state.tab },
+  'toggle-insert'() {
+    open.inserting = !open.inserting
+    open.insertAt = null
+    open.formError = null
+    animGaps = open.inserting
+    renderLayer()
+  },
+  slot(el) {
+    open.insertAt = Number(el.dataset.i)
+    open.formError = null
+    renderLayer()
+    animateSlipIn()
+  },
+  'cancel-insert'() { open.insertAt = null; open.formError = null; renderLayer() },
+  view(el) {
+    const v = el.dataset.v
+    const l = getList(open.id)
+    if (v === 'activity' && open.view !== 'activity') { open.dotsSince = l.seenAt; l.seenAt = Date.now() }
+    Object.assign(open, { view: v, inserting: false, insertAt: null, igGuide: false })
+    renderLayer()
+    renderStack()
+  },
+  play(el) { player = { listId: open.id, sid: el.dataset.sid, paused: false }; renderLayer() },
+  'play-all'() { const first = ordered(getList(open.id))[0]; if (first) { player = { listId: open.id, sid: first.id, paused: false }; renderLayer(); $('#layer').scrollTo({ top: 0, behavior: RM ? 'auto' : 'smooth' }) } },
+  'p-prev'() { step(-1) },
+  'p-next'() { step(1) },
+  'p-toggle'() { player.paused = !player.paused; renderLayer() },
+  'p-close'() { player = null; renderLayer() },
+  async remove(el) {
+    const l = getList(open.id)
+    const s = l.songs.find((x) => x.id === el.dataset.sid)
+    if (!s) return
+    await animateSlipOut(el.closest('.row, .act'))
+    l.songs = l.songs.filter((x) => x !== s)
+    if (player?.sid === s.id) player = null
+    lastDeleted = { listId: l.id, song: s }
+    renderLayer()
+    toast(`‘${s.title}’을(를) 뺐어요`, true)
+  },
+  undo() {
+    const d = lastDeleted
+    lastDeleted = null
+    $('#toast-slot').innerHTML = ''
+    if (!d) return
+    getList(d.listId)?.songs.push(d.song)
+    if (open?.id === d.listId) { open.fresh = d.song.id; renderLayer(); setTimeout(() => { if (open?.fresh === d.song.id) open.fresh = null }, 800) }
+    renderStack()
+    toast('되돌렸어요')
+  },
+  copy(el) { copyText(el.dataset.text, el.dataset.done) },
+  ig() { copyText(addLink(getList(open.id)), '추가 링크를 복사했어요'); open.igGuide = true; renderLayer() },
+  x() { toast('배포판에서는 링크가 담긴 X 글쓰기 창이 열려요') },
+  visibility(el) {
+    const pub = el.dataset.v === 'public'
+    if (open.kind === 'new') draft.public = pub
+    else getList(open.id).public = pub
+    renderLayer()
+  },
+  visitor() { Object.assign(open, { visitor: true, view: 'list', inserting: false, insertAt: null }); renderLayer(); $('#layer').scrollTop = 0 },
+  'visitor-off'() { Object.assign(open, { visitor: false, view: 'share', inserting: false, insertAt: null }); renderLayer() },
+  method(el) { draft.method = el.dataset.v; renderLayer() },
+  'fake-shot'() { startCapture() },
+  'add-lines'() {
+    const box = $('#nf-lines')
+    const parsed = parseLines(box?.value).map((s) => ({ ...s, key: newId() }))
+    if (!parsed.length) return toast('‘가수 - 제목’ 형식으로 한 줄에 한 곡씩 적어 주세요')
+    draft.songs = [...draft.songs, ...parsed].slice(0, 100)
+    box.value = ''
+    renderLayer()
+  },
+  'draft-remove'(el) { draft.songs.splice(Number(el.dataset.i), 1); renderLayer() },
+}
+function step(d) {
+  const songs = ordered(getList(player.listId))
+  const i = songs.findIndex((s) => s.id === player.sid) + d
+  if (songs[i]) { player.sid = songs[i].id; player.paused = false; renderLayer() }
+}
+
+const FORMS = {
+  insert(form) {
+    const l = getList(open.id)
+    const asOwner = l.mine && !open.visitor
+    const i = Number(form.dataset.i)
+    const f = form.elements
+    const title = f.title.value.trim()
+    const artist = f.artist.value.trim()
+    const ytRaw = f.yt.value.trim()
+    const yt = ytRaw ? ytId(ytRaw) : null
+    const name = asOwner ? null : String(f.name?.value || '').trim().replace(/님$/, '').slice(0, 12)
+    const err = !title ? '노래 제목을 적어 주세요'
+      : ytRaw && !yt ? '유튜브 영상 링크가 아닌 것 같아요 (비워 둬도 돼요)'
+      : !asOwner && !name ? '내 이름을 적어 주세요. 주인에게 ‘○○님이 넣음’으로 보여요'
+      : ''
+    if (err) { open.formError = err; renderLayer(); return }
+    const s = { id: newId(), title, artist, yt, by: asOwner ? null : name, byMe: !asOwner, at: Date.now(), pos: positionFor(ordered(l), i) }
+    l.songs.push(s)
+    if (!asOwner) me.name = name
+    Object.assign(open, { insertAt: null, inserting: false, formError: null, fresh: s.id })
+    renderLayer()
+    document.querySelector(`.row[data-sid="${s.id}"]`)?.scrollIntoView({ block: 'nearest', behavior: RM ? 'auto' : 'smooth' })
+    toast(`${i + 1}번째 자리에 들어갔어요`)
+    setTimeout(() => { if (open?.fresh === s.id) open.fresh = null }, 800)
+  },
+  create() {
+    const title = ($('#nf-title')?.value || '').trim()
+    const name = ($('#nf-name')?.value || '').trim().replace(/님$/, '').slice(0, 12)
+    const lines = $('#nf-lines')
+    if (lines?.value.trim()) { draft.songs = [...draft.songs, ...parseLines(lines.value).map((s) => ({ ...s, key: newId() }))]; lines.value = '' }
+    draft.errors = {}
+    if (!title) draft.errors.title = '탭에 플레이리스트 이름을 적어 주세요'
+    if (!name) draft.errors.name = '다른 사람에게 보일 이름을 적어 주세요'
+    if (draft.errors.title || draft.errors.name) { renderLayer(); if (!title) $('#nf-title')?.focus(); return }
+    const songs = draft.songs.map((s) => ({ ...song(s.title, s.artist), yt: s.yt || null, at: Date.now() }))
+    const l = playlist(`n${newId()}`, title, null, songs, { mine: true, public: draft.public, seenAt: Date.now() })
+    lists.unshift(l)
+    me.name = name
+    pendingFlash = l.id
+    toast(`‘${title}’을(를) 만들었어요. 열면 공유 칸이 있어요`)
+    location.hash = 'mine'
+  },
+}
+
+/* ════════ 이벤트 ════════ */
+document.addEventListener('click', (e) => {
+  const a = e.target.closest('[data-act]')
+  if (a && ACTIONS[a.dataset.act] && !a.disabled) { e.preventDefault(); ACTIONS[a.dataset.act](a) }
+})
+document.addEventListener('submit', (e) => {
+  const f = e.target.closest('[data-form]')
+  if (!f) return
+  e.preventDefault()
+  FORMS[f.dataset.form]?.(f)
+})
+document.addEventListener('input', (e) => {
+  const t = e.target
+  if (t.id === 'nf-name') { const h = $('#nf-hint'); if (h) h.textContent = `다른 사람에게는 ‘${t.value.trim().replace(/님$/, '') || '하린'}님의 플레이리스트’로 보여요` }
+  if (t.dataset.draft != null && draft) { const s = draft.songs[Number(t.dataset.draft)]; if (s) s[t.dataset.k] = t.value }
+})
+document.addEventListener('change', (e) => {
+  if (e.target.id === 'nf-shot' && e.target.files?.[0]) startCapture()
+})
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape' || !open) return
+  if (open.insertAt != null) ACTIONS['cancel-insert']()
+  else location.hash = state.tab
+})
+window.addEventListener('hashchange', route)
+
+renderStack()
+route()
+</script>
