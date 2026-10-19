@@ -5,7 +5,7 @@
 | 파일             | 무엇                                                                                       | Artifact                                          |
 | ---------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------- |
 | `folder.html`    | **지금 기준 UI 시안.** 서류 폴더 인터랙션, 둘러보기 피드. 프런트만, 예시 데이터            | https://claude.ai/artifact/6y8L3tJJCAzDVU5fpGCUCp |
-| `accordion.html` | 실험. 아코디언 파일철 인터랙션만 빠르게 (디자인 시스템 무시, 소리 있음)                    | https://claude.ai/artifact/T3CuToCF2UEwHveMEjfQ4j |
+| `accordion.html` | 실험. 아코디언 파일철 인터랙션 (흑백 단색, Pretendard, 소리 있음)                          | https://claude.ai/artifact/T3CuToCF2UEwHveMEjfQ4j |
 | `src.html`       | v2 데모. Artifact 공유 저장소로 실제 저장됨 (공개 링크에선 주인만 쓰기). 색·버튼 토큰 원본 | https://claude.ai/artifact/UZhD2gemzbihsP5vWZM1uU |
 
 결정 배경은 Notion Decision Log, Stitch·Figma AI용 정리는 `design/kanqaroo-design-brief.md`.
@@ -15,6 +15,7 @@
 ```bash
 python3 prototype/build.py   # v2 데모 → prototype/dist/kanqaroo-demo.html (폰트 포함 약 1.4MB)
 python3 prototype/build.py prototype/folder.html src/assets/fonts prototype/dist/kanqaroo-folder.html  # 폴더 시안
+python3 prototype/build.py prototype/accordion.html src/assets/fonts prototype/dist/kanqaroo-accordion.html  # 아코디언 실험
 ```
 
 Artifact는 외부 폰트를 못 불러와서, `src.html`의 `__FONT_400__` 같은 자리표시자를 `src/assets/fonts/`의 Pretendard 서브셋으로 채운다.
