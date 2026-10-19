@@ -1,23 +1,144 @@
-# Kanqaroo — Design Brief for Google Stitch / Figma AI
+# Kanqaroo — Stitch 디자인 의뢰서 v3 (아코디언 파일철 + 캥거루 낙서)
 
-> **사용법 (사람용 메모)**
+> **사용법**
 >
-> - 2026-10-19 기준 스냅샷이에요. 원본: 화면·인터랙션은 `prototype/folder.html` ([폴더 시안 Artifact](https://claude.ai/artifact/6y8L3tJJCAzDVU5fpGCUCp)), 색·버튼 토큰은 `prototype/src.html`, 결정 배경은 Notion Decision Log.
-> - **Part A**(Design System)는 Stitch의 DESIGN.md 형식을 따라서 따로 잘라 써도 돼요. 핵심은 **A-2 인터랙션 언어**예요.
-> - **Part C**의 프롬프트를 순서대로 써요. 디자인 시스템 시트 → 서랍 → 꺼낸 폴더 → 새 폴더 → 예정 기능 → 일관성 점검.
-> - Stitch는 움직임을 못 만들어서, 모션은 "프레임 여러 장"으로 요청하게 써 뒀어요. 실제 움직임은 시안 Artifact로 확인해요.
-> - 모델이 읽기 쉽게 본문은 영어로 썼어요. 따옴표 안의 한국어는 실제 UI 문구라 그대로 써야 해요.
+> - 2026-10-19 기준이에요. 움직임 원본은 `prototype/accordion.html` ([아코디언 Artifact](https://claude.ai/artifact/T3CuToCF2UEwHveMEjfQ4j)), 기능 흐름은 `prototype/folder.html`·`prototype/src.html`, 결정 배경은 Notion Decision Log.
+> - **1장 기획안**은 사람이 보는 정리라 한국어로 썼어요. **Part A~C**는 Stitch에 넣는 부분이라 영어로 썼고, 따옴표 안 한국어는 실제 UI 문구예요.
+> - Stitch에 DESIGN.md를 넣는 기능이 있으면 **Part A**를 넣고, 없으면 프롬프트마다 Part A를 같이 붙여요.
+> - **Part C 프롬프트는 순서대로** 써요. 디자인 시스템 → 캥거루 → 메인 → 꺼내기 → 쪽지 넣기 → 내 파일철 → 새 칸 → 예정 기능 → 점검.
+> - Stitch는 움직임을 못 만들어서 모션은 "프레임 3장"으로 요청해요. 실제 손맛은 아코디언 Artifact로 확인해요.
+> - 캥거루 스타일 레퍼런스 이미지(굵은 검은 선 동물 얼굴)가 있으면 Prompt 2에 첨부해요. 단, **분위기 참고용**이고 그대로 따라 그리지 않게 해요.
 
 ---
 
-## Product in one paragraph
+# 1. 기획안
 
-**kanqaroo** is a mobile-first Korean web service where people slip songs into each other's playlists. People, not algorithms, find songs that truly fit your taste and songs you would never meet on your own. The first screen is **둘러보기** (browse): a feed of other people's public playlists. Open one, pick a gap between two songs, and your song goes in immediately, with no approval and no reactions. There are no accounts: the owner keeps a **manage link**, and an **add link** lets friends who don't browse the feed add songs too. Music plays on YouTube; kanqaroo only shows the list. The UI is Korean.
+## 1-1. 한 줄 정의와 이번 디자인의 목표
 
-**People**
+**Kanqaroo**는 친구 플레이리스트에 노래를 슬쩍 끼워 넣는(소매넣기) 웹 서비스예요. 알고리즘 대신 사람이 골라주는 노래로 "진짜 내 취향"과 "전혀 몰랐던 음악"을 만나게 하는 게 목적이에요.
 
-- **Owner (주인)**: makes a playlist, decides whether it shows in 둘러보기, shares the add link on Instagram stories or X, checks who added what, removes songs they don't want.
-- **Visitor (다른 사람)**: browses folders in 둘러보기 or opens an add link, taps a gap, types a song and their name once, and the owner sees "민지님이 넣음".
+이번 디자인의 목표는 세 가지예요.
+
+1. **아코디언 파일철 넘기기**를 메인 탐색 방식으로 굳혀요. SNS 피드처럼 여러 플레이리스트를 빠르게 훑는 경험이에요.
+2. 지금까지 만든 기능(자리 골라 넣기, 활동, 빼기, 공유, 공개 범위, 새 플레이리스트, 캡처 가져오기)을 이 안에 하나의 언어로 담아요.
+3. 새 기능 **캥거루 낙서**를 넣어요. 노래를 넣는 사람이 아주 간단한 캥거루 얼굴을 그려서 쪽지에 붙여요.
+
+## 1-2. 지금까지 정해진 것
+
+| 구분          | 내용                                                                   | 상태      |
+| ------------- | ---------------------------------------------------------------------- | --------- |
+| 로그인        | 없음. 주인은 관리 링크, 친구는 추가 링크                               | 확정      |
+| 넣기 방식     | 넣는 사람이 자리를 골라서 넣으면 바로 들어감. 승인·반응 없음           | 확정      |
+| 주인 권한     | 누가 넣었는지 보고(활동), 마음에 안 들면 빼기(되돌리기 가능)           | 확정      |
+| 첫 화면       | 둘러보기(남의 플레이리스트). 온보딩·사용법 화면 없음                   | 확정      |
+| 공유          | 링크 복사, 인스타 스토리(링크 스티커 안내), X                          | 확정      |
+| 곡 가져오기   | 한 줄씩 적기, 캡처로 가져오기(기기 안에서 글자 인식)                   | 확정      |
+| 재생          | 유튜브. 나중에 페이지 안 연속 재생(영상은 늘 보이게, 최소 200×200)     | 확정      |
+| 탐색 인터랙션 | 아코디언 파일철 (넘기기·튕기기·꺼내기·다시 꽂기·쏙 넣기)               | 임시      |
+| 시각 방향     | 흑백 단색, Pretendard 하나, 각진 모서리, 버튼은 한 규격(색으로만 구분) | 임시      |
+| 캥거루 낙서   | 넣는 사람이 캥거루 얼굴을 그려 쪽지에 붙임                             | 이번 기획 |
+| 공개 범위     | 공개(둘러보기에 보이고 누구나 넣기) / 링크 있는 사람만                 | 임시      |
+
+## 1-3. 이번에 디자인할 것 / 안 할 것
+
+**한다**
+
+- 디자인 시스템 시트 (흑백 토큰, 칸막이·시트·쪽지·버튼·입력·탭·토스트)
+- 캥거루 낙서 스타일 시트 (기본 얼굴, 프리셋 6개, 크기별 스티커, 그리기 패드)
+- 둘러보기 아코디언 (멈춤 / 넘기는 중 / 빠르게 튕기는 중)
+- 꺼낸 시트 (방문자) → 자리 고르기 → 쪽지 쓰기(+캥거루) → 쏙 넣기
+- 내 파일철 (내 칸들 + 맨 뒤 빈 칸) → 내 시트(목록·활동·공유) → 빼기·되돌리기
+- 새 칸 만들기 (한 줄씩 / 캡처 읽기 진행 / 확인해 주세요)
+- 플레이어 자리, 빈 상태, 오류 상태
+
+**안 한다**
+
+- 로그인·회원가입, 알림, 댓글·반응, 랜딩·온보딩
+- 다크 모드, 색 있는 버전 (흑백으로 먼저 굳힘)
+- 데스크톱 전용 레이아웃 (모바일 한 열, 넓은 화면은 가운데 정렬)
+
+## 1-4. 화면 흐름
+
+```
+둘러보기(아코디언) ─ 넘기기/튕기기/탭 점프 ─┐
+   │                                          │
+   └─ 앞 칸 누르기 → 꺼낸 시트(방문자)        │
+         ├─ 쪽지 넣기 → 자리 고르기 → 쪽지 쓰기 + 캥거루 → 쏙 넣기 → (아코디언으로, 포켓이 출렁)
+         └─ 다시 꽂기 → 아코디언
+
+내 파일철(아코디언) ─ 맨 뒤 빈 칸 → 새 칸 만들기 → 꽂기 → 새 칸이 맨 앞에
+   └─ 내 칸 누르기 → 내 시트 [목록 | 활동 | 공유]
+         ├─ 목록: 쪽지 빼기 → 토스트 "되돌리기"
+         ├─ 활동: 누가 몇 번째에 넣었는지 (캥거루 + 이름 + 곡)
+         └─ 공유: 추가 링크·인스타·X / 공개 범위 / 관리 링크
+```
+
+## 1-5. 인터랙션 명세
+
+| 동작         | 손짓                     | 일어나는 일                                                                                           | 소리   |
+| ------------ | ------------------------ | ----------------------------------------------------------------------------------------------------- | ------ |
+| 펼침         | 페이지 열림              | 앞 칸부터 아래에서 차례로 올라와 펼쳐짐 (약 1초)                                                      | 없음   |
+| 넘기기       | 위로 쓸기 / 휠 / ↓       | 앞 칸이 바닥 경첩을 축으로 앞으로 쓰러지고, 다음 칸이 똑바로 섬                                       | 착     |
+| 튕기기       | 빠르게 쓸기              | 손 속도만큼 여러 칸이 연달아 넘어감                                                                   | 다다닥 |
+| 점프         | 뒤에 보이는 탭 누르기    | 그 칸까지 연달아 넘어감                                                                               | 다다닥 |
+| 꺼내기       | 서 있는 앞 칸 누르기     | 포켓 속 종이가 빠져나와 화면 가운데 시트가 됨                                                         | 슥     |
+| 다시 꽂기    | "다시 꽂기" / 바깥 / Esc | 시트가 줄어들며 포켓으로 돌아감                                                                       | 슥     |
+| 자리 고르기  | 시트의 "쪽지 넣기"       | 줄 사이가 벌어지며 "여기에 끼우기"가 나타남                                                           | -      |
+| 쪽지 쓰기    | 자리 누르기              | 그 자리에 검은 쪽지가 올라옴. 제목·가수·내 이름 + 캥거루 그리기                                       | -      |
+| 쏙 넣기      | "쏙 넣기"                | 시트가 꽂히고, 캥거루가 붙은 쪽지가 포물선으로 날아가 포켓에 쏙. 포켓이 출렁, 위로 새 쪽지가 삐져나옴 | 툭     |
+| 빼기 (주인)  | 쪽지의 "빼기"            | 쪽지가 오른쪽으로 빠지고 줄이 닫힘. 토스트 "되돌리기"                                                 | -      |
+| 새 칸 만들기 | 내 파일철 맨 뒤 빈 칸    | 빈 시트가 꺼내짐 → 작성 → "꽂기" → 새 칸이 맨 앞에 꽂힘                                               | 툭     |
+
+## 1-6. 새 기능: 캥거루 낙서
+
+**왜**: 로그인이 없어서 "누가 넣었는지"가 이름 글자뿐이에요. 넣는 사람이 그린 작은 캥거루가 그 사람의 얼굴 노릇을 해요. 그리는 순간이 재밌고, 받는 사람은 쪽지마다 다른 캥거루를 보는 재미가 생겨요.
+
+**어떻게** (추천안)
+
+- 쪽지 쓰는 화면에 정사각형 **그리기 패드**가 있어요. 패드에는 **캥거루 얼굴 바탕**(머리, 긴 귀 두 개, 주둥이, 코)이 미리 그려져 있고 **눈·입은 비어 있어요**.
+- 넣는 사람은 검은 펜 하나로 눈·입·표정·소품(안경, 헤드폰, 모자 등)을 그려요. 색과 굵기는 고르지 않아요 (펜 하나, 레퍼런스처럼 굵고 고른 선).
+- 도구: "한 획 지우기", "다 지우기". 그리기 싫으면 **프리셋 6개**(웃음, 윙크, 선글라스, 헤드폰, 졸림, 놀람) 중 하나를 누르거나 그냥 넘어가면 "기본 캥거루"(웃는 얼굴)가 붙어요.
+- 바탕이 고정이라 누가 그려도 캥거루로 보이고, 전체 톤이 레퍼런스처럼 하나로 맞아요.
+
+**어디에 보이나**
+
+| 자리                                                    | 크기                 |
+| ------------------------------------------------------- | -------------------- |
+| 칸막이 위로 삐져나온 쪽지                               | 24px                 |
+| 꺼낸 시트의 쪽지 줄                                     | 40px                 |
+| 칸막이 앞면 아래 "넣은 캥거루들" 줄 (최대 5마리 + "+3") | 56px                 |
+| 내 시트의 활동 목록                                     | 40px                 |
+| 날아가는 쪽지                                           | 56px                 |
+| 그리기 패드                                             | 화면 폭 60% 정사각형 |
+
+검은 쪽지 위에는 **흰 정사각형 스티커**로 붙여서 검은 선 그림이 잘 보이게 해요.
+
+**나중에 개발할 때 메모**: 그림은 이미지 파일이 아니라 선 좌표(SVG 경로)로 저장해요. 획 수·점 수에 상한을 둬요. 부적절한 그림은 주인이 쪽지째 빼면 되고, 신고는 나중에 다뤄요.
+
+## 1-7. Stitch 작업 순서
+
+| 순서 | 프롬프트                  | 받을 결과                                         | 넘어가기 전에 확인할 것                                     |
+| ---- | ------------------------- | ------------------------------------------------- | ----------------------------------------------------------- |
+| 1    | P1 디자인 시스템 시트     | 토큰·컴포넌트 한 장                               | 흑백만 썼는지, 모서리가 전부 각졌는지, 버튼 규격이 하나인지 |
+| 2    | P2 캥거루 낙서 시트       | 기본 얼굴, 프리셋 6개, 크기별 스티커, 패드        | 24px에서도 캥거루로 보이는지, 선 굵기가 고른지              |
+| 3    | P3 둘러보기 (멈춤)        | 메인 화면 1장                                     | 칸막이가 화면을 충분히 채우는지, 뒤 칸 탭이 다 읽히는지     |
+| 4    | P4 넘기기 프레임          | 3프레임 + 튕기기 1장                              | 경첩(바닥) 기준으로 넘어가 보이는지                         |
+| 5    | P5 꺼낸 시트 (방문자)     | 시트 1장                                          | 쪽지 줄에 캥거루·이름이 같이 보이는지                       |
+| 6    | P6~P8 쪽지 넣기 흐름      | 자리 고르기 → 쪽지 쓰기(3상태) → 쏙 넣기(3프레임) | 자리 고르기가 한눈에 보이는지, 패드가 쉬워 보이는지         |
+| 7    | P9~P10 내 파일철·내 시트  | 아코디언 1장 + 시트 3변형                         | 방문자 화면과 같은 부품으로만 만들었는지                    |
+| 8    | P11 새 칸 만들기          | 작성 화면 + 캡처 읽기 상태                        | 빈 칸 → 꽂기 흐름이 아코디언 언어와 이어지는지              |
+| 9    | P12 플레이어·빈 상태·오류 | 3~4장                                             | 영상이 200px 이상, 늘 보이는지                              |
+| 10   | P13 일관성 점검           | 전체 수정본                                       | Part A 규칙 체크리스트 통과                                 |
+
+**Stitch 다음 단계**: 마음에 드는 화면을 Figma로 보내서 손보고 → 확정본을 Notion Decision Log에 남기고 → 그다음에 아코디언 시안 위에 기능을 합쳐 개발해요.
+
+## 1-8. 열린 질문
+
+- 캥거루 바탕을 고정할지, 빈 종이에 자유롭게 그리게 할지 (추천: 바탕 고정)
+- 앱 로고도 캥거루 낙서 스타일로 갈지
+- 둘러보기와 내 파일철을 위 전환 버튼으로 오갈지, 파일철 두 개를 나란히 둘지
+- 공개 플레이리스트에 아무나 넣게 할지, 링크 있는 사람만 넣게 할지 (지금: 아무나)
+- 칸막이가 수십 개일 때 찾기(검색·정렬)가 필요한지
 
 ---
 
@@ -25,374 +146,282 @@
 
 ## 1. Visual Theme & Atmosphere
 
-- White canvas, **one** vivid orange, everything else neutral gray.
-- The whole UI is made of **paper**: playlists are file folders standing in a drawer, the song list is a sheet inside the folder, and songs added by other people are slips tucked between the lines.
-- Typographic and flat. No shadows: paper layers are separated by 1px borders and overlap, not by blur.
-- **Never**: gradients, multiple accent colors, large tinted backgrounds (no "color filter" look), glassmorphism, drop shadows, album-art grids, illustrations, skeuomorphic paper textures, emoji in UI, dark mode (not now).
-- Mobile-first, single column, max width 480px, 16px side gutters.
+- **Monochrome only**: black, white and a few grays. No accent color.
+- The UI is an **accordion file folder** seen slightly from above: playlists are dividers standing on a hinge at the bottom; flipping a divider forward reveals the next one.
+- Chunky and printed: **square corners everywhere (radius 0)**, solid black outlines, flat fills. Depth comes from darker grays on dividers further back, never from shadows or gradients.
+- Hand-drawn **kangaroo doodles** (thick even black lines) are the only illustration, and they belong to the people who add songs.
+- **Never**: rounded corners, colors, gradients, drop shadows, glass, textures, emoji, stock illustrations.
+- Mobile-first single column (390px design width). On wide screens the file stays centered, max 540px wide.
 
-## 2. Interaction Language (the core idea)
+## 2. Color Palette & Roles
 
-One physical model, used everywhere. If a new screen needs a pattern, build it from these parts.
+| Name    | Hex          | Role                                                                                |
+| ------- | ------------ | ----------------------------------------------------------------------------------- |
+| Ink     | `#111111`    | Outlines, text, primary buttons, slips (songs added by others), sheet header, toast |
+| White   | `#FFFFFF`    | Divider fronts, sheets, doodle stickers, text on Ink                                |
+| Desk    | `#E8E8E8`    | Page background, unselected tabs                                                    |
+| Divider | `#F0F0F0`    | Back panel and tab of each divider                                                  |
+| Gray 1  | `#555555`    | Secondary text (owner name, artist)                                                 |
+| Gray 2  | `#8C8C8C`    | Tertiary text (track numbers, counts, placeholders)                                 |
+| Depth   | Ink at 6–50% | Overlay on dividers further back (each step back ≈ +6%)                             |
 
-### Materials (three paper layers)
+## 3. Typography Rules
 
-| Layer      | Looks like                                                                                              | Used for                                                                                                                                               |
-| ---------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Folder** | Surface gray `#F6F6F6`, 1px `#DCDCDC` border, a tab on top                                              | A playlist. Also the blank folder used to create one                                                                                                   |
-| **Sheet**  | White paper, 1px `#DCDCDC` border, radius 6, a faint orange-light margin line after the number column   | The song list, activity list and share panel inside a folder                                                                                           |
-| **Slip**   | Orange Light `#FDEDE6` strip with a 3px Orange left edge, sticking 10px out past the sheet's right edge | Anything someone else put in: a song added by another person, the insert form, an activity item. Slips peeking above a closed folder = recent activity |
+Font: **Pretendard** only (400 / 600 / 700 / 800). Korean breaks by word. Numbers tabular.
 
-### Verbs (motions)
+| Style                 | Size / Weight   | Notes                         |
+| --------------------- | --------------- | ----------------------------- |
+| Divider title (front) | 26–40 / 800     | −0.03em, wraps to 2 lines max |
+| Sheet title           | 24 / 800        | white on Ink header           |
+| Tab label             | 15 / 700        | one line, ellipsis            |
+| Song title            | 16 / 700        | one line, ellipsis            |
+| Artist                | 13 / 400 Gray 1 |                               |
+| Owner line            | 15 / 600 Gray 1 | "지우님의 플레이리스트"       |
+| Meta                  | 14 / 400 Gray 2 | "7곡 · 쪽지 2장"              |
+| Track number          | 13 / 700 Gray 2 | "01"                          |
+| Slip credit           | 13 / 700        | "민지님이 넣음"               |
+| Button                | 15 / 700        |                               |
+| Wordmark              | 18 / 800        | lowercase "kanqaroo"          |
 
-| Verb                        | What happens                                                                                                                                                                                                               |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **꽂혀 있음** (filed, rest) | Folders stand in a drawer, overlapping. Only the tab and the top of each folder show. Tabs alternate left / center / right so every title is visible                                                                       |
-| **꺼내기** (pull out)       | Tap a folder: it lifts out of the drawer and grows to fill the screen, tab staying where it was. Then the sheet rises out of the folder                                                                                    |
-| **넣기** (slip in)          | Tap "노래 넣기": the lines of the sheet part and a dashed orange "여기에 넣기" gap appears between every pair of rows. Tap a gap: a slip slides in from the right with the form on it. Submit: the slip settles into a row |
-| **빼기** (pull a slip out)  | A row slides out to the right and the gap closes. A toast offers "되돌리기"                                                                                                                                                |
-| **다시 꽂기** (file back)   | Close: the sheet sinks into the folder, the folder shrinks back into its slot in the drawer. A newly created folder drops into the drawer with a small bounce                                                              |
+## 4. Component Stylings
 
-### Tabs are always paper index tabs
+### Lines and shape
 
-Navigation tabs (둘러보기 / 내 플레이리스트) and the dividers inside a folder (목록 / 활동 / 공유) use the same component: a rounded-top tab standing on a hairline. The selected tab is the color of the paper below it and joins it; unselected tabs are Line gray `#ECECEC` with Ink 3 text. There are no underline tabs.
+- Radius 0 on everything. Object outline 2px Ink. Row rules inside a sheet 1px Ink. Outline buttons and inputs 1.5px.
 
-## 3. Color Palette & Roles
+### Buttons — one size
 
-Only these colors exist. Orange is an accent, not a background.
+- Height 44, padding 0 16, text 15/700, square.
+- **Primary**: Ink fill, White text. **Secondary**: no fill, 1.5px Ink border, Ink text.
+- On Ink surfaces (sheet header, slip form) invert: primary = White fill + Ink text, secondary = 1.5px White border + White text.
+- Same size and weight everywhere; only fill/border color differs. One primary per view. Side-by-side buttons share width equally.
 
-| Name         | Hex       | Role                                                                                                                                                                        |
-| ------------ | --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Orange       | `#ED692C` | Primary CTA fill, slip left edge and peeking-slip outline, numbers of songs added by others, unseen dot, badge, focus ring, insert-mode dashed gap, playing bars, logo mark |
-| Orange Dim   | `#B8460F` | Small orange **text** on white or gray: eyebrow labels, "민지님이 넣음" tags, names in folder meta, "여기에 넣기" label, error text, play icon. 5.4:1 on white              |
-| Orange Light | `#FDEDE6` | Slip paper, tint box (share), sheet margin line                                                                                                                             |
-| Ink          | `#141414` | Primary text, text **on orange** (6:1). Never white text on orange (3.15:1, fails AA). Also the video placeholder and toast background                                      |
-| Ink 2        | `#5C5C5C` | Secondary text: artist names, descriptions, folder meta                                                                                                                     |
-| Ink 3        | `#9B9B9B` | Tertiary: track numbers, timestamps, placeholders, unselected tab text                                                                                                      |
-| Line         | `#ECECEC` | Row dividers, unselected tab fill, segmented-control track on gray paper                                                                                                    |
-| Line 2       | `#DCDCDC` | Borders of folders, tabs, sheets, inputs and secondary buttons                                                                                                              |
-| Surface      | `#F6F6F6` | Folder paper, gray boxes, hover                                                                                                                                             |
-| White        | `#FFFFFF` | Page background, sheet paper, secondary button fill                                                                                                                         |
+### Divider (one playlist)
 
-## 4. Typography Rules
+- **Back panel**: Divider gray, 2px outline, full height. Its **tab** sticks up 32px from the top edge, 38% wide, at one of four positions (0%, 20%, 40%, 60% from the left, cycling) so tabs behind stay readable. Tab: title 15/700.
+- **Paper inside**: White, 1.5px outline, peeks out above the front showing the first three lines "01 Nights — Frank Ocean".
+- **Peeking slips**: up to 3 small Ink slips stick up between the paper and the front, slightly tilted (−3° to 2°), each with a 24px doodle sticker and the name in White.
+- **Front**: White, 2px outline, bottom 78% of the divider, a 1.5px lip line 10px under its top edge. Content: title (26–40/800), owner line, meta; at the bottom a row "넣은 캥거루들" with up to five 56px doodle stickers and "+3"; on the standing divider a "눌러서 꺼내기 →" hint.
+- **States**: standing (upright, readable), behind (leans back, shifts up, darker), flipping (falls toward the viewer around the bottom hinge), flipped (lies flat at the bottom; only its plain back shows).
 
-Font: **Pretendard** (fallback: Apple SD Gothic Neo, Noto Sans KR, system-ui). Weights 400 / 600 / 700 / 800. Korean line breaks by word (`word-break: keep-all`). Numbers in lists are tabular.
+### Sheet (pulled-out paper)
 
-| Style                        | Size / Weight / Line height                   | Extra                                      |
-| ---------------------------- | --------------------------------------------- | ------------------------------------------ |
-| Folder tab title (open)      | 22 / 800 / 1.2                                | letter-spacing −0.02em, one line, ellipsis |
-| Folder tab title (in drawer) | 15 / 800                                      | one line, ellipsis                         |
-| H2 (section title)           | 16 / 700 / 1.5                                |                                            |
-| Body                         | 16 / 400 / 1.5                                | Ink                                        |
-| Track title                  | 16 / 600 / 1.35                               | one line, ellipsis                         |
-| Track artist                 | 14 / 400                                      | Ink 2, one line, ellipsis                  |
-| Track number                 | 14 / 700                                      | two digits "01", Ink 3 (Orange on slips)   |
-| Folder meta                  | 14 / 400                                      | Ink 2, owner name 700 Ink                  |
-| Folder last-activity line    | 13 / 400                                      | Ink 2, name in Orange Dim 700, one line    |
-| Eyebrow                      | 13 / 700                                      | Orange Dim, letter-spacing +0.02em         |
-| Label (form)                 | 13 / 700                                      | Ink                                        |
-| Small                        | 13 / 400                                      | Ink 2                                      |
-| Tiny                         | 12 / 400                                      | Ink 3                                      |
-| Tag                          | 12 / 700                                      | Orange Dim                                 |
-| Tab label                    | 15 / 700 (drawer), 14 / 700 (folder dividers) |                                            |
-| Button                       | 15 / 700                                      |                                            |
-| Logo wordmark                | 17 / 800                                      | lowercase "kanqaroo"                       |
+- White, 2px outline, max width 460, centered. Header: Ink band with sheet title and secondary "다시 꽂기". Body scrolls.
+- Rows: number · title/artist · credit, 1px Ink rule between rows.
+- **Slip row** (a song someone else added): Ink fill, White text, tilted ±1°, 40px doodle sticker on the left, "민지님이 넣음" on the right.
+- Footer: primary "쪽지 넣기".
+- Owner's sheet adds square index tabs under the header: "목록 · 활동 2 · 공유" (selected: White joined to the sheet; others: Desk gray).
 
-## 5. Component Stylings
+### Insert gap ("여기에 끼우기")
 
-### Controls share one height: 44px
+- Appears between every pair of rows (and before the first, after the last) after "쪽지 넣기". 40px tall: 1.5px dashed Ink line with the label "여기에 끼우기" (13/700) on it.
 
-Buttons, icon buttons, text inputs, link fields and the segmented control are all 44px tall.
+### Slip form
 
-### Button: one spec for every button
+- An Ink slip that rises in the chosen gap, tilted −0.8°. Heading "3번째 자리에 끼워요". Inputs with a White underline only: "노래 제목", "가수", "유튜브 링크 (선택)", "내 이름".
+- **Doodle pad** below the inputs (see 6). Buttons: secondary "그만두기", primary "쏙 넣기" (inverted colors).
 
-- Height 44, horizontal padding 18, text 15/700, border 1px, fully rounded (pill).
-- **Primary (CTA)**: Orange fill, Orange border, Ink text. **Secondary**: White fill, Line 2 border, Ink text.
-- They differ **only by color**. At most one primary per view (an open insert slip counts as its own context).
-- Disabled: 40% opacity. Hover: primary gets a 7% black overlay; secondary turns Surface.
-- Alone → full width. Side by side → equal widths, 8px gap.
+### Doodle sticker
 
-### Icon button
+- White square, 1.5px Ink outline, doodle centered. Sizes 24 / 40 / 56. On Ink surfaces the sticker stays White.
 
-- 44×44 circle, no border, no fill, 16px icon in Ink 2 (play icon Orange Dim). Hover → Surface fill.
-- Every icon button has a Korean label ("재생", "빼기", "폴더 닫기").
+### Navigation and header
 
-### Text input / textarea
+- Header 52px: wordmark left, sound toggle right ("소리 켬"/"소리 끔", secondary button).
+- Under the header a two-part square switch "둘러보기 | 내 파일철" (selected: Ink fill White text) and a counter "03 / 10" on the right.
 
-- Height 44, radius 12, 1px Line 2 border, White fill, 14px padding, 15px text. Focus: Orange border, no glow.
-- Label above (13/700). Helper below in Tiny. Error below in 13/600 Orange Dim.
+### Toast
 
-### Segmented control
+- Bottom, full width minus 32px, Ink fill, White 14/600, square. Action "되돌리기" underlined.
 
-- Pill track (Line on gray paper, Surface on white), 4px padding, total height 44. Selected segment: White pill with a tiny shadow `0 1px 3px rgba(0,0,0,.08)` (the only shadow in the system).
+### Inputs (on white)
 
-### Paper index tab
+- Height 44, 1.5px Ink border, square, 15px text. Focus: 2px border. Error text 13/700 Ink with a "!" prefix (no red).
 
-- Rounded top corners 10, 1px Line 2 border on top/left/right, no bottom border, 15/700 text, 16px padding.
-- Unselected: 40px tall, Line fill, Ink 3 text. Selected: 44px tall, filled with the paper it belongs to (White page or White sheet), Ink text, covering the hairline under it.
-- Count badge after the label: Orange pill, 20px, Ink number 12/700.
+## 5. Layout Principles
 
-### Folder — in the drawer
+- Stage = everything below the header and switch. The standing divider fills nearly the full width (gutters 16px) and about 70% of the stage height; its hinge (bottom edge) sits about 9% above the bottom of the stage.
+- Dividers behind lean back 1.3° more each and rise 16px each, so their tabs stack up above the standing one; up to 9 are visible.
+- Flipped dividers lie flat toward the viewer below the hinge and mostly leave the screen.
+- Sheets and forms are centered overlays with a 55% Ink backdrop.
 
-- Tab: 34px tall, up to 64% wide, Surface fill, title 15/800, optional 8px orange unseen dot. Position by index: 1st left, 2nd center, 3rd right, repeat.
-- Body: Surface fill, 1px Line 2 border, radius 14 (0 at the corner under a side tab), padding 14/16/24. Two lines: meta "**지우님** · 7곡 · 2명이 넣음" and last activity "최근에 넣은 곡 · Plastic Love — **민준님** · 20분 전" (or "새로 넣은 곡 2개" in Orange Dim for my own playlists).
-- Peeking slips: up to 3 small slips (52×20, Orange Light, 1px Orange outline, no bottom border) stick 10–14px up from the body's top edge on the side opposite the tab, one per song added in the last 3 days.
-- Stacking: each folder overlaps the one above by 10px; later folders sit on top.
-- Ghost folder (top of 내 플레이리스트): same shape with dashed Line 2 borders and no fill, tab "+ 새 플레이리스트", body "빈 폴더에 이름을 붙이고 곡을 담아요".
+## 6. Kangaroo Doodle Style
 
-### Folder — pulled out (open)
+- Thick, even black line (about 3px at 56px size), round caps, slightly wobbly hand-drawn feel, flat black fills allowed for inner ears and nose. White background. Friendly and simple, like a children's notebook doodle.
+- **Base face** (always present, already drawn): rounded head, two tall upright ears with black-filled inner ears, an oval snout with a small black nose, short cheek lines. No eyes and no mouth.
+- **The visitor adds** eyes, mouth and small props with one black pen. No colors, no brush sizes.
+- **Presets** (if they don't draw): 웃음 (dot eyes + smile), 윙크, 선글라스, 헤드폰, 졸림 (closed eyes, "z"), 놀람 (round eyes, "o" mouth). Default = 웃음.
+- **Pad**: square, White, 1.5px Ink outline, base face drawn in solid Ink; tool row "한 획 지우기 · 다 지우기"; preset row of six 40px stickers; caption "눈이랑 입을 그려 주세요".
 
-- Fills the screen under the header. Tab 52px tall, up to 86% wide, same left/center/right position as in the drawer, title 22/800.
-- Body: Surface, padding 12/16/20, 14px gap. Order: eyebrow row ("지우님의 플레이리스트 · 7곡 · 2명이 넣음" + close X icon button) → primary "노래 넣기" → sheet → secondary "처음부터 이어 듣기".
-- My own folder adds divider tabs on the sheet: "목록" / "활동 (badge)" / "공유".
-- New folder: the tab itself is a text input with placeholder "플레이리스트 이름".
+## 7. Motion (for frames)
 
-### Track row (on the sheet)
-
-- `[number 28px] [title / artist / tag] [actions]`, 12px gap, min height 60, 1px Line divider.
-- Variants: **default** (owner's own song, plain on the sheet) · **slip** (added by someone else: slip paper, Orange number, tag "민지님이 넣음") · **mine** (I added it to someone else's list: slip + tag "내가 넣음" + remove icon) · **playing** (three animated orange bars replace the number) · **settling** (a just-added slip slides in 28px from the right with a brighter orange flash).
-- Actions: play icon button; remove icon button only for the owner, or for the person who added it.
-
-### Insert gap and insert slip
-
-- Gap (insert mode only): 38px tall — 28px Orange bar in the number column, label "여기에 넣기" 13/700 Orange Dim, then a dashed Orange rule to the edge. Hidden (0px) outside insert mode.
-- Insert slip: slip paper, 14/24/16 padding, 10px gap. Heading 14/800 "3번째 자리에 들어가요" + "(맨 앞)/(맨 뒤)" at the ends. Fields: "노래 제목" | "가수 (선택)" side by side → "유튜브 링크 (선택)" → "내 이름 (예: 민지)" (visitors only). Buttons: "취소" | "넣기" equal widths.
-
-### Activity item (owner, 활동 tab)
-
-- A slip: "**민지님**이 2번째 자리에 넣었어요" (15) / "Kyoto · Phoebe Bridgers" (14 Ink 2) / "2시간 전" (Tiny) + play icon + "빼기" secondary button.
-- Unseen = slip paper with Orange edge. Seen = White with a Line 2 edge.
-
-### Share panel (owner, 공유 tab)
-
-- Tint box: "추가 링크 · 친구에게 보내기" / link field / primary "링크 복사" / "인스타 스토리" | "X에 올리기".
-- "둘러보기에 보이기": segmented "공개" | "링크 있는 사람만" + one tiny explanation line.
-- Secondary "다른 사람에게 보이는 화면 보기" (shows a gray bar "다른 사람에게 보이는 화면이에요" + "돌아가기").
-- Gray box: "관리 링크 · 나만 보관" + link field + "복사".
-
-### Player _(placeholder until deployed)_
-
-- Sticks to the top of the open folder while playing. Full-bleed 16:9 video area (never shorter than 200px — YouTube requires a visible embedded player of at least 200×200px), Ink background.
-- Below: Orange number + title/artist, then prev / pause / next / close icon buttons and a "유튜브에서 열기" secondary button pushed right.
-
-### Toast, header, footer
-
-- Toast: bottom center, Ink pill, White 14/600 text, optional Orange "되돌리기".
-- Header: sticky 56px, White 94% + blur, hairline below. Logo left, "새 플레이리스트" secondary button right.
-- Footer: Tiny Ink 3, "음악은 유튜브에서 들어요. Kanqaroo는 곡 목록과 링크만 보여줘요."
-
-## 6. Layout Principles
-
-- One column, max 480px, centered, 16px gutters.
-- Drawer screen: header → paper index tabs on a hairline → folder stack (16px under the tabs).
-- Open folder: covers everything below the header and scrolls on its own; the drawer keeps its scroll position underneath so the folder can return to its slot.
-- Slips break out of the sheet by 10px on the right; the folder body's 16px padding keeps them inside the folder.
-- Spacing scale: 4, 6, 8, 10, 12, 14, 16, 24. Radius scale: 6 (sheet), 10 (tabs), 12 (inputs, link fields), 14 (folders), 18 (boxes), full (buttons, badges, segmented, toast).
-- No fixed bottom bars.
-
-## 7. Motion
-
-All motion uses `cubic-bezier(.2,.7,.2,1)` unless noted. With reduced motion, everything snaps.
-
-| Motion          | Spec                                                                                                                          |
-| --------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Pull out (open) | Folder grows from its drawer rectangle to full screen while moving up: 420ms. Sheet rises 28px + fades in: 300ms, 160ms delay |
-| File back       | Sheet sinks 24px + fades: 160ms ease-in. Folder shrinks back to its slot: 360ms `(.4,0,.2,1)`, 90ms delay                     |
-| Gaps open       | Each gap grows 0 → 38px: 220ms                                                                                                |
-| Slip in         | Slot grows to the slip's height: 240ms. Slip slides from 40px right + fades in: 280ms                                         |
-| Slip settles    | New row slides from 28px right with a brighter orange that fades to slip paper: 700ms                                         |
-| Slip out        | Row slides 56px right + fades: 180ms ease-in, then collapses: 160ms                                                           |
-| Filed (new)     | New folder drops 16px with a small overshoot: 550ms; its outline is orange for ~1s                                            |
-| Toast           | Rises 8px: 180ms ease-out                                                                                                     |
+| Motion  | What to show                                                                                                   |
+| ------- | -------------------------------------------------------------------------------------------------------------- |
+| 펼침    | Dividers rise from below one after another, front first                                                        |
+| 넘기기  | Standing divider tilts toward the viewer around its bottom edge until flat                                     |
+| 튕기기  | Several dividers mid-fall at different angles                                                                  |
+| 꺼내기  | The paper grows out of the pocket into the centered sheet                                                      |
+| 쏙 넣기 | Slip with doodle arcs from the sheet area down into the pocket; pocket dips; a new peeking slip pops up; "쏙!" |
+| 빼기    | Slip row slides out to the right; the rows close the gap                                                       |
 
 ## 8. Copy & Voice
 
-- Polite, casual Korean (해요체). Short sentences.
-- People are always "○○님" — "민지님이 넣었어요", "지우님의 플레이리스트". Never "민지가".
-- "소매넣기" is the brand idea, not a UI label. The folder metaphor stays visual: UI text still says 플레이리스트 / 노래 넣기 / 빼기, not "파일" or "폴더".
-- **Banned words**: 영수증, 주머니, 군집, 보드, 반응, 수락, 거절, 승인, 로그인/회원가입 (as a feature).
+- Polite casual Korean (해요체), short. People are "○○님": "민지님이 넣음", "지우님의 플레이리스트".
+- UI words: 둘러보기, 내 파일철, 칸, 쪽지 넣기, 여기에 끼우기, 쏙 넣기, 다시 꽂기, 빼기, 되돌리기, 활동, 공유, 추가 링크, 관리 링크, 내 캥거루.
+- Never: 영수증, 주머니, 보드, 반응, 수락, 거절, 로그인.
 
-## 9. Do / Don't
+## 9. Checklist
 
-| Do                                           | Don't                                                        |
-| -------------------------------------------- | ------------------------------------------------------------ |
-| Build every view from folder → sheet → slip  | Cards with shadows, modals, bottom sheets with a grab handle |
-| Paper index tabs for every tab set           | Underline tabs or pill tabs for navigation                   |
-| Keep the folder's tab position when it opens | Move the title to a generic page header                      |
-| One orange button per view, Ink text on it   | Bigger or bolder CTAs; white text on orange                  |
-| Slips only for things other people put in    | Orange Light as a general highlight (e.g. for errors)        |
-| Real Korean sample content (below)           | Lorem ipsum or English placeholder copy                      |
-
----
-
-# Part B — Product, Screens, Flows
-
-## Vocabulary (UI term → meaning)
-
-| UI term                 | Meaning                                                                            |
-| ----------------------- | ---------------------------------------------------------------------------------- |
-| 둘러보기                | Feed of other people's public playlists                                            |
-| 내 플레이리스트         | Playlists made in this browser (manage links remembered here)                      |
-| 노래 넣기               | Adding a song at a chosen gap. It appears immediately                              |
-| 빼기                    | Removing a song (owner, or the person who added it, in the same browser)           |
-| 활동                    | Who added which song at which position, newest first                               |
-| 공개 / 링크 있는 사람만 | Whether a playlist shows in 둘러보기 (and anyone can add) or only via the add link |
-| 추가 링크               | Link the owner shares; anyone with it can add songs                                |
-| 관리 링크               | The owner's private link for removing songs from another device                    |
-
-## Feature status
-
-| Status                      | Features                                                                                                                                                                                                                                                                                                                   |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **In the folder wireframe** | 둘러보기 feed · 내 플레이리스트 · open/close folders · insert at any gap · remove + undo · activity with unseen badge · share panel (copy link, Instagram guide, X) · 공개 범위 · visitor preview · new folder with "가수 - 제목" lines or a screenshot (simulated reading with "확인해 주세요" rows) · player placeholder |
-| **Next (needs backend)**    | Real saving (Workers + D1), real screenshot reading on the device (Tesseract), real YouTube embed playback                                                                                                                                                                                                                 |
-| **Later**                   | Suggest a YouTube video for a typed title ("이 영상 맞아요?") · playlist editing (rename, reorder, delete playlist)                                                                                                                                                                                                        |
-| **Removed** (do not design) | Landing/onboarding pages, accounts/login, accept/reject, reactions, receipts, "pouch" inbox                                                                                                                                                                                                                                |
-
-## Screens
-
-### S1. 둘러보기 (first screen)
-
-Header → index tabs "둘러보기" (selected) | "내 플레이리스트 (badge)" → folder stack of other people's public playlists, most recently active first. No intro text.
-
-### S2. 내 플레이리스트
-
-Same drawer with the ghost folder first, then my folders. Meta "**내 플레이리스트** · 6곡 · 2명이 넣음", last line "새로 넣은 곡 2개 · Everything — 민지님" when unseen, " · 링크로만 공개" for private ones.
-
-### S3. Open folder — someone else's
-
-Tab "새벽 운전" → eyebrow "지우님의 플레이리스트 · 7곡 · 2명이 넣음" + X → primary "노래 넣기" → sheet → "처음부터 이어 듣기".
-
-- Insert mode: button turns secondary "자리 고르기 끝내기", hint "줄 사이 원하는 자리를 눌러 주세요", gaps appear.
-- After "넣기": toast "3번째 자리에 들어갔어요", new slip settles with "내가 넣음".
-
-### S4. Open folder — mine
-
-Same, plus divider tabs on the sheet:
-
-- **목록**: tracklist with remove icons.
-- **활동**: activity slips. Empty: "아직 넣은 사람이 없어요. 공유 탭에서 링크를 보내 보세요."
-- **공유**: share panel.
-
-### S5. New playlist (blank folder)
-
-Pulled out from the ghost folder (or the header button).
-
-1. Tab = input "플레이리스트 이름". Eyebrow "새 플레이리스트" + X.
-2. "내 이름" (helper "다른 사람에게는 ‘하린님의 플레이리스트’로 보여요").
-3. "곡 가져오기 (나중에 넣어도 돼요)" + segmented "한 줄씩 적기" | "캡처로 가져오기".
-   - Lines: textarea "가수 - 제목 (한 줄에 한 곡)" + "목록에 추가".
-   - Capture: dashed drop box "플레이리스트 화면 캡처 올리기" / "멜론·스포티파이·유튜브 뮤직 등 어떤 앱이든 돼요." / "사진은 서버로 보내지 않고 이 기기에서 읽어요." + "예시 캡처로 해보기" → progress "캡처에서 곡 이름을 읽고 있어요… 62%" → "6곡을 읽었어요. 틀린 곡은 고치거나 빼 주세요."
-4. "담을 곡 N개": a sheet. Uncertain rows show inline title/artist inputs and the tag "확인해 주세요" (no slip paper — nobody else put them in).
-5. "둘러보기에 보이기": "공개" | "링크 있는 사람만".
-6. Primary "만들기" → the folder files back into 내 플레이리스트 with the drop bounce, toast "‘퇴근길’을(를) 만들었어요. 열면 공유 칸이 있어요".
-
-### S6. States
-
-| State       | Copy                                                                                                                                                                                   |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Empty sheet | "아직 곡이 없어요"                                                                                                                                                                     |
-| Form errors | "노래 제목을 적어 주세요" · "유튜브 영상 링크가 아닌 것 같아요 (비워 둬도 돼요)" · "내 이름을 적어 주세요. 주인에게 ‘○○님이 넣음’으로 보여요" · "탭에 플레이리스트 이름을 적어 주세요" |
-| Removed     | Toast "‘Kyoto’을(를) 뺐어요" + "되돌리기"                                                                                                                                              |
-
-## Key flows
-
-1. **Visitor**: 둘러보기 → tap a folder (pull out) → "노래 넣기" → tap a gap → slip → "넣기" → close (file back).
-2. **Owner**: 내 플레이리스트 → ghost folder → name the tab → add lines or a screenshot → "만들기" → folder drops into the drawer → open → 공유 → copy add link.
-3. **Owner checks**: folder with peeking slips / orange dot → open → 활동 → listen → "빼기" → "되돌리기" if it was a mistake.
-
-## Sample content (use this, not lorem ipsum)
-
-| Folder              | Owner | Songs (added by)                                                                                                                                                                       |
-| ------------------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 새벽 운전           | 지우  | Nights / Frank Ocean · Kyoto / Phoebe Bridgers (민지) · Square (2017) / 백예린 · Antifreeze / 검정치마 · Plastic Love / 竹内まりや (민준) · Space Song / Beach House · 밤편지 / 아이유 |
-| 첫 자취방           | 준호  | 별일 없이 산다 / 장기하와 얼굴들 · 위잉위잉 / 혁오 · 난춘 / 새소년 (민지) · NO PAIN / 실리카겔 · 주저하는 연인들을 위해 / 잔나비                                                       |
-| 헬스장 금지곡       | 도윤  | Lose Yourself / Eminem · Stronger / Kanye West · Numb / Linkin Park · 말달리자 / 크라잉넛 (서준) · 낭만고양이 / 체리필터 (유나)                                                        |
-| 비 오는 날 작업용   | 민지  | No Surprises / Radiohead · Chamber of Reflection / Mac DeMarco (하늘) · 기억을 걷는 시간 / 넬 · 산책 / 백예린 (지우)                                                                   |
-| 요즘 듣는 거 (mine) | 하린  | Ivy / Frank Ocean · Hollywood / 검정치마 · Motion Sickness / Phoebe Bridgers (지우) · Panda Bear / 혁오 · Everything / 검정치마 (민지) · 0310 / 백예린                                 |
-
-## Open design questions
-
-- 공개 playlists: can anyone in 둘러보기 add songs, or only people with the add link? (wireframe: anyone)
-- Should my own public playlists also appear in 둘러보기?
-- Is the drawer readable with 30+ folders (search, sorting, or just scrolling)?
-- Where the player lives on long lists, within the "video stays visible" rule.
-- Logo: the current mark is a placeholder.
+- [ ] Only Ink / White / Desk / Divider / Gray 1 / Gray 2
+- [ ] Radius 0 everywhere
+- [ ] Every button 44px, 15/700; primary vs secondary differ only by fill/border
+- [ ] One primary per view
+- [ ] Pretendard only
+- [ ] No shadows or gradients; depth only from gray steps
+- [ ] Every slip shows a doodle sticker and "○○님이 넣음"
+- [ ] Doodles share the same base face and line weight
 
 ---
 
-# Part C — Stitch prompts
+# Part B — Screens
 
-Use them in order. Attach Part A (or the whole file) to each one if Stitch doesn't keep it.
+Design width 390 × 844. Use the sample content below.
 
-### Prompt 1 — Design system sheet
+| #   | Screen                     | Key content                                                                                                                                                                                                                                                                                                    |
+| --- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| S1  | 둘러보기 (rest)            | Header, switch (둘러보기 selected), counter "01 / 10", standing divider "새벽 운전" with 2 peeking slips and a kangaroo row, 9 tabs behind                                                                                                                                                                     |
+| S2  | Flipping                   | 3 frames: "새벽 운전" upright → falling 45° → flat; "첫 자취방" stands up. Extra frame: fast riffle with 3 dividers mid-fall                                                                                                                                                                                   |
+| S3  | Pulled-out sheet (visitor) | "새벽 운전" sheet: 7 rows, rows 02 and 05 are slips with doodles ("민지님이 넣음", "민준님이 넣음"), primary "쪽지 넣기"                                                                                                                                                                                       |
+| S4  | Choosing a spot            | Same sheet with "여기에 끼우기" gaps between every row; hint "끼울 자리를 눌러 주세요"                                                                                                                                                                                                                         |
+| S5  | Slip form                  | Ink slip in the gap after row 02: inputs + doodle pad. 3 states: base face only / visitor drew sunglasses / preset "윙크" selected. Error state "! 노래 제목을 적어 주세요"                                                                                                                                    |
+| S6  | 쏙 넣기                    | 3 frames: sheet shrinking back into the pocket / slip with doodle arcing toward the pocket / pocket dips, new peeking slip with the doodle, "쏙!"                                                                                                                                                              |
+| S7  | 내 파일철                  | Switch on "내 파일철"; my dividers "요즘 듣는 거" (with a "새 쪽지 2" mark on its tab) and "작업할 때"; last divider is blank with dashed outline "+ 새 플레이리스트"                                                                                                                                          |
+| S8  | My sheet                   | Tabs 목록 / 활동 2 / 공유. 목록: rows with "빼기" on slips. 활동: "민지님이 5번째 자리에 넣었어요 · Everything · 10분 전" with doodles. 공유: 추가 링크 + "링크 복사" + "인스타 스토리" / "X에 올리기", "둘러보기에 보이기" (공개 / 링크 있는 사람만), 관리 링크. Toast "‘Everything’을(를) 뺐어요 · 되돌리기" |
+| S9  | New playlist               | Blank sheet pulled from the blank divider: title input "플레이리스트 이름", "내 이름", "곡 가져오기" (한 줄씩 적기 / 캡처로 가져오기), capture progress "캡처에서 곡 이름을 읽고 있어요… 62%", result rows with "확인해 주세요", visibility switch, primary "꽂기"                                             |
+| S10 | Player (upcoming)          | On the sheet: full-width 16:9 video area (≥200px tall) "유튜브 플레이어", now playing "01 Nights — Frank Ocean", prev / pause / next / close, "유튜브에서 열기"                                                                                                                                                |
+| S11 | Empty & error              | Empty sheet "아직 곡이 없어요 · 첫 쪽지를 넣어 보세요"; not found "플레이리스트를 찾을 수 없어요"                                                                                                                                                                                                              |
+
+## Sample content
+
+| Divider             | Owner | Songs (★ = slip, added by)                                                                                                                                                               |
+| ------------------- | ----- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 새벽 운전           | 지우  | Nights / Frank Ocean · ★Kyoto / Phoebe Bridgers (민지) · Square (2017) / 백예린 · Antifreeze / 검정치마 · ★Plastic Love / 竹内まりや (민준) · Space Song / Beach House · 밤편지 / 아이유 |
+| 첫 자취방           | 준호  | 별일 없이 산다 / 장기하와 얼굴들 · 위잉위잉 / 혁오 · ★난춘 / 새소년 (민지) · NO PAIN / 실리카겔 · 주저하는 연인들을 위해 / 잔나비                                                        |
+| 헬스장 금지곡       | 도윤  | Lose Yourself / Eminem · Stronger / Kanye West · Numb / Linkin Park · ★말달리자 / 크라잉넛 (서준) · ★낭만고양이 / 체리필터 (유나)                                                        |
+| 비 오는 날 작업용   | 민지  | No Surprises / Radiohead · ★Chamber of Reflection / Mac DeMarco (하늘) · 기억을 걷는 시간 / 넬 · ★산책 / 백예린 (지우)                                                                   |
+| Other tabs          |       | 출근길 30분 · 여름 끝물 · 이별 후 3일차 · 노래방 18번 · 고양이랑 낮잠 · 시험 기간                                                                                                        |
+| 요즘 듣는 거 (mine) | 하린  | Ivy / Frank Ocean · Hollywood / 검정치마 · ★Motion Sickness / Phoebe Bridgers (지우) · Panda Bear / 혁오 · ★Everything / 검정치마 (민지)                                                 |
+
+---
+
+# Part C — Stitch prompts (in order)
+
+### P1 — Design system sheet
 
 ```
-Create a design system sheet for a mobile web app called "kanqaroo" (Korean UI, Pretendard font). Follow the attached DESIGN.md strictly.
+Create a design system sheet for "kanqaroo", a Korean mobile web app (Pretendard font only). Follow the attached DESIGN.md strictly.
 
-The whole UI is made of paper, flat, no shadows: playlists are FILE FOLDERS (light gray #F6F6F6, 1px #DCDCDC border, a rounded tab on top), the song list is a white SHEET inside the folder, and songs added by other people are SLIPS (orange-light #FDEDE6 strips with a 3px orange #ED692C left edge, sticking 10px out past the sheet's right edge). One accent color: orange #ED692C; small orange text uses #B8460F. Grays: #141414, #5C5C5C, #9B9B9B, #ECECEC, #DCDCDC.
+Visual language: MONOCHROME only (#111111 ink, #FFFFFF white, #E8E8E8 desk background, #F0F0F0 divider gray, #555555 and #8C8C8C text grays). SQUARE CORNERS everywhere (radius 0). Solid 2px black outlines on objects, 1px black rules inside lists. No colors, no shadows, no gradients. Depth only from darker gray overlays.
+
+Show these components with labels in English and UI text in Korean:
+- Buttons, all exactly 44px tall, 15px bold, square: primary (black fill, white text), secondary (1.5px black border), and the inverted pair for black surfaces. A row of two equal-width buttons.
+- A divider (one playlist): gray back panel with a square tab on top ("새벽 운전"), white paper peeking out with "01 Nights — Frank Ocean / 02 Kyoto — Phoebe Bridgers", two small black slips peeking out with tiny white doodle stickers and names "민지", "민준", and a white front with "새벽 운전" (40px extra bold), "지우님의 플레이리스트", "7곡 · 쪽지 2장", a row of kangaroo doodle stickers at the bottom, and "눌러서 꺼내기 →".
+- The same divider in three depth states: standing, behind (darker gray), flipped flat (plain back only).
+- Sheet header (black band, white title, "다시 꽂기"), a normal row, a slip row (black, tilted 1°, 40px white doodle sticker, "민지님이 넣음"), an insert gap ("여기에 끼우기" on a dashed line).
+- Square index tabs "목록 / 활동 2 / 공유", a two-part switch "둘러보기 | 내 파일철", 44px inputs, a black toast "‘Kyoto’을(를) 뺐어요  되돌리기".
+```
+
+### P2 — Kangaroo doodle sheet
+
+```
+Create a kangaroo doodle style sheet for kanqaroo. Style: simple hand-drawn line doodles of animal faces — thick, even black lines (about 3px at 56px), round line caps, slightly wobbly, flat black fills only for inner ears and nose, pure white background, friendly and minimal like a notebook doodle. [If a style reference image is attached, match its line quality and simplicity, but draw original kangaroos.]
 
 Show:
-- Paper index tabs (selected: white, joined to the paper below; unselected: #ECECEC with gray text) — used for ALL tabs.
-- A closed folder: tab with title "새벽 운전", body with "지우님 · 7곡 · 2명이 넣음" and "최근에 넣은 곡 · Plastic Love — 민준님 · 20분 전", two small slips peeking above the body's top edge. Show three folders stacked with tabs on the left, center and right.
-- A dashed ghost folder "+ 새 플레이리스트".
-- Track rows on a sheet: owner's song (plain), slip row "민지님이 넣음", slip row "내가 넣음" with remove X, playing row (orange bars instead of the number). Two-digit numbers, hairline dividers.
-- Insert gap: orange bar + "여기에 넣기" + dashed orange line. Insert slip with "3번째 자리에 들어가요", inputs 노래 제목 / 가수 (선택) / 유튜브 링크 (선택) / 내 이름, buttons 취소 | 넣기.
-- Buttons: primary (orange fill, near-black text) and secondary (white, gray border). ALL buttons 44px tall, 15px bold, pill shape; they differ ONLY in color. A row of two equal-width buttons. 44px icon buttons.
-- Inputs 44px, segmented control "공개 | 링크 있는 사람만", orange count badge, dark toast "3번째 자리에 들어갔어요".
-Label components in English; keep UI text in Korean.
+1) The BASE kangaroo face: rounded head, two tall upright ears with black-filled inner ears, an oval snout with a small black nose, short cheek lines, NO eyes and NO mouth.
+2) Six presets built on that same base: "웃음" (dot eyes, small smile), "윙크", "선글라스", "헤드폰", "졸림" (closed eyes and a small "z"), "놀람" (round eyes, "o" mouth).
+3) Three examples drawn by visitors on the same base (messy but cute): glasses and a grin, a party hat, a tongue out.
+4) Each doodle as a white square sticker with a 1.5px black outline at 24px, 40px and 56px, and at 40px placed on a black slip row.
+5) The doodle pad: a white square with the base face, caption "눈이랑 입을 그려 주세요", tool buttons "한 획 지우기" and "다 지우기", and a row of the six preset stickers.
+Keep everything black and white, square corners.
 ```
 
-### Prompt 2 — The drawer (둘러보기, 내 플레이리스트)
+### P3 — 둘러보기 (main screen at rest)
 
 ```
-Using the kanqaroo system, design 2 mobile screens (390px wide). Header: logo "kanqaroo" left, secondary button "새 플레이리스트" right. Under it, paper index tabs "둘러보기" and "내 플레이리스트 2" standing on a hairline.
+Design the main screen of kanqaroo (390×844), monochrome, square corners, Pretendard. Header: "kanqaroo" wordmark left, secondary button "소리 켬" right. Below: a square two-part switch "둘러보기 | 내 파일철" (둘러보기 selected) and the counter "01 / 10" on the right.
 
-1) 둘러보기 selected: a vertical stack of overlapping file folders (each overlaps the one above by 10px; tabs alternate left, center, right). Folders: 새벽 운전 (지우님 · 7곡 · 2명이 넣음, 2 peeking slips), 첫 자취방 (준호님 · 5곡 · 1명이 넣음, 1 slip), 헬스장 금지곡 (도윤님 · 6곡), 비 오는 날 작업용 (민지님 · 6곡), 출근길 30분 (서연님 · 5곡). Each shows a last-activity line like "최근에 넣은 곡 · Plastic Love — 민준님 · 20분 전". No intro text, no hero.
-2) 내 플레이리스트 selected: a dashed ghost folder "+ 새 플레이리스트" first, then "요즘 듣는 거" (orange dot on the tab, "새로 넣은 곡 2개 · Everything — 민지님") and "작업할 때" ("링크로만 공개").
+The rest of the screen is an ACCORDION FILE seen slightly from above: one divider stands upright in front and fills almost the full width and about 70% of the height; nine more dividers lean back behind it, each a little higher and darker gray, so only their square tabs show above it, staggered left/center/right: 첫 자취방, 헬스장 금지곡, 비 오는 날 작업용, 출근길 30분, 여름 끝물, 이별 후 3일차, 노래방 18번, 고양이랑 낮잠, 시험 기간.
+The front divider "새벽 운전": white paper peeking out with the first lines, two black slips peeking out with tiny kangaroo doodle stickers ("민지", "민준"), white front with "새벽 운전" in 40px extra bold, "지우님의 플레이리스트", "7곡 · 쪽지 2장", a row of two 56px kangaroo stickers labelled "넣은 캥거루들", and "눌러서 꺼내기 →". Small hint at the bottom: "↑ 위로 쓸어 넘기고, 누르면 꺼내 봐요". No onboarding, no cards, no colors.
 ```
 
-### Prompt 3 — Pulling a folder out (3 frames)
+### P4 — Flipping (frames)
 
 ```
-Show the "꺼내기" interaction as 3 frames side by side:
-1) The 둘러보기 drawer with the "새벽 운전" folder slightly lifted.
-2) Mid-way: the folder grown to about 70% of the screen, the white sheet starting to rise out of it.
-3) Open: the folder fills the screen under the header. Its tab (title "새벽 운전", 22px bold) stays top-left. Inside: eyebrow "지우님의 플레이리스트 · 7곡 · 2명이 넣음" with an X close button, a primary "노래 넣기" button, the white sheet with 7 numbered rows (row 02 "Kyoto" and row 05 "Plastic Love" are orange-light slips tagged "민지님이 넣음" / "민준님이 넣음"), and a secondary "처음부터 이어 듣기".
+Show the flipping interaction of the kanqaroo accordion file as 4 frames side by side, same layout as the main screen:
+1) "새벽 운전" standing in front.
+2) "새벽 운전" falling toward the viewer around its BOTTOM edge at about 45°, growing larger and darker; "첫 자취방" behind it starting to stand up.
+3) "새벽 운전" lying almost flat at the bottom (only its plain gray back visible), "첫 자취방" standing upright and readable; counter "02 / 10".
+4) A fast riffle: three dividers mid-fall at different angles, counter "05 / 10".
+Monochrome, square corners, depth only through gray.
 ```
 
-### Prompt 4 — Slipping a song in (3 frames)
+### P5 — Pulled-out sheet (visitor)
 
 ```
-On the open "새벽 운전" folder, show the "넣기" interaction as 3 frames:
-1) Insert mode: the button became secondary "자리 고르기 끝내기", hint "줄 사이 원하는 자리를 눌러 주세요", and between every row a gap with an orange bar, "여기에 넣기" and a dashed orange line.
-2) The gap after row 02 opened: an orange-light slip slid in from the right holding the form — "3번째 자리에 들어가요", 노래 제목 / 가수 (선택) side by side, 유튜브 링크 (선택), 내 이름, buttons 취소 | 넣기.
-3) After 넣기: row 03 is now a slip "Motion Sickness / Phoebe Bridgers — 내가 넣음" with a remove X, and a dark toast "3번째 자리에 들어갔어요".
+The visitor tapped "새벽 운전". Show the pulled-out sheet: a centered white sheet (2px black outline, square) over a 55% black backdrop; the accordion is dimmed behind it. Header: black band with "새벽 운전" (24px extra bold, white) and a secondary inverted button "다시 꽂기". Line under it: "지우님의 플레이리스트 · 7곡 · 쪽지 2장". Seven rows with numbers 01–07, title and artist, 1px black rules. Rows 02 (Kyoto / Phoebe Bridgers) and 05 (Plastic Love / 竹内まりや) are black slips tilted 1° with a 40px white kangaroo doodle sticker on the left and "민지님이 넣음" / "민준님이 넣음" on the right. Footer: primary button "쪽지 넣기" (44px, full width).
 ```
 
-### Prompt 5 — My folder: 목록 · 활동 · 공유
+### P6 — Choosing a spot
 
 ```
-Open folder "요즘 듣는 거" owned by me. Eyebrow "내 플레이리스트 · 6곡 · 2명이 넣음". Paper divider tabs sit on top of the white sheet: "목록", "활동 2", "공유". Make 3 variations:
-- 목록: tracklist with play and remove icons; rows by 지우 and 민지 are slips.
-- 활동: two slips "민지님이 5번째 자리에 넣었어요 / Everything · 검정치마 / 10분 전" and "지우님이 3번째 자리에 넣었어요 / Motion Sickness · Phoebe Bridgers / 1시간 전", each with a play icon and a "빼기" secondary button.
-- 공유: orange-light box "추가 링크 · 친구에게 보내기" with a monospace link field, primary "링크 복사", "인스타 스토리" | "X에 올리기"; then "둘러보기에 보이기" segmented "공개 | 링크 있는 사람만"; secondary "다른 사람에게 보이는 화면 보기"; gray box "관리 링크 · 나만 보관" with link field and "복사".
+Same sheet after tapping "쪽지 넣기": between every pair of rows (and above the first, below the last) a 40px gap appears with a 1.5px dashed black line and the label "여기에 끼우기". The footer shows "끼울 자리를 눌러 주세요" and a secondary "그만두기". Everything else unchanged.
 ```
 
-### Prompt 6 — New playlist (blank folder)
+### P7 — Slip form with the kangaroo pad (3 states + error)
 
 ```
-A blank folder pulled out of the drawer. Its tab is a text input showing "퇴근길" (placeholder "플레이리스트 이름"). Inside: eyebrow "새 플레이리스트" + X, field "내 이름" (하린) with helper "다른 사람에게는 ‘하린님의 플레이리스트’로 보여요", "곡 가져오기 (나중에 넣어도 돼요)" with segmented "한 줄씩 적기 | 캡처로 가져오기" (capture selected), a dashed white box "6곡을 읽었어요. 틀린 곡은 고치거나 빼 주세요." with "다른 캡처 올리기", then a sheet "담을 곡 6개" where row 02 shows editable inputs "Squre (2O17)" / "백예린" with the tag "확인해 주세요", then "둘러보기에 보이기" segmented, and a primary "만들기" at the bottom.
+The visitor tapped the gap after row 02. A black slip rose into that gap (tilted -0.8°) with: heading "3번째 자리에 끼워요"; underline-only white inputs "노래 제목", "가수", "유튜브 링크 (선택)", "내 이름"; then the kangaroo pad — a white square with the base kangaroo face (no eyes, no mouth), caption "눈이랑 입을 그려 주세요", small buttons "한 획 지우기" and "다 지우기", and a row of six 40px preset stickers; then buttons "그만두기" (inverted secondary) and "쏙 넣기" (inverted primary, white fill).
+Make 4 variations: (a) empty pad; (b) the visitor drew sunglasses and a grin; (c) preset "윙크" selected (highlighted with a 2px white outline); (d) error "! 노래 제목을 적어 주세요" under the title input.
 ```
 
-### Prompt 7 — Player placeholder
+### P8 — 쏙 넣기 (frames)
 
 ```
-On the open "새벽 운전" folder, add a player stuck to the top: a full-width 16:9 dark video area (at least 200px tall) labelled "유튜브 플레이어", then "01 Nights — Frank Ocean", then 44px icon buttons previous / pause / next / close and a secondary "유튜브에서 열기" on the right. Row 01 in the sheet shows three orange bars instead of its number. The video always stays visible.
+Show the "쏙 넣기" moment as 3 frames:
+1) The sheet shrinking back down into the "새벽 운전" pocket.
+2) A small black slip carrying the visitor's kangaroo doodle and "Motion Sickness · 하린" flying in an arc toward the top of the pocket.
+3) The pocket dipping slightly; a third black slip with the new doodle now peeks out of the pocket next to "민지" and "민준"; the meta reads "8곡 · 쪽지 3장"; a bold "쏙!" floats above.
 ```
 
-### Prompt 8 — Consistency pass
+### P9 — 내 파일철
 
 ```
-Check every screen against the kanqaroo system and fix: everything is built from folder (gray paper) → sheet (white paper) → slip (orange-light strip with orange left edge); all tabs are paper index tabs; open folders keep their tab position; all buttons and inputs exactly 44px, 15px bold, pill shape; primary vs secondary differ only by color; one orange button per view; no white text on orange; small orange text #B8460F; no shadows except the segmented control's selected pill; no colors outside the palette; names always followed by "님".
+Switch set to "내 파일철". Same accordion layout with my dividers: front "요즘 듣는 거" (my playlist, owner line "내 플레이리스트", meta "6곡 · 쪽지 2장", tab shows a small black "새 쪽지 2" label), behind it "작업할 때" (meta includes "링크로만 공개"), and the LAST divider is blank with a dashed black outline and the tab "+ 새 플레이리스트". Counter "01 / 03".
+```
+
+### P10 — My sheet: 목록 · 활동 · 공유
+
+```
+Pulled-out sheet of my playlist "요즘 듣는 거". Under the black header, square index tabs "목록", "활동 2", "공유". Make 3 variations:
+- 목록: rows; the two slips (Motion Sickness by 지우, Everything by 민지) show doodles and a small inverted "빼기" button. Add a black toast at the bottom "‘Everything’을(를) 뺐어요" with an underlined "되돌리기".
+- 활동: list of slips with 40px doodles: "민지님이 5번째 자리에 넣었어요 / Everything · 검정치마 / 10분 전" and "지우님이 3번째 자리에 넣었어요 / Motion Sickness · Phoebe Bridgers / 1시간 전".
+- 공유: box "추가 링크 · 친구에게 보내기" with a link field and primary "링크 복사", then "인스타 스토리" | "X에 올리기" (equal width secondary); "둘러보기에 보이기" two-part switch "공개 | 링크 있는 사람만"; box "관리 링크 · 나만 보관" with link field and "복사".
+```
+
+### P11 — New playlist (blank divider)
+
+```
+The blank divider was tapped: a blank white sheet comes out. Header input "플레이리스트 이름" (typed: "퇴근길"). Fields: "내 이름" (하린) with helper "다른 사람에게는 ‘하린님의 플레이리스트’로 보여요"; "곡 가져오기" two-part switch "한 줄씩 적기 | 캡처로 가져오기" (capture selected); a square progress bar "캡처에서 곡 이름을 읽고 있어요… 62%"; below it the result list "담을 곡 6개" where row 02 shows editable inputs "Squre (2O17)" / "백예린" with the label "확인해 주세요"; "둘러보기에 보이기" switch; primary "꽂기". Also show one frame of the new "퇴근길" divider sliding into the front of 내 파일철.
+```
+
+### P12 — Player, empty and error
+
+```
+Make 3 screens in the same style: (1) the "새벽 운전" sheet with a player at its top — full-width 16:9 black video area at least 200px tall labelled "유튜브 플레이어", then "01 Nights — Frank Ocean", 44px square icon buttons previous / pause / next / close and a secondary "유튜브에서 열기"; row 01 shows a playing indicator instead of its number. (2) An empty sheet "아직 곡이 없어요" with "첫 쪽지를 넣어 보세요" and primary "쪽지 넣기". (3) Not found: "플레이리스트를 찾을 수 없어요" with secondary "둘러보기로".
+```
+
+### P13 — Consistency pass
+
+```
+Check all kanqaroo screens against DESIGN.md and fix: only #111111/#FFFFFF/#E8E8E8/#F0F0F0/#555555/#8C8C8C; radius 0 everywhere; every button 44px tall, 15px bold, differing only by fill/border; one primary button per view; Pretendard only; no shadows or gradients; every slip shows a white doodle sticker and "○○님이 넣음"; all kangaroos share the same base face and line weight; names always end with "님".
 ```
