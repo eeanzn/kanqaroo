@@ -1,6 +1,7 @@
 <title>Kanqaroo</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
+@property --tint { syntax: '<color>'; inherits: true; initial-value: #FFFFFF; }
 /* Layout: 떠 있는 알약 헤더 아래 한 화면 무대. 플레이리스트 = 아코디언 파일, 바닥 경첩에서 앞으로 넘어간다.
    중립 무채색 UI + 글래스. 색과 그림은 파일(플레이리스트)만. 8px 라운드, 헤더만 완전히 둥글게. 토큰 원본은 DESIGN.md */
 :root {
@@ -24,6 +25,11 @@
   --dim: rgba(0, 0, 0, .16);
   --veil: rgba(255, 255, 255, .42);
   --knock: #FFFFFF;
+  --tint: #FFFFFF;
+  --rim-hi: color-mix(in oklab, var(--tint) 42%, white);
+  --rim-mid: color-mix(in oklab, var(--tint) 40%, transparent);
+  --rim-lo: color-mix(in oklab, var(--tint) 70%, white);
+  --rim-edge: color-mix(in oklab, var(--tint) 50%, rgba(255, 255, 255, .4));
   --font: 'Pretendard', system-ui, -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
   --hdr-top: calc(env(safe-area-inset-top, 0px) + 8px);
   --stage-top: calc(var(--hdr-top) + 56px + 12px);
@@ -35,7 +41,7 @@
     --line: rgba(255, 255, 255, .1); --fill: rgba(255, 255, 255, .08); --fill-2: rgba(255, 255, 255, .12);
     --primary: #F5F5F5; --on-primary: #000000; --danger: #FF6B6B;
     --glass: rgba(44, 44, 48, .26); --glass-thick: rgba(28, 28, 30, .68); --glass-edge: rgba(255, 255, 255, .14);
-    --spec: rgba(255, 255, 255, .5); --glass-shade: 0 8px 24px rgba(0, 0, 0, .35), 0 1px 3px rgba(0, 0, 0, .2); --hbtn: rgba(255, 255, 255, .12); --dim: rgba(0, 0, 0, .36); --veil: rgba(0, 0, 0, .45); --knock: #1C1C1E;
+    --spec: rgba(255, 255, 255, .5); --glass-shade: 0 8px 24px rgba(0, 0, 0, .35), 0 1px 3px rgba(0, 0, 0, .2); --hbtn: rgba(255, 255, 255, .12); --dim: rgba(0, 0, 0, .36); --veil: rgba(0, 0, 0, .45); --knock: #1C1C1E; --rim-hi: color-mix(in oklab, var(--tint) 62%, rgba(255, 255, 255, .7)); --rim-mid: color-mix(in oklab, var(--tint) 34%, transparent); --rim-lo: color-mix(in oklab, var(--tint) 75%, rgba(255, 255, 255, .25)); --rim-edge: color-mix(in oklab, var(--tint) 55%, rgba(255, 255, 255, .1));
   }
 }
 :root[data-theme="dark"] {
@@ -44,7 +50,7 @@
   --line: rgba(255, 255, 255, .1); --fill: rgba(255, 255, 255, .08); --fill-2: rgba(255, 255, 255, .12);
   --primary: #F5F5F5; --on-primary: #000000; --danger: #FF6B6B;
   --glass: rgba(44, 44, 48, .26); --glass-thick: rgba(28, 28, 30, .68); --glass-edge: rgba(255, 255, 255, .14);
-  --spec: rgba(255, 255, 255, .5); --glass-shade: 0 8px 24px rgba(0, 0, 0, .35), 0 1px 3px rgba(0, 0, 0, .2); --hbtn: rgba(255, 255, 255, .12); --dim: rgba(0, 0, 0, .36); --veil: rgba(0, 0, 0, .45); --knock: #1C1C1E;
+  --spec: rgba(255, 255, 255, .5); --glass-shade: 0 8px 24px rgba(0, 0, 0, .35), 0 1px 3px rgba(0, 0, 0, .2); --hbtn: rgba(255, 255, 255, .12); --dim: rgba(0, 0, 0, .36); --veil: rgba(0, 0, 0, .45); --knock: #1C1C1E; --rim-hi: color-mix(in oklab, var(--tint) 62%, rgba(255, 255, 255, .7)); --rim-mid: color-mix(in oklab, var(--tint) 34%, transparent); --rim-lo: color-mix(in oklab, var(--tint) 75%, rgba(255, 255, 255, .25)); --rim-edge: color-mix(in oklab, var(--tint) 55%, rgba(255, 255, 255, .1));
 }
 @font-face { font-family: 'Pretendard'; font-weight: 400; font-display: swap; src: url(data:font/woff2;base64,__FONT_400__) format('woff2'); }
 @font-face { font-family: 'Pretendard'; font-weight: 600; font-display: swap; src: url(data:font/woff2;base64,__FONT_600__) format('woff2'); }
@@ -52,7 +58,7 @@
 @font-face { font-family: 'Pretendard'; font-weight: 800; font-display: swap; src: url(data:font/woff2;base64,__FONT_800__) format('woff2'); }
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html { height: 100%; }
+html { height: 100%; transition: --tint .7s ease; }
 body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 17px; line-height: 1.5; word-break: keep-all; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
 button, input { font: inherit; color: inherit; }
 canvas { display: block; }
@@ -73,9 +79,10 @@ ol, ul { padding: 0; list-style: none; }
 /* ── 글래스 ── */
 .glass { background: var(--glass); -webkit-backdrop-filter: blur(6px) saturate(190%) brightness(1.04); backdrop-filter: blur(6px) saturate(190%) brightness(1.04); border: 0; box-shadow: var(--glass-shade), inset 0 0 0 0.5px var(--glass-edge); }
 .glass.thick { background: var(--glass-thick); -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%); }
-/* 반사광 테두리: 왼쪽 위가 밝고 오른쪽 아래로 옅어지는 0.75px 띠 */
+/* 반사광 테두리: 왼쪽 위가 밝고 오른쪽 아래로 옅어지는 0.75px 띠. 색은 뒤에 있는 것(--tint)을 머금음 */
 .lg { position: relative; }
-.lg::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 0.75px; pointer-events: none; background: linear-gradient(140deg, var(--spec), rgba(255, 255, 255, .12) 30%, rgba(255, 255, 255, 0) 55%, rgba(255, 255, 255, .1) 78%, var(--glass-edge)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+.lg { box-shadow: var(--glass-shade), inset 0 0 0 0.5px var(--rim-edge); }
+.lg::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 0.75px; pointer-events: none; background: linear-gradient(140deg, var(--rim-hi), var(--rim-mid) 30%, transparent 55%, var(--rim-mid) 78%, var(--rim-lo)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
 
 /* ── Ambient: 멈춘 파일의 색·그림을 흐리게 깐 배경. 0.7초에 걸쳐 바뀜 ── */
 .amb { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
@@ -92,7 +99,7 @@ ol, ul { padding: 0; list-style: none; }
 .hdr { position: fixed; z-index: 40; top: var(--hdr-top); left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); max-width: 560px; margin: 0 auto; height: 56px; border-radius: 999px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px 0 16px; }
 .logo { display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 4px; margin-left: -4px; border: 0; background: none; cursor: pointer; font-size: 17px; font-weight: 700; letter-spacing: -0.02em; border-radius: 8px; }
 .logo svg { width: 28px; height: 28px; }
-.hbtn { width: 40px; height: 40px; border-radius: 999px; border: 0; background: var(--hbtn); box-shadow: inset 0 0 0 0.5px var(--glass-edge); display: grid; place-items: center; cursor: pointer; }
+.hbtn { width: 40px; height: 40px; border-radius: 999px; border: 0; background: var(--hbtn); box-shadow: inset 0 0 0 0.5px var(--rim-edge); display: grid; place-items: center; cursor: pointer; }
 .hbtn:active { background: var(--fill-2); }
 .hbtn[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); box-shadow: none; }
 
@@ -113,7 +120,7 @@ ol, ul { padding: 0; list-style: none; }
 .ibtn.s { width: 32px; height: 32px; }
 .ibtn.ghost { background: transparent; }
 .ibtn.danger { color: var(--danger); }
-.on-cover { background: var(--oc, rgba(255, 255, 255, .24)); color: var(--on); box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, .3); }
+.on-cover { background: var(--oc, rgba(255, 255, 255, .24)); color: var(--on); box-shadow: inset 0 0 0 0.5px color-mix(in oklab, var(--tf, #FFFFFF) 50%, rgba(255, 255, 255, .35)); }
 .btn.on-cover-primary { background: var(--on); color: var(--c); }
 
 /* ── ActionBar ── */
@@ -139,20 +146,20 @@ ol, ul { padding: 0; list-style: none; }
 /* ── File (아코디언 파일) ── */
 .pocket { position: absolute; left: 50%; bottom: var(--hingeB, 16px); width: var(--W, 340px); height: var(--H, 460px); margin-left: calc(var(--W, 340px) / -2); transform-origin: 50% 100%; will-change: transform; }
 .face { position: absolute; inset: 0; border-radius: 8px; overflow: hidden; background: var(--c); color: var(--on); isolation: isolate; box-shadow: 0 14px 34px rgba(0, 0, 0, .18), 0 2px 6px rgba(0, 0, 0, .08); }
-.face::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(158deg, rgba(255, 255, 255, .28) 0%, rgba(255, 255, 255, .08) 26%, rgba(255, 255, 255, 0) 48%, rgba(255, 255, 255, 0) 80%, rgba(255, 255, 255, .1) 100%); }
+.face::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(158deg, color-mix(in oklab, var(--tf, #FFFFFF) 30%, rgba(255, 255, 255, .28)) 0%, color-mix(in oklab, var(--tf, #FFFFFF) 20%, rgba(255, 255, 255, .08)) 26%, transparent 48%, transparent 80%, color-mix(in oklab, var(--tf, #FFFFFF) 25%, rgba(255, 255, 255, .1)) 100%); }
 .face .cv-img { position: absolute; inset: 0; background: var(--img) center / cover; }
 .face .rim { position: absolute; inset: 0; border-radius: 8px; box-shadow: inset 0 -0.5px 0 rgba(0, 0, 0, .14); pointer-events: none; z-index: 3; }
-.face .rim::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 0.75px; background: linear-gradient(150deg, rgba(255, 255, 255, .9), rgba(255, 255, 255, .16) 26%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, .08) 76%, rgba(255, 255, 255, .45)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+.face .rim::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 0.75px; background: linear-gradient(150deg, color-mix(in oklab, var(--tf, #FFFFFF) 40%, white), color-mix(in oklab, var(--tf, #FFFFFF) 45%, transparent) 26%, transparent 50%, color-mix(in oklab, var(--tf, #FFFFFF) 35%, transparent) 76%, color-mix(in oklab, var(--tf, #FFFFFF) 70%, white)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
 .strip { position: relative; z-index: 2; height: 56px; padding: 12px 16px 0; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .is-img .strip { background: rgba(0, 0, 0, .45); }
 .strip .ttl { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .strip .cnt { flex: none; font-size: 13px; font-weight: 600; opacity: .8; }
-.pocketfront { position: absolute; left: 0; right: 0; bottom: 0; top: 56px; z-index: 2; padding: 12px 12px 12px; display: flex; flex-direction: column; gap: 12px; background: rgba(255, 255, 255, .1); box-shadow: inset 0 0.5px 0 rgba(255, 255, 255, .6), inset 0 10px 18px -12px rgba(255, 255, 255, .35), 0 -0.5px 0 rgba(0, 0, 0, .14); }
+.pocketfront { position: absolute; left: 0; right: 0; bottom: 0; top: 56px; z-index: 2; padding: 12px 12px 12px; display: flex; flex-direction: column; gap: 12px; background: rgba(255, 255, 255, .1); box-shadow: inset 0 0.5px 0 color-mix(in oklab, var(--tf, #FFFFFF) 40%, rgba(255, 255, 255, .7)), inset 0 10px 18px -12px color-mix(in oklab, var(--tf, #FFFFFF) 35%, rgba(255, 255, 255, .35)), 0 -0.5px 0 rgba(0, 0, 0, .14); }
 .is-img .pocketfront { background: none; overflow: hidden; isolation: isolate; }
 .is-img .pocketfront::before { content: ""; position: absolute; inset: -20px; z-index: -1; background: var(--img) center / cover; filter: blur(16px) brightness(.6) saturate(1.2); }
 .owner { padding: 0 4px; font-size: 15px; line-height: 22.5px; font-weight: 600; display: flex; justify-content: space-between; gap: 12px; }
 .owner span:last-child { font-weight: 400; opacity: .8; white-space: nowrap; }
-.panel { position: relative; flex: 1; min-height: 0; border-radius: 8px; padding: 8px 12px 12px; display: flex; flex-direction: column; background: var(--pv); color: var(--on); box-shadow: inset 0 0 0 0.5px rgba(255, 255, 255, .28); overflow: hidden; isolation: isolate; }
+.panel { position: relative; flex: 1; min-height: 0; border-radius: 8px; padding: 8px 12px 12px; display: flex; flex-direction: column; background: var(--pv); color: var(--on); box-shadow: inset 0 0 0 0.5px color-mix(in oklab, var(--tf, #FFFFFF) 50%, rgba(255, 255, 255, .35)); overflow: hidden; isolation: isolate; }
 .is-img .panel::before { content: ""; position: absolute; inset: -24px; z-index: -1; background: var(--img) center / cover; filter: blur(18px) brightness(.5) saturate(1.2); }
 .pv { flex: 1; min-height: 0; overflow: hidden; }
 .pv li { display: flex; align-items: baseline; gap: 8px; height: 36px; padding-top: 6px; border-bottom: 1px solid color-mix(in srgb, var(--on) 16%, transparent); white-space: nowrap; }
@@ -394,6 +401,20 @@ function toHsl(hex) {
   const h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4
   return [(h * 60 + 360) % 360, s * 100, l * 100]
 }
+// 빛 테두리 색: 표지색을 밝고 선명하게 (회색 계열은 그대로 회색)
+function glow(hex) {
+  const [h, sat, l] = toHsl(hex)
+  return `hsl(${Math.round(h)} ${Math.round(sat < 8 ? sat : clamp(sat, 45, 90))}% ${Math.round(clamp(l, 58, 78))}%)`
+}
+function rgbHex(r, g, b) { return '#' + [r, g, b].map((v) => Math.round(v).toString(16).padStart(2, '0')).join('') }
+function canvasTint(c) {
+  const t = document.createElement('canvas'); t.width = t.height = 8
+  const g = t.getContext('2d', { willReadFrequently: true }); g.drawImage(c, 0, 0, 8, 8)
+  const d = g.getImageData(0, 0, 8, 8).data
+  let r = 0, gg = 0, b = 0
+  for (let i = 0; i < d.length; i += 4) { r += d[i]; gg += d[i + 1]; b += d[i + 2] }
+  return glow(rgbHex(r / 64, gg / 64, b / 64))
+}
 const loadImg = (src) => new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => no(new Error('image')); im.src = src })
 function drawCover(g, im, W, H) {
   const s = Math.max(W / im.naturalWidth, H / im.naturalHeight), w = im.naturalWidth * s, h = im.naturalHeight * s
@@ -405,7 +426,7 @@ async function fileToCover(file) {
     const im = await loadImg(url), c = document.createElement('canvas')
     c.width = 600; c.height = 900
     drawCover(c.getContext('2d'), im, 600, 900)
-    return c.toDataURL('image/jpeg', 0.86)
+    return { v: c.toDataURL('image/jpeg', 0.86), tint: canvasTint(c) }
   } finally { URL.revokeObjectURL(url) }
 }
 const loadScript = (src) => new Promise((ok, no) => { const el = document.createElement('script'); el.src = src; el.onload = ok; el.onerror = () => no(new Error(`script ${src}`)); document.head.append(el) })
@@ -423,7 +444,7 @@ function pattern(kind) {
     const cols = ['#C9A27E', '#8DA399', '#D98C7A', '#5B6C8F']
     for (let i = 0; i < 14; i++) { g.fillStyle = cols[i % 4]; g.beginPath(); g.arc((i * 137) % 480, (i * 211) % 640, 40 + (i * 23) % 70, 0, Math.PI * 2); g.fill() }
   }
-  try { return c.toDataURL('image/jpeg', 0.85) } catch { return '' }
+  try { return { v: c.toDataURL('image/jpeg', 0.85), tint: canvasTint(c) } } catch { return { v: '', tint: '#9A9A9A' } }
 }
 
 /* ════════ 데이터 (예시) ════════ */
@@ -437,11 +458,11 @@ const PL = [
   { id: 'p2', title: '첫 자취방', owner: '준호', cover: { type: 'color', v: '#E3B23C' }, likes: 42, songs: [S('별일 없이 산다', '장기하와 얼굴들'), S('위잉위잉', '혁오'), S('난춘', '새소년', '민지'), S('NO PAIN', '실리카겔'), S('주저하는 연인들을 위해', '잔나비')] },
   { id: 'p3', title: '헬스장 금지곡', owner: '도윤', cover: { type: 'color', v: '#C2412D' }, likes: 77, songs: [S('Lose Yourself', 'Eminem'), S('Stronger', 'Kanye West'), S('Numb', 'Linkin Park'), S('말달리자', '크라잉넛', '서준'), S('낭만고양이', '체리필터', '유나'), S('고백 (Go Back)', '다이나믹 듀오')] },
   { id: 'p4', title: '비 오는 날 작업용', owner: '민지', cover: { type: 'color', v: '#7FA37A' }, likes: 63, songs: [S('No Surprises', 'Radiohead'), S('Weird Fishes/Arpeggi', 'Radiohead'), S('Chamber of Reflection', 'Mac DeMarco', '하늘'), S('기억을 걷는 시간', '넬'), S('바람이 분다', '이소라'), S('산책', '백예린', '지우')] },
-  { id: 'p5', title: '여름 끝물', owner: '하늘', cover: { type: 'image', v: IMG.stripes }, likes: 91, songs: [S('Maria También', 'Khruangbin'), S('The Less I Know The Better', 'Tame Impala'), S('TOMBOY', '혁오'), S('Ditto', 'NewJeans', '서연'), S('Get Lucky', 'Daft Punk')] },
+  { id: 'p5', title: '여름 끝물', owner: '하늘', cover: { type: 'image', v: IMG.stripes.v, tint: IMG.stripes.tint }, likes: 91, songs: [S('Maria También', 'Khruangbin'), S('The Less I Know The Better', 'Tame Impala'), S('TOMBOY', '혁오'), S('Ditto', 'NewJeans', '서연'), S('Get Lucky', 'Daft Punk')] },
   { id: 'p6', title: '출근길 30분', owner: '서연', cover: { type: 'color', v: '#3E8EB8' }, likes: 35, songs: [S('Blinding Lights', 'The Weeknd'), S('Hype Boy', 'NewJeans'), S('우주를 줄게', '볼빨간사춘기'), S('Yellow', 'Coldplay', '도윤'), S('봄이 좋냐??', '10cm')] },
   { id: 'p7', title: '이별 후 3일차', owner: '유나', cover: { type: 'color', v: '#6B4FA0' }, likes: 54, songs: [S('너의 모든 순간', '성시경'), S('모든 날, 모든 순간', '폴킴', '지우'), S('Someone Like You', 'Adele'), S('서른 즈음에', '김광석'), S('Paris in the Rain', 'Lauv', '민준')] },
   { id: 'p8', title: '노래방 18번', owner: '서준', cover: { type: 'color', v: '#F06A3A' }, likes: 88, songs: [S('가시', '버즈'), S('Tears', '소찬휘', '수아'), S('하하하쏭', '자우림'), S('해변의 여인', '쿨'), S('소녀시대', '이승철', '도윤')] },
-  { id: 'p9', title: '고양이랑 낮잠', owner: '수아', cover: { type: 'image', v: IMG.dots }, likes: 47, songs: [S("Don't Know Why", 'Norah Jones'), S('My Funny Valentine', 'Chet Baker'), S('공드리', '혁오', '유나'), S('무릎', '아이유')] },
+  { id: 'p9', title: '고양이랑 낮잠', owner: '수아', cover: { type: 'image', v: IMG.dots.v, tint: IMG.dots.tint }, likes: 47, songs: [S("Don't Know Why", 'Norah Jones'), S('My Funny Valentine', 'Chet Baker'), S('공드리', '혁오', '유나'), S('무릎', '아이유')] },
   { id: 'p10', title: '요즘 듣는 거', owner: myName, mine: true, cover: { type: 'color', v: '#222222' }, likes: 19, songs: [S('Ivy', 'Frank Ocean'), S('Hollywood', '검정치마'), S('Motion Sickness', 'Phoebe Bridgers', '지우'), S('Panda Bear', '혁오'), S('Everything', '검정치마', '민지')] },
   { id: 'p11', title: '퇴근길', owner: myName, mine: true, cover: { type: 'color', v: '#E9E4D8' }, likes: 6, songs: [S('Sunday Morning', 'Maroon 5'), S('밤양갱', '비비')] },
 ]
@@ -451,9 +472,10 @@ const byId = (id) => PL.find((p) => p.id === id)
 const glassVars = (on) => (on === '#FFFFFF'
   ? '--pv:rgba(0,0,0,.18);--on-2:rgba(255,255,255,.78);--oc:rgba(255,255,255,.2)'
   : '--pv:rgba(255,255,255,.26);--on-2:rgba(17,17,17,.78);--oc:rgba(255,255,255,.42)')
+const tintOf = (p) => (p.cover.type === 'image' ? p.cover.tint || '#9A9A9A' : glow(p.cover.v))
 const coverVars = (p) => p.cover.type === 'image'
-  ? `--c:#333;--on:#FFFFFF;--img:url('${p.cover.v}');${glassVars('#FFFFFF')}`
-  : `--c:${p.cover.v};--on:${onColor(p.cover.v)};${glassVars(onColor(p.cover.v))}`
+  ? `--c:#333;--on:#FFFFFF;--img:url('${p.cover.v}');--tf:${tintOf(p)};${glassVars('#FFFFFF')}`
+  : `--c:${p.cover.v};--on:${onColor(p.cover.v)};--tf:${tintOf(p)};${glassVars(onColor(p.cover.v))}`
 const isImg = (p) => p.cover.type === 'image'
 
 /* ════════ 소리 (0ddb584 그대로: WebAudio로 즉석 합성) ════════ */
@@ -689,7 +711,8 @@ function replayIntro() {
 
 /* ════════ 배경: 멈춘 파일의 색·그림 (그림은 흐리게, 색은 Apple Music처럼 번진 색) ════════ */
 const amb = $('#amb')
-let ambKey = null, ambI = 0
+let ambKey = null, ambI = 0, ambTint = '#FFFFFF'
+const setTint = (c) => document.documentElement.style.setProperty('--tint', c)
 function ambCanvas(hex) {
   const c = document.createElement('canvas'); c.width = 90; c.height = 120
   const g = c.getContext('2d'), [h, sat, l] = toHsl(hex)
@@ -706,6 +729,8 @@ function ambCanvas(hex) {
 function setAmbient(p) {
   const key = p ? `${p.id}|${p.cover.v.length}|${p.cover.v.slice(-24)}` : ''
   if (key === ambKey) return
+  ambTint = p ? tintOf(p) : '#FFFFFF'
+  if (route.cur === '') setTint(ambTint)
   ambKey = key
   const layers = amb.children, next = layers[(ambI ^= 1)], prev = layers[ambI ^ 1]
   next.innerHTML = ''
@@ -1223,7 +1248,7 @@ function padAction(act, p) {
   else if (act === 'pad-save') {
     const c = document.createElement('canvas'); c.width = ink.width; c.height = ink.height
     const cg = c.getContext('2d'); cg.drawImage($('#pad-base', pgEdit), 0, 0); cg.drawImage(ink, 0, 0)
-    p.cover = { type: 'image', v: c.toDataURL('image/jpeg', 0.88), src: 'draw' }
+    p.cover = { type: 'image', v: c.toDataURL('image/jpeg', 0.88), tint: canvasTint(c), src: 'draw' }
     renderEdit(p.id); refreshFile(p.id); toast('그림을 표지로 썼어요')
   }
 }
@@ -1254,7 +1279,7 @@ function renderEdit(id) {
   $('#e-img', pgEdit)?.addEventListener('change', async (e) => {
     const f0 = e.target.files?.[0]
     if (!f0) return
-    try { p.cover = { type: 'image', v: await fileToCover(f0), src: 'photo' }; renderEdit(id); refreshFile(id); toast('표지 사진을 바꿨어요') } catch { toast('사진을 열지 못했어요. 다른 사진을 골라 주세요') }
+    try { const r = await fileToCover(f0); p.cover = { type: 'image', v: r.v, tint: r.tint, src: 'photo' }; renderEdit(id); refreshFile(id); toast('표지 사진을 바꿨어요') } catch { toast('사진을 열지 못했어요. 다른 사진을 골라 주세요') }
   })
   if (edTab === 'draw') initPad(p)
 }
@@ -1312,6 +1337,7 @@ function route() {
   pgEdit.hidden = !h.startsWith('edit-')
   pgComp.hidden = h !== 'components'
   $('#edge').hidden = h === ''
+  setTint(h === '' ? ambTint : '#FFFFFF')
   $('#me-btn').setAttribute('aria-pressed', String(h !== ''))
   if (h === 'me') renderMe()
   else if (h.startsWith('edit-')) renderEdit(h.slice(5))
