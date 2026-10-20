@@ -7,7 +7,6 @@ package-lock.json
 prototype/src.html
 prototype/folder.html
 prototype/accordion.html
-design/archive/v4.1/specimen.html
 
 # 외부에서 가져온 에이전트 스킬 (impeccable, 원본 그대로 유지)
 .claude/skills/impeccable
