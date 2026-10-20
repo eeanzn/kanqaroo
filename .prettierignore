@@ -6,6 +6,7 @@ prototype/dist
 
 # 프로토타입 원본은 게시본과 바이트 단위로 같게 유지
 prototype/accordion.html
+prototype/lab
 archive/prototype-v2
 
 # 외부에서 가져온 에이전트 스킬 (impeccable, 원본 그대로 유지)

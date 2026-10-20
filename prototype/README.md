@@ -9,6 +9,7 @@
 | `build.py`       | 폰트를 채워 한 파일로 → `dist/kanqaroo-accordion.html` (Artifact용)                                                                   |
 | `build_tess.py`  | 스크린샷 곡 읽기용 한글·영어 글자 데이터 → `dist/tess/*.js`                                                                           |
 | `build_pages.py` | 완전한 HTML 문서로 감싸 GitHub Pages용 → `dist/pages/`                                                                                |
+| `lab/`           | 실기기에서만 확인되는 실험 페이지. `lab/bars.html`: iOS Safari 위·아래 막대 뒤로 화면이 비치게 하는 방법 비교(A~D)                    |
 
 무엇을 만드는지는 `../PRODUCT.md`, 토큰·컴포넌트는 `../DESIGN.md`, 결정 배경은 Notion Decision Log. 지난 시안(v2 데모, 서류 폴더)은 `../archive/prototype-v2/`.
 
