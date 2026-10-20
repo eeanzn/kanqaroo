@@ -25,7 +25,7 @@
 
 ## 용어 (코드 이름)
 
-지금(v5): `playlist` 플레이리스트 · `song` 곡 · 곡 넣기(제목·아티스트·넣은 사람 이름, 맨 아래에 바로 들어감) · 순서 바꾸기(누구나, 되돌리기 없음) · 좋아요 · 공유 · 듣기(YouTube/Spotify/Apple Music 검색 링크) · 관리 페이지(주인, 헤더 프로필 버튼). 로그인 없음: 주인은 기기·관리 링크로 알아본다. 소매넣기는 서비스 개념일 뿐, 기능 이름이 아님
+지금(v5): `playlist` 플레이리스트 · `song` 곡 · 곡 넣기(제목·아티스트·넣은 사람 이름, 맨 아래에 바로 들어감. 스크린샷 OCR로 한 번에) · 순서 바꾸기(누구나, 되돌리기 없음) · 좋아요 · 공유 · 듣기(YouTube/Spotify/Apple Music 검색 링크) · 관리 페이지(주인, 헤더 프로필 버튼). 로그인 없음: 주인은 기기·관리 링크로 알아본다. 소매넣기는 서비스 개념일 뿐, 기능 이름이 아님
 
 Stage 2 앱(v1, 폐기 예정): `board` 취향 보드 · `crate` 군집 · `slip` 소매넣기 · `pouch` 주머니 · `reaction` 반응 · `receipt` 영수증 · `keep` 담기 · `track` 곡
 
@@ -42,6 +42,7 @@ Stage 2 앱(v1, 폐기 예정): `board` 취향 보드 · `crate` 군집 · `slip
 
 ```bash
 python3 prototype/build.py prototype/accordion.html src/assets/fonts prototype/dist/kanqaroo-accordion.html  # 프로토타입 빌드 (같은 Artifact URL에 다시 publish)
+python3 prototype/build_tess.py   # OCR 글자 데이터 → prototype/dist/tess/ (Artifact files로 같이 올림)
 npm run dev            # 개발 서버
 npm run lint && npm run typecheck
 npm test               # 단위 테스트 (+ TEST_DATABASE_URL 있으면 DB 통합 테스트)

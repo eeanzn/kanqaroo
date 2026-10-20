@@ -19,6 +19,7 @@
   --glass-edge: rgba(255, 255, 255, .7);
   --glass-shade: 0 8px 24px rgba(0, 0, 0, .08);
   --dim: rgba(0, 0, 0, .28);
+  --veil: rgba(255, 255, 255, .42);
   --knock: #FFFFFF;
   --font: 'Pretendard', system-ui, -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
   --hdr-top: calc(env(safe-area-inset-top, 0px) + 8px);
@@ -31,7 +32,7 @@
     --line: rgba(255, 255, 255, .1); --fill: rgba(255, 255, 255, .08); --fill-2: rgba(255, 255, 255, .12);
     --primary: #F5F5F5; --on-primary: #000000; --danger: #FF6B6B;
     --glass: rgba(20, 20, 22, .8); --glass-edge: rgba(255, 255, 255, .12);
-    --glass-shade: 0 8px 24px rgba(0, 0, 0, .4); --dim: rgba(0, 0, 0, .5); --knock: #1C1C1E;
+    --glass-shade: 0 8px 24px rgba(0, 0, 0, .4); --dim: rgba(0, 0, 0, .5); --veil: rgba(0, 0, 0, .45); --knock: #1C1C1E;
   }
 }
 :root[data-theme="dark"] {
@@ -40,7 +41,7 @@
   --line: rgba(255, 255, 255, .1); --fill: rgba(255, 255, 255, .08); --fill-2: rgba(255, 255, 255, .12);
   --primary: #F5F5F5; --on-primary: #000000; --danger: #FF6B6B;
   --glass: rgba(20, 20, 22, .8); --glass-edge: rgba(255, 255, 255, .12);
-  --glass-shade: 0 8px 24px rgba(0, 0, 0, .4); --dim: rgba(0, 0, 0, .5); --knock: #1C1C1E;
+  --glass-shade: 0 8px 24px rgba(0, 0, 0, .4); --dim: rgba(0, 0, 0, .5); --veil: rgba(0, 0, 0, .45); --knock: #1C1C1E;
 }
 @font-face { font-family: 'Pretendard'; font-weight: 400; font-display: swap; src: url(data:font/woff2;base64,__FONT_400__) format('woff2'); }
 @font-face { font-family: 'Pretendard'; font-weight: 600; font-display: swap; src: url(data:font/woff2;base64,__FONT_600__) format('woff2'); }
@@ -52,6 +53,7 @@ html { height: 100%; }
 body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 17px; line-height: 1.5; word-break: keep-all; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
 body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 45; background: var(--bg); }
 button, input { font: inherit; color: inherit; }
+canvas { display: block; }
 button { -webkit-tap-highlight-color: transparent; }
 :focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
 h1, h2, h3, p, ol, ul { margin: 0; }
@@ -68,6 +70,16 @@ ol, ul { padding: 0; list-style: none; }
 
 /* ── 글래스 ── */
 .glass { background: var(--glass); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); border: 1px solid var(--glass-edge); box-shadow: var(--glass-shade); }
+
+/* ── Ambient: 멈춘 파일의 색·그림을 흐리게 깐 배경. 0.7초에 걸쳐 바뀜 ── */
+.amb { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+.amb-l { position: absolute; inset: -15%; opacity: 0; transition: opacity .7s ease; }
+.amb-l.on { opacity: 1; }
+.amb-l > * { position: absolute; inset: 0; width: 100%; height: 100%; animation: drift 28s ease-in-out infinite alternate; }
+.amb-img { background: var(--img) center / cover; filter: blur(56px) saturate(1.4); }
+.amb-l canvas { filter: blur(28px) saturate(1.25); }
+.amb::after { content: ""; position: absolute; inset: 0; background: var(--veil); }
+@keyframes drift { from { transform: scale(1.08) rotate(0deg); } to { transform: scale(1.28) rotate(9deg) translate(2%, -3%); } }
 
 /* ── Header ── */
 .hdr { position: fixed; z-index: 40; top: var(--hdr-top); left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); max-width: 560px; margin: 0 auto; height: 56px; border-radius: 999px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px 0 16px; }
@@ -108,22 +120,24 @@ ol, ul { padding: 0; list-style: none; }
 .stage:focus-visible { outline: none; }
 .stage:focus-visible .pocket.is-focus .face { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text); }
 .file { position: absolute; inset: 0; perspective: 1500px; perspective-origin: 50% 0%; }
-.foot { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 10px); display: grid; justify-items: center; gap: 2px; pointer-events: none; }
-.foot .hint { font-size: 13px; color: var(--text-2); transition: opacity .4s; }
-.foot .hint.gone { opacity: 0; }
-.foot .pos { font-size: 13px; font-weight: 600; color: var(--text-3); }
+.foot { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 6px); display: flex; justify-content: center; pointer-events: none; }
+.pager { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border-radius: 999px; font-size: 13px; line-height: 19.5px; }
+.pager .pos { font-weight: 600; }
+.pager .hint { color: var(--text-2); }
+.pager .hint.gone { display: none; }
 
 /* ── File (아코디언 파일) ── */
 .pocket { position: absolute; left: 50%; bottom: var(--hingeB, 16px); width: var(--W, 340px); height: var(--H, 460px); margin-left: calc(var(--W, 340px) / -2); transform-origin: 50% 100%; will-change: transform; }
-.face { position: absolute; inset: 0; border-radius: 8px; overflow: hidden; background: var(--c); color: var(--on); isolation: isolate; }
+.face { position: absolute; inset: 0; border-radius: 8px; overflow: hidden; background: var(--c); color: var(--on); isolation: isolate; box-shadow: 0 12px 32px rgba(0, 0, 0, .16); }
 .face .cv-img { position: absolute; inset: 0; background: var(--img) center / cover; }
 .face .rim { position: absolute; inset: 0; border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .28), inset 0 1px 0 rgba(255, 255, 255, .45); pointer-events: none; z-index: 3; }
 .strip { position: relative; z-index: 1; height: 56px; padding: 12px 16px 0; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-.is-img .strip { background: rgba(0, 0, 0, .36); }
+.is-img .strip { background: rgba(0, 0, 0, .45); }
 .strip .ttl { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .strip .cnt { flex: none; font-size: 13px; font-weight: 600; opacity: .8; }
 .pocketfront { position: absolute; left: 0; right: 0; bottom: 0; top: 56px; z-index: 1; padding: 12px 12px 12px; display: flex; flex-direction: column; gap: 12px; background: rgba(255, 255, 255, .12); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 -1px 0 rgba(0, 0, 0, .14); }
-.is-img .pocketfront { background: rgba(0, 0, 0, .08); }
+.is-img .pocketfront { background: none; overflow: hidden; isolation: isolate; }
+.is-img .pocketfront::before { content: ""; position: absolute; inset: -20px; z-index: -1; background: var(--img) center / cover; filter: blur(16px) brightness(.6) saturate(1.2); }
 .owner { padding: 0 4px; font-size: 15px; line-height: 22.5px; font-weight: 600; display: flex; justify-content: space-between; gap: 12px; }
 .owner span:last-child { font-weight: 400; opacity: .8; white-space: nowrap; }
 .panel { position: relative; flex: 1; min-height: 0; border-radius: 8px; padding: 8px 12px 12px; display: flex; flex-direction: column; background: var(--glass); color: var(--text); box-shadow: inset 0 0 0 1px var(--glass-edge); overflow: hidden; isolation: isolate; }
@@ -141,6 +155,13 @@ ol, ul { padding: 0; list-style: none; }
 .shade { position: absolute; inset: 0; border-radius: 8px; background: #000; opacity: var(--shade, 0); pointer-events: none; z-index: 4; }
 .pocket.is-back .pocketfront, .pocket.is-back .strip { visibility: hidden; }
 .pocket:not(.is-focus) .panel .abar { pointer-events: none; }
+.ed { font: inherit; color: inherit; letter-spacing: inherit; background: transparent; border: 0; margin: 0; padding: 0 2px; border-radius: 4px; outline: none; min-width: 0; box-shadow: inset 0 -1px 0 color-mix(in srgb, currentColor 45%, transparent); }
+.ed:focus { background: color-mix(in srgb, currentColor 14%, transparent); box-shadow: inset 0 -2px 0 currentColor; }
+.ttl-ed { flex: 1; min-width: 0; display: flex; align-items: center; gap: 6px; }
+.ttl-in { flex: 1; width: 100%; min-width: 0; font-size: 20px; line-height: 29px; font-weight: 700; letter-spacing: -0.01em; }
+.ic-ed { width: 16px; height: 16px; opacity: .7; }
+.own-ed { display: inline-flex; align-items: baseline; min-width: 0; }
+.own-in { field-sizing: content; min-width: 2ch; max-width: 9em; font-weight: 600; }
 
 /* ── 레이어 (상세 · 시트 · 다이얼로그) ── */
 .layer { position: fixed; inset: 0; z-index: 50; }
@@ -150,7 +171,7 @@ ol, ul { padding: 0; list-style: none; }
 .detail.glass { -webkit-backdrop-filter: blur(40px) saturate(180%); backdrop-filter: blur(40px) saturate(180%); }
 .dcover { position: relative; flex: none; padding: 16px 16px 16px 20px; background: var(--c); color: var(--on); display: grid; gap: 4px; isolation: isolate; }
 .dcover .cv-img { position: absolute; inset: 0; z-index: -1; background: var(--img) center / cover; }
-.dcover.is-img::after { content: ""; position: absolute; inset: 0; z-index: -1; background: rgba(0, 0, 0, .38); }
+.dcover.is-img::after { content: ""; position: absolute; inset: 0; z-index: -1; background: rgba(0, 0, 0, .45); }
 .dtop { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 38px; }
 .dtop .t-body-s { font-weight: 600; opacity: .9; }
 .dmeta { opacity: .85; }
@@ -192,15 +213,42 @@ ol, ul { padding: 0; list-style: none; }
 .lopt { display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 12px; border-radius: 8px; background: var(--fill); color: var(--text); text-decoration: none; font-size: 17px; font-weight: 600; }
 .lopt .ic:last-child { margin-left: auto; color: var(--text-3); }
 .lopts { display: grid; gap: 8px; }
+.sf { display: grid; gap: 16px; }
+.pick { position: relative; overflow: hidden; }
+.pick input { position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 0; }
+.or { display: flex; align-items: center; gap: 12px; color: var(--text-3); }
+.or::before, .or::after { content: ""; flex: 1; border-top: 1px solid var(--line); }
+.prog { height: 4px; border-radius: 2px; background: var(--fill-2); overflow: hidden; }
+.prog i { display: block; width: var(--p, 2%); height: 100%; background: var(--text); transition: width .25s ease; }
+.ocr-st { color: var(--text-2); }
+.cands { display: grid; max-height: 46vh; overflow-y: auto; overscroll-behavior: contain; margin: 0 -8px; }
+.cand { display: grid; grid-template-columns: 44px minmax(0, 1fr); align-items: center; padding: 4px 8px 4px 0; }
+.cand + .cand { border-top: 1px solid var(--line); }
+.cbox { display: grid; place-items: center; width: 44px; height: 44px; cursor: pointer; }
+.cbox input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+.cbox span { width: 24px; height: 24px; border-radius: 6px; display: grid; place-items: center; box-shadow: inset 0 0 0 2px var(--text-3); }
+.cbox span .ic { width: 16px; height: 16px; opacity: 0; }
+.cbox input:checked + span { background: var(--primary); color: var(--on-primary); box-shadow: none; }
+.cbox input:checked + span .ic { opacity: 1; }
+.cbox input:focus-visible + span { outline: 2px solid var(--text); outline-offset: 2px; }
+.ci { display: grid; min-width: 0; }
+.ci input { width: 100%; min-width: 0; border: 0; background: transparent; border-radius: 6px; padding: 0 8px; outline: none; }
+.ci input:focus { background: var(--fill); }
+.ci .ci-t { height: 30px; font-size: 17px; font-weight: 600; }
+.ci .ci-a { height: 26px; font-size: 15px; color: var(--text-2); }
+.ci input::placeholder { color: var(--text-3); }
+.cand.err .ci-a, .cand.err .ci-t:placeholder-shown { box-shadow: inset 0 -2px 0 var(--danger); }
+.cand:has(input[type="checkbox"]:not(:checked)) .ci { opacity: .45; }
 .dlg-wrap { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; }
 .dlg { width: min(100%, 340px); border-radius: 12px; padding: 20px; display: grid; gap: 8px; }
 .dlg p { color: var(--text-2); }
-.dlg .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.dlg .row2 { margin-top: 12px; }
 .toast { position: fixed; z-index: 70; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); transform: translateX(-50%); width: max-content; max-width: calc(100% - 40px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 12px 20px; border-radius: 999px; font-size: 15px; line-height: 22.5px; font-weight: 600; text-align: center; }
 
 /* ── 페이지 (관리 · 편집 · 컴포넌트) ── */
 .page { position: fixed; inset: 0; z-index: 30; overflow-y: auto; background: var(--bg); padding: var(--stage-top) 0 calc(env(safe-area-inset-bottom, 0px) + 112px); }
-.page-in { max-width: 560px; margin: 0 auto; padding: 8px max(20px, env(safe-area-inset-right, 0px)) 0 max(20px, env(safe-area-inset-left, 0px)); display: grid; gap: 24px; }
+.page-in { max-width: 560px; margin: 0 auto; padding: 8px max(20px, env(safe-area-inset-right, 0px)) 0 max(20px, env(safe-area-inset-left, 0px)); display: grid; grid-template-columns: minmax(0, 1fr); gap: 24px; }
 .ph { display: grid; gap: 4px; }
 .ph p { color: var(--text-2); }
 .card { border-radius: 8px; padding: 8px; }
@@ -216,19 +264,45 @@ ol, ul { padding: 0; list-style: none; }
 .setrow + .setrow { border-top: 1px solid var(--line); }
 .setrow.link { width: 100%; border: 0; border-radius: 0; background: none; color: var(--text); font: inherit; cursor: pointer; text-align: left; }
 .setrow.link .ic { color: var(--text-3); }
+.set-ed { display: inline-flex; align-items: center; gap: 2px; color: var(--text-2); }
+.set-in { width: 8em; height: 40px; text-align: right; border: 0; background: transparent; color: inherit; font-size: 15px; padding: 0 8px; border-radius: 8px; outline: none; }
+.set-in:focus { background: var(--fill); color: var(--text); }
 .seg { display: inline-flex; padding: 2px; border-radius: 8px; background: var(--fill); }
 .seg button { height: 32px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; font-size: 13px; font-weight: 600; color: var(--text-2); cursor: pointer; }
 .seg button[aria-pressed="true"] { background: var(--bg); color: var(--text); box-shadow: 0 1px 3px rgba(0, 0, 0, .12); }
+.seg.full { display: flex; }
+.seg.full button { flex: 1; height: 36px; font-size: 15px; }
 .cta { position: fixed; z-index: 31; left: 0; right: 0; bottom: 0; padding: 16px max(20px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 18px) max(20px, env(safe-area-inset-left, 0px)); background: linear-gradient(to top, var(--bg) 70%, transparent); }
 .cta > * { max-width: 520px; margin: 0 auto; display: flex; }
 .subbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-left: -12px; }
+.preview-w { display: grid; gap: 8px; }
 .preview { height: 280px; position: relative; }
 .preview .face { position: relative; height: 100%; }
+.preview .abar { pointer-events: none; }
+.hint-ed { color: var(--text-2); text-align: center; }
+.cp { display: grid; gap: 12px; }
+.cp .sec-title { padding-bottom: 0; }
+.upl { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 16px; min-height: 96px; padding: 12px; border-radius: 8px; background: var(--fill); cursor: pointer; overflow: hidden; }
+.upl input { position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 0; }
+.upl-img { width: 48px; height: 72px; border-radius: 6px; background: var(--img) center / cover; }
+.upl-ph { width: 48px; height: 72px; border-radius: 6px; display: grid; place-items: center; box-shadow: inset 0 0 0 1px var(--line); color: var(--text-2); }
+.upl-t { display: grid; gap: 2px; }
+.upl-t .t-caption { color: var(--text-2); }
+.pad-w { display: grid; gap: 12px; }
+.pad { position: relative; width: min(100%, 300px); aspect-ratio: 2 / 3; justify-self: center; border-radius: 8px; overflow: hidden; box-shadow: inset 0 0 0 1px var(--line), var(--glass-shade); }
+.pad canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+#pad-ink { touch-action: none; cursor: crosshair; }
+.pad-tools { display: grid; gap: 12px; }
+.pcols { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; }
+.pad-row { display: flex; align-items: center; gap: 8px; }
+.pad-row .grow { flex: 1; }
+.ibtn[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); }
 .swatches { display: flex; flex-wrap: wrap; gap: 8px; }
 .sw { width: 40px; height: 40px; border-radius: 6px; border: 0; background: var(--c); cursor: pointer; box-shadow: inset 0 0 0 1px var(--line); display: grid; place-items: center; color: var(--on); }
 .sw[aria-pressed="true"] { outline: 2px solid var(--text); outline-offset: 2px; }
 .sw.up { background: var(--fill); color: var(--text-2); position: relative; overflow: hidden; }
 .sw.up input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.sw.s { width: 32px; height: 32px; border-radius: 999px; }
 .dz { display: grid; gap: 8px; }
 
 /* 컴포넌트 시트 */
@@ -243,10 +317,14 @@ ol, ul { padding: 0; list-style: none; }
 .face-static { position: relative; width: 100%; max-width: 335px; height: 400px; }
 
 @media (prefers-reduced-motion: reduce) {
-  .foot .hint { transition: none; }
   .srow.fresh { animation: none; }
+  .amb-l { transition: none; }
+  .amb-l > * { animation: none; }
+  .prog i { transition: none; }
 }
 </style>
+
+<div class="amb" id="amb" aria-hidden="true"><div class="amb-l"></div><div class="amb-l"></div></div>
 
 <header class="hdr glass" id="hdr">
   <button class="logo" data-go="" aria-label="kanqaroo, 피드로"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 11c0-2.2 1.8-4 4-4h12c2.2 0 4 1.8 4 4v5c0 6.1-4.9 11-11 11h-.1C9.4 27 6 23.6 6 19.1V11Z" fill="currentColor"/><path d="M9 13.5c2.2 1.4 4.5 2 7 2s4.8-.6 7-2" stroke="var(--knock)" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="14" cy="21.5" r="2.2" fill="var(--knock)"/><path d="M16.2 21.5V15.8l3.6-1" stroke="var(--knock)" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>kanqaroo</button>
@@ -254,10 +332,10 @@ ol, ul { padding: 0; list-style: none; }
 </header>
 
 <main>
-  <div class="stage" id="stage" role="application" aria-label="플레이리스트 피드. 위아래로 넘기고, 누르면 열어요. 방향키와 Enter도 돼요" tabindex="0">
+  <div class="stage" id="stage" role="application" aria-label="플레이리스트 피드. 아래로 끌어 넘기고, 누르면 열어요. 방향키와 Enter도 돼요" tabindex="0">
     <div class="file" id="file"></div>
   </div>
-  <div class="foot"><p class="hint" id="hint">위아래로 넘기고, 누르면 열어요</p><p class="pos" id="pos" aria-live="polite">1 / 11</p></div>
+  <div class="foot"><p class="pager glass"><span class="pos" id="pos" aria-live="polite">1 / 11</span><span class="hint" id="hint">아래로 넘기고, 누르면 열어요</span></p></div>
 </main>
 
 <section class="page" id="pg-me" hidden aria-label="내 플레이리스트"></section>
@@ -281,7 +359,7 @@ ol, ul { padding: 0; list-style: none; }
 <script>
 'use strict'
 /* ════════ 아이콘 (Phosphor Regular, MIT) · 로고 ════════ */
-const IC = {"user":"M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z","heart":"M178,40c-20.65,0-38.73,8.88-50,23.89C116.73,48.88,98.65,40,78,40a62.07,62.07,0,0,0-62,62c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,228.66,240,172,240,102A62.07,62.07,0,0,0,178,40ZM128,214.8C109.74,204.16,32,155.69,32,102A46.06,46.06,0,0,1,78,56c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0c6.82-16.67,23.15-27,42.6-27a46.06,46.06,0,0,1,46,46C224,155.61,146.24,204.15,128,214.8Z","share-network":"M176,160a39.89,39.89,0,0,0-28.62,12.09l-46.1-29.63a39.8,39.8,0,0,0,0-28.92l46.1-29.63a40,40,0,1,0-8.66-13.45l-46.1,29.63a40,40,0,1,0,0,55.82l46.1,29.63A40,40,0,1,0,176,160Zm0-128a24,24,0,1,1-24,24A24,24,0,0,1,176,32ZM64,152a24,24,0,1,1,24-24A24,24,0,0,1,64,152Zm112,72a24,24,0,1,1,24-24A24,24,0,0,1,176,224Z","plus":"M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z","dots-six-vertical":"M104,60A12,12,0,1,1,92,48,12,12,0,0,1,104,60Zm60,12a12,12,0,1,0-12-12A12,12,0,0,0,164,72ZM92,116a12,12,0,1,0,12,12A12,12,0,0,0,92,116Zm72,0a12,12,0,1,0,12,12A12,12,0,0,0,164,116ZM92,184a12,12,0,1,0,12,12A12,12,0,0,0,92,184Zm72,0a12,12,0,1,0,12,12A12,12,0,0,0,164,184Z","x":"M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z","trash":"M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z","pencil-simple":"M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.68,147.31,64l24-24L216,84.68Z","image":"M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V158.75l-26.07-26.06a16,16,0,0,0-22.63,0l-20,20-44-44a16,16,0,0,0-22.62,0L40,149.37V56ZM40,172l52-52,80,80H40Zm176,28H194.63l-36-36,20-20L216,181.38V200ZM144,100a12,12,0,1,1,12,12A12,12,0,0,1,144,100Z","check":"M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z","caret-left":"M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z","caret-right":"M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z","link":"M240,88.23a54.43,54.43,0,0,1-16,37L189.25,160a54.27,54.27,0,0,1-38.63,16h-.05A54.63,54.63,0,0,1,96,119.84a8,8,0,0,1,16,.45A38.62,38.62,0,0,0,150.58,160h0a38.39,38.39,0,0,0,27.31-11.31l34.75-34.75a38.63,38.63,0,0,0-54.63-54.63l-11,11A8,8,0,0,1,135.7,59l11-11A54.65,54.65,0,0,1,224,48,54.86,54.86,0,0,1,240,88.23ZM109,185.66l-11,11A38.41,38.41,0,0,1,70.6,208h0a38.63,38.63,0,0,1-27.29-65.94L78,107.31A38.63,38.63,0,0,1,144,135.71a8,8,0,0,0,16,.45A54.86,54.86,0,0,0,144,96a54.65,54.65,0,0,0-77.27,0L32,130.75A54.62,54.62,0,0,0,70.56,224h0a54.28,54.28,0,0,0,38.64-16l11-11A8,8,0,0,0,109,185.66Z","music-note":"M210.3,56.34l-80-24A8,8,0,0,0,120,40V148.26A48,48,0,1,0,136,184V98.75l69.7,20.91A8,8,0,0,0,216,112V64A8,8,0,0,0,210.3,56.34ZM88,216a32,32,0,1,1,32-32A32,32,0,0,1,88,216ZM200,101.25l-64-19.2V50.75L200,70Z","youtube-logo":"M164.44,121.34l-48-32A8,8,0,0,0,104,96v64a8,8,0,0,0,12.44,6.66l48-32a8,8,0,0,0,0-13.32ZM120,145.05V111l25.58,17ZM234.33,69.52a24,24,0,0,0-14.49-16.4C185.56,39.88,131,40,128,40s-57.56-.12-91.84,13.12a24,24,0,0,0-14.49,16.4C19.08,79.5,16,97.74,16,128s3.08,48.5,5.67,58.48a24,24,0,0,0,14.49,16.41C69,215.56,120.4,216,127.34,216h1.32c6.94,0,58.37-.44,91.18-13.11a24,24,0,0,0,14.49-16.41c2.59-10,5.67-28.22,5.67-58.48S236.92,79.5,234.33,69.52Zm-15.49,113a8,8,0,0,1-4.77,5.49c-31.65,12.22-85.48,12-86,12H128c-.54,0-54.33.2-86-12a8,8,0,0,1-4.77-5.49C34.8,173.39,32,156.57,32,128s2.8-45.39,5.16-54.47A8,8,0,0,1,41.93,68c30.52-11.79,81.66-12,85.85-12h.27c.54,0,54.38-.18,86,12a8,8,0,0,1,4.77,5.49C221.2,82.61,224,99.43,224,128S221.2,173.39,218.84,182.47Z","spotify-logo":"M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm31.07-46.26a8,8,0,0,1-10.81,3.33,42.79,42.79,0,0,0-40.52,0,8,8,0,0,1-7.48-14.14,59.33,59.33,0,0,1,55.48,0A8,8,0,0,1,159.07,169.74Zm32-56a8,8,0,0,1-10.83,3.29,110.62,110.62,0,0,0-104.46,0,8,8,0,0,1-7.54-14.12,126.67,126.67,0,0,1,119.54,0A8,8,0,0,1,191.06,113.76Zm-16,28a8,8,0,0,1-10.82,3.3,77,77,0,0,0-72.48,0,8,8,0,0,1-7.52-14.12,93,93,0,0,1,87.52,0A8,8,0,0,1,175.06,141.76Z","apple-logo":"M223.3,169.59a8.07,8.07,0,0,0-2.8-3.4C203.53,154.53,200,134.64,200,120c0-17.67,13.47-33.06,21.5-40.67a8,8,0,0,0,0-11.62C208.82,55.74,187.82,48,168,48a72.2,72.2,0,0,0-40,12.13,71.56,71.56,0,0,0-90.71,9.09A74.63,74.63,0,0,0,16,123.4a127.06,127.06,0,0,0,40.14,89.73A39.8,39.8,0,0,0,83.59,224h87.68a39.84,39.84,0,0,0,29.12-12.57,125,125,0,0,0,17.82-24.6C225.23,174,224.33,172,223.3,169.59Zm-34.63,30.94a23.76,23.76,0,0,1-17.4,7.47H83.59a23.82,23.82,0,0,1-16.44-6.51A111.14,111.14,0,0,1,32,123,58.5,58.5,0,0,1,48.65,80.47,54.81,54.81,0,0,1,88,64h.78A55.45,55.45,0,0,1,123,76.28a8,8,0,0,0,10,0A55.44,55.44,0,0,1,168,64a70.64,70.64,0,0,1,36,10.35c-13,14.52-20,30.47-20,45.65,0,23.77,7.64,42.73,22.18,55.3A105.82,105.82,0,0,1,188.67,200.53ZM128.23,30A40,40,0,0,1,167,0h1a8,8,0,0,1,0,16h-1a24,24,0,0,0-23.24,18,8,8,0,1,1-15.5-4Z","speaker-high":"M155.51,24.81a8,8,0,0,0-8.42.88L77.25,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H77.25l69.84,54.31A8,8,0,0,0,160,224V32A8,8,0,0,0,155.51,24.81ZM32,96H72v64H32ZM144,207.64,88,164.09V91.91l56-43.55Zm54-106.08a40,40,0,0,1,0,52.88,8,8,0,0,1-12-10.58,24,24,0,0,0,0-31.72,8,8,0,0,1,12-10.58ZM248,128a79.9,79.9,0,0,1-20.37,53.34,8,8,0,0,1-11.92-10.67,64,64,0,0,0,0-85.33,8,8,0,1,1,11.92-10.67A79.83,79.83,0,0,1,248,128Z","speaker-slash":"M53.92,34.62A8,8,0,1,0,42.08,45.38L73.55,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H77.25l69.84,54.31A8,8,0,0,0,160,224V175.09l42.08,46.29a8,8,0,1,0,11.84-10.76ZM32,96H72v64H32ZM144,207.64,88,164.09V95.89l56,61.6Zm42-63.77a24,24,0,0,0,0-31.72,8,8,0,1,1,12-10.57,40,40,0,0,1,0,52.88,8,8,0,0,1-12-10.59Zm-80.16-76a8,8,0,0,1,1.4-11.23l39.85-31A8,8,0,0,1,160,32v74.83a8,8,0,0,1-16,0V48.36l-26.94,21A8,8,0,0,1,105.84,67.91ZM248,128a79.9,79.9,0,0,1-20.37,53.34,8,8,0,0,1-11.92-10.67,64,64,0,0,0,0-85.33,8,8,0,1,1,11.92-10.67A79.83,79.83,0,0,1,248,128Z","moon":"M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z","sun":"M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z","play":"M232.4,114.49,88.32,26.35a16,16,0,0,0-16.2-.3A15.86,15.86,0,0,0,64,39.87V216.13A15.94,15.94,0,0,0,80,232a16.07,16.07,0,0,0,8.36-2.35L232.4,141.51a15.81,15.81,0,0,0,0-27ZM80,215.94V40l143.83,88Z","heart-fill":"M240,102c0,70-103.79,126.66-108.21,129a8,8,0,0,1-7.58,0C119.79,228.66,16,172,16,102A62.07,62.07,0,0,1,78,40c20.65,0,38.73,8.88,50,23.89C139.27,48.88,157.35,40,178,40A62.07,62.07,0,0,1,240,102Z"}
+const IC = {"user":"M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z","heart":"M178,40c-20.65,0-38.73,8.88-50,23.89C116.73,48.88,98.65,40,78,40a62.07,62.07,0,0,0-62,62c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,228.66,240,172,240,102A62.07,62.07,0,0,0,178,40ZM128,214.8C109.74,204.16,32,155.69,32,102A46.06,46.06,0,0,1,78,56c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0c6.82-16.67,23.15-27,42.6-27a46.06,46.06,0,0,1,46,46C224,155.61,146.24,204.15,128,214.8Z","share-network":"M176,160a39.89,39.89,0,0,0-28.62,12.09l-46.1-29.63a39.8,39.8,0,0,0,0-28.92l46.1-29.63a40,40,0,1,0-8.66-13.45l-46.1,29.63a40,40,0,1,0,0,55.82l46.1,29.63A40,40,0,1,0,176,160Zm0-128a24,24,0,1,1-24,24A24,24,0,0,1,176,32ZM64,152a24,24,0,1,1,24-24A24,24,0,0,1,64,152Zm112,72a24,24,0,1,1,24-24A24,24,0,0,1,176,224Z","plus":"M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z","dots-six-vertical":"M104,60A12,12,0,1,1,92,48,12,12,0,0,1,104,60Zm60,12a12,12,0,1,0-12-12A12,12,0,0,0,164,72ZM92,116a12,12,0,1,0,12,12A12,12,0,0,0,92,116Zm72,0a12,12,0,1,0,12,12A12,12,0,0,0,164,116ZM92,184a12,12,0,1,0,12,12A12,12,0,0,0,92,184Zm72,0a12,12,0,1,0,12,12A12,12,0,0,0,164,184Z","x":"M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z","trash":"M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z","pencil-simple":"M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.68,147.31,64l24-24L216,84.68Z","image":"M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V158.75l-26.07-26.06a16,16,0,0,0-22.63,0l-20,20-44-44a16,16,0,0,0-22.62,0L40,149.37V56ZM40,172l52-52,80,80H40Zm176,28H194.63l-36-36,20-20L216,181.38V200ZM144,100a12,12,0,1,1,12,12A12,12,0,0,1,144,100Z","check":"M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z","caret-left":"M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z","caret-right":"M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z","link":"M240,88.23a54.43,54.43,0,0,1-16,37L189.25,160a54.27,54.27,0,0,1-38.63,16h-.05A54.63,54.63,0,0,1,96,119.84a8,8,0,0,1,16,.45A38.62,38.62,0,0,0,150.58,160h0a38.39,38.39,0,0,0,27.31-11.31l34.75-34.75a38.63,38.63,0,0,0-54.63-54.63l-11,11A8,8,0,0,1,135.7,59l11-11A54.65,54.65,0,0,1,224,48,54.86,54.86,0,0,1,240,88.23ZM109,185.66l-11,11A38.41,38.41,0,0,1,70.6,208h0a38.63,38.63,0,0,1-27.29-65.94L78,107.31A38.63,38.63,0,0,1,144,135.71a8,8,0,0,0,16,.45A54.86,54.86,0,0,0,144,96a54.65,54.65,0,0,0-77.27,0L32,130.75A54.62,54.62,0,0,0,70.56,224h0a54.28,54.28,0,0,0,38.64-16l11-11A8,8,0,0,0,109,185.66Z","music-note":"M210.3,56.34l-80-24A8,8,0,0,0,120,40V148.26A48,48,0,1,0,136,184V98.75l69.7,20.91A8,8,0,0,0,216,112V64A8,8,0,0,0,210.3,56.34ZM88,216a32,32,0,1,1,32-32A32,32,0,0,1,88,216ZM200,101.25l-64-19.2V50.75L200,70Z","youtube-logo":"M164.44,121.34l-48-32A8,8,0,0,0,104,96v64a8,8,0,0,0,12.44,6.66l48-32a8,8,0,0,0,0-13.32ZM120,145.05V111l25.58,17ZM234.33,69.52a24,24,0,0,0-14.49-16.4C185.56,39.88,131,40,128,40s-57.56-.12-91.84,13.12a24,24,0,0,0-14.49,16.4C19.08,79.5,16,97.74,16,128s3.08,48.5,5.67,58.48a24,24,0,0,0,14.49,16.41C69,215.56,120.4,216,127.34,216h1.32c6.94,0,58.37-.44,91.18-13.11a24,24,0,0,0,14.49-16.41c2.59-10,5.67-28.22,5.67-58.48S236.92,79.5,234.33,69.52Zm-15.49,113a8,8,0,0,1-4.77,5.49c-31.65,12.22-85.48,12-86,12H128c-.54,0-54.33.2-86-12a8,8,0,0,1-4.77-5.49C34.8,173.39,32,156.57,32,128s2.8-45.39,5.16-54.47A8,8,0,0,1,41.93,68c30.52-11.79,81.66-12,85.85-12h.27c.54,0,54.38-.18,86,12a8,8,0,0,1,4.77,5.49C221.2,82.61,224,99.43,224,128S221.2,173.39,218.84,182.47Z","spotify-logo":"M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm31.07-46.26a8,8,0,0,1-10.81,3.33,42.79,42.79,0,0,0-40.52,0,8,8,0,0,1-7.48-14.14,59.33,59.33,0,0,1,55.48,0A8,8,0,0,1,159.07,169.74Zm32-56a8,8,0,0,1-10.83,3.29,110.62,110.62,0,0,0-104.46,0,8,8,0,0,1-7.54-14.12,126.67,126.67,0,0,1,119.54,0A8,8,0,0,1,191.06,113.76Zm-16,28a8,8,0,0,1-10.82,3.3,77,77,0,0,0-72.48,0,8,8,0,0,1-7.52-14.12,93,93,0,0,1,87.52,0A8,8,0,0,1,175.06,141.76Z","apple-logo":"M223.3,169.59a8.07,8.07,0,0,0-2.8-3.4C203.53,154.53,200,134.64,200,120c0-17.67,13.47-33.06,21.5-40.67a8,8,0,0,0,0-11.62C208.82,55.74,187.82,48,168,48a72.2,72.2,0,0,0-40,12.13,71.56,71.56,0,0,0-90.71,9.09A74.63,74.63,0,0,0,16,123.4a127.06,127.06,0,0,0,40.14,89.73A39.8,39.8,0,0,0,83.59,224h87.68a39.84,39.84,0,0,0,29.12-12.57,125,125,0,0,0,17.82-24.6C225.23,174,224.33,172,223.3,169.59Zm-34.63,30.94a23.76,23.76,0,0,1-17.4,7.47H83.59a23.82,23.82,0,0,1-16.44-6.51A111.14,111.14,0,0,1,32,123,58.5,58.5,0,0,1,48.65,80.47,54.81,54.81,0,0,1,88,64h.78A55.45,55.45,0,0,1,123,76.28a8,8,0,0,0,10,0A55.44,55.44,0,0,1,168,64a70.64,70.64,0,0,1,36,10.35c-13,14.52-20,30.47-20,45.65,0,23.77,7.64,42.73,22.18,55.3A105.82,105.82,0,0,1,188.67,200.53ZM128.23,30A40,40,0,0,1,167,0h1a8,8,0,0,1,0,16h-1a24,24,0,0,0-23.24,18,8,8,0,1,1-15.5-4Z","speaker-high":"M155.51,24.81a8,8,0,0,0-8.42.88L77.25,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H77.25l69.84,54.31A8,8,0,0,0,160,224V32A8,8,0,0,0,155.51,24.81ZM32,96H72v64H32ZM144,207.64,88,164.09V91.91l56-43.55Zm54-106.08a40,40,0,0,1,0,52.88,8,8,0,0,1-12-10.58,24,24,0,0,0,0-31.72,8,8,0,0,1,12-10.58ZM248,128a79.9,79.9,0,0,1-20.37,53.34,8,8,0,0,1-11.92-10.67,64,64,0,0,0,0-85.33,8,8,0,1,1,11.92-10.67A79.83,79.83,0,0,1,248,128Z","speaker-slash":"M53.92,34.62A8,8,0,1,0,42.08,45.38L73.55,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H77.25l69.84,54.31A8,8,0,0,0,160,224V175.09l42.08,46.29a8,8,0,1,0,11.84-10.76ZM32,96H72v64H32ZM144,207.64,88,164.09V95.89l56,61.6Zm42-63.77a24,24,0,0,0,0-31.72,8,8,0,1,1,12-10.57,40,40,0,0,1,0,52.88,8,8,0,0,1-12-10.59Zm-80.16-76a8,8,0,0,1,1.4-11.23l39.85-31A8,8,0,0,1,160,32v74.83a8,8,0,0,1-16,0V48.36l-26.94,21A8,8,0,0,1,105.84,67.91ZM248,128a79.9,79.9,0,0,1-20.37,53.34,8,8,0,0,1-11.92-10.67,64,64,0,0,0,0-85.33,8,8,0,1,1,11.92-10.67A79.83,79.83,0,0,1,248,128Z","moon":"M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z","sun":"M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z","play":"M232.4,114.49,88.32,26.35a16,16,0,0,0-16.2-.3A15.86,15.86,0,0,0,64,39.87V216.13A15.94,15.94,0,0,0,80,232a16.07,16.07,0,0,0,8.36-2.35L232.4,141.51a15.81,15.81,0,0,0,0-27ZM80,215.94V40l143.83,88Z","heart-fill":"M240,102c0,70-103.79,126.66-108.21,129a8,8,0,0,1-7.58,0C119.79,228.66,16,172,16,102A62.07,62.07,0,0,1,78,40c20.65,0,38.73,8.88,50,23.89C139.27,48.88,157.35,40,178,40A62.07,62.07,0,0,1,240,102Z","eraser":"M225,80.4,183.6,39a24,24,0,0,0-33.94,0L31,157.66a24,24,0,0,0,0,33.94l30.06,30.06A8,8,0,0,0,66.74,224H216a8,8,0,0,0,0-16h-84.7L225,114.34A24,24,0,0,0,225,80.4ZM108.68,208H70.05L42.33,180.28a8,8,0,0,1,0-11.31L96,115.31,148.69,168Zm105-105L160,156.69,107.31,104,161,50.34a8,8,0,0,1,11.32,0l41.38,41.38a8,8,0,0,1,0,11.31Z","arrow-counter-clockwise":"M224,128a96,96,0,0,1-94.71,96H128A95.38,95.38,0,0,1,62.1,197.8a8,8,0,0,1,11-11.63A80,80,0,1,0,71.43,71.39a3.07,3.07,0,0,1-.26.25L44.59,96H72a8,8,0,0,1,0,16H24a8,8,0,0,1-8-8V56a8,8,0,0,1,16,0V85.8L60.25,60A96,96,0,0,1,224,128Z","scan":"M224,40V80a8,8,0,0,1-16,0V48H176a8,8,0,0,1,0-16h40A8,8,0,0,1,224,40ZM80,208H48V176a8,8,0,0,0-16,0v40a8,8,0,0,0,8,8H80a8,8,0,0,0,0-16Zm136-40a8,8,0,0,0-8,8v32H176a8,8,0,0,0,0,16h40a8,8,0,0,0,8-8V176A8,8,0,0,0,216,168ZM40,88a8,8,0,0,0,8-8V48H80a8,8,0,0,0,0-16H40a8,8,0,0,0-8,8V80A8,8,0,0,0,40,88ZM80,72h96a8,8,0,0,1,8,8v96a8,8,0,0,1-8,8H80a8,8,0,0,1-8-8V80A8,8,0,0,1,80,72Zm8,96h80V88H88Z","copy":"M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z","x-logo":"M214.75,211.71l-62.6-98.38,61.77-67.95a8,8,0,0,0-11.84-10.76L143.24,99.34,102.75,35.71A8,8,0,0,0,96,32H48a8,8,0,0,0-6.75,12.3l62.6,98.37-61.77,68a8,8,0,1,0,11.84,10.76l58.84-64.72,40.49,63.63A8,8,0,0,0,160,224h48a8,8,0,0,0,6.75-12.29ZM164.39,208,62.57,48h29L193.43,208Z","paint-brush":"M232,32a8,8,0,0,0-8-8c-44.08,0-89.31,49.71-114.43,82.63A60,60,0,0,0,32,164c0,30.88-19.54,44.73-20.47,45.37A8,8,0,0,0,16,224H92a60,60,0,0,0,57.37-77.57C182.3,121.31,232,76.08,232,32ZM92,208H34.63C41.38,198.41,48,183.92,48,164a44,44,0,1,1,44,44Zm32.42-94.45q5.14-6.66,10.09-12.55A76.23,76.23,0,0,1,155,121.49q-5.9,4.94-12.55,10.09A60.54,60.54,0,0,0,124.42,113.55Zm42.7-2.68a92.57,92.57,0,0,0-22-22c31.78-34.53,55.75-45,69.9-47.91C212.17,55.12,201.65,79.09,167.12,110.87Z","pencil-simple-line":"M227.32,73.37,182.63,28.69a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H216a8,8,0,0,0,0-16H115.32l112-112A16,16,0,0,0,227.32,73.37ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.69,147.32,64l24-24L216,84.69Z","camera":"M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm8,136a8,8,0,0,1-8,8H48a8,8,0,0,1-8-8V80a8,8,0,0,1,8-8H80a8,8,0,0,0,6.66-3.56L100.28,48h55.43l13.63,20.44A8,8,0,0,0,176,72h32a8,8,0,0,1,8,8ZM128,88a44,44,0,1,0,44,44A44.05,44.05,0,0,0,128,88Zm0,72a28,28,0,1,1,28-28A28,28,0,0,1,128,160Z"}
 const icon = (k, cls = '') => `<svg class="ic ${cls}" viewBox="0 0 256 256" aria-hidden="true">${IC[k].split('|').map((d) => `<path d="${d}"/>`).join('')}</svg>`
 const LOGO = '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 11c0-2.2 1.8-4 4-4h12c2.2 0 4 1.8 4 4v5c0 6.1-4.9 11-11 11h-.1C9.4 27 6 23.6 6 19.1V11Z" fill="currentColor"/><path d="M9 13.5c2.2 1.4 4.5 2 7 2s4.8-.6 7-2" stroke="var(--knock)" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="14" cy="21.5" r="2.2" fill="var(--knock)"/><path d="M16.2 21.5V15.8l3.6-1" stroke="var(--knock)" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>'
 
@@ -295,6 +373,29 @@ const backOut = (t) => { const c = 1.5; return 1 + (c + 1) * (t - 1) ** 3 + c * 
 const store = { get(k, d) { try { const v = localStorage.getItem('kq.' + k); return v == null ? d : JSON.parse(v) } catch { return d } }, set(k, v) { try { localStorage.setItem('kq.' + k, JSON.stringify(v)) } catch { /* 저장 안 됨 */ } } }
 function lum(hex) { const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((x) => (x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2] }
 const onColor = (hex) => { const L = lum(hex); return (L + 0.05) / 0.05 > 1.05 / (L + 0.05) ? '#111111' : '#FFFFFF' }
+function toHsl(hex) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255)
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn
+  if (!d) return [0, 0, l * 100]
+  const s = d / (1 - Math.abs(2 * l - 1))
+  const h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4
+  return [(h * 60 + 360) % 360, s * 100, l * 100]
+}
+const loadImg = (src) => new Promise((ok, no) => { const im = new Image(); im.onload = () => ok(im); im.onerror = () => no(new Error('image')); im.src = src })
+function drawCover(g, im, W, H) {
+  const s = Math.max(W / im.naturalWidth, H / im.naturalHeight), w = im.naturalWidth * s, h = im.naturalHeight * s
+  g.drawImage(im, (W - w) / 2, (H - h) / 2, w, h)
+}
+async function fileToCover(file) {
+  const url = URL.createObjectURL(file)
+  try {
+    const im = await loadImg(url), c = document.createElement('canvas')
+    c.width = 600; c.height = 900
+    drawCover(c.getContext('2d'), im, 600, 900)
+    return c.toDataURL('image/jpeg', 0.86)
+  } finally { URL.revokeObjectURL(url) }
+}
+const loadScript = (src) => new Promise((ok, no) => { const el = document.createElement('script'); el.src = src; el.onload = ok; el.onerror = () => no(new Error(`script ${src}`)); document.head.append(el) })
 
 /* ════════ 표지 그림 예시 (캔버스로 그림) ════════ */
 function pattern(kind) {
@@ -393,16 +494,23 @@ const C = {
       <span class="grow"></span>
       <button type="button" class="btn primary m" data-fa="add" tabindex="-1">${icon('plus')}곡 넣기</button></div>`
   },
-  face(p, { rows = 5 } = {}) {
+  face(p, { rows = 5, editable = false } = {}) {
     const extra = p.songs.length - rows
+    const idA = (id) => (editable === true ? `id="${id}"` : 'tabindex="-1"')
+    const ttl = editable
+      ? `<span class="ttl-ed"><input class="ed ttl-in" ${idA('e-title')} value="${esc(p.title)}" maxlength="30" autocomplete="off" aria-label="플레이리스트 제목">${icon('pencil-simple-line', 'ic-ed')}</span>`
+      : `<b class="ttl t-title-m">${esc(p.title)}</b>`
+    const own = editable
+      ? `<span class="own-ed"><input class="ed own-in" ${idA('e-owner')} value="${esc(p.owner)}" maxlength="12" autocomplete="off" aria-label="내 이름" size="${Math.max(2, p.owner.length + 1)}">님의 플레이리스트</span>`
+      : `<span>${esc(p.owner)}님의 플레이리스트</span>`
     const list = p.songs.length
       ? `<ol class="pv">${p.songs.slice(0, rows).map((s, k) => `<li><span class="n">${k + 1}</span><b>${esc(s.t)}</b><i>${esc(s.a)}</i>${s.by ? `<span class="by">${esc(s.by)}</span>` : ''}</li>`).join('')}${extra > 0 ? `<li class="more">외 ${extra}곡</li>` : ''}</ol>`
       : '<div class="pv-empty">아직 곡이 없어요</div>'
     return `<div class="face${isImg(p) ? ' is-img' : ''}" style="${coverVars(p)}">
       ${isImg(p) ? '<div class="cv-img"></div>' : ''}
-      <div class="strip"><b class="ttl t-title-m">${esc(p.title)}</b><span class="cnt">${p.songs.length}곡</span></div>
+      <div class="strip">${ttl}<span class="cnt">${p.songs.length}곡</span></div>
       <div class="pocketfront">
-        <p class="owner"><span>${esc(p.owner)}님의 플레이리스트</span><span>좋아요 ${p.likes}</span></p>
+        <p class="owner">${own}<span>좋아요 ${p.likes}</span></p>
         <div class="panel">${list}${C.actionBar(p, 'panel')}</div>
       </div>
       <div class="rim"></div></div>`
@@ -422,7 +530,9 @@ const C = {
       <span class="pthumb${isImg(p) ? ' is-img' : ''}" style="${coverVars(p)}">${isImg(p) ? '<span class="cv-img"></span>' : icon('music-note')}</span>
       <span><b>${esc(p.title)}</b><span class="meta">${p.songs.length}곡 · 좋아요 ${p.likes}</span></span>${icon('caret-right')}</button>`,
   tf: (id, label, { value = '', ph = '', max = 60 } = {}) => `<div class="tf" id="${id}-w"><label for="${id}">${esc(label)}</label><input id="${id}" value="${esc(value)}" placeholder="${esc(ph)}" maxlength="${max}" autocomplete="off"><p class="msg" id="${id}-m" hidden></p></div>`,
-  seg: (name, opts, cur) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-seg="${name}" data-v="${v}" aria-pressed="${v === cur}">${esc(l)}</button>`).join('')}</div>`,
+  cand: (c, i) => `<li class="cand"><label class="cbox"><input type="checkbox" ${c.a ? 'checked' : ''} data-ci="${i}" aria-label="‘${esc(c.t)}’ 넣기"><span>${icon('check')}</span></label>
+      <div class="ci"><input class="ci-t" value="${esc(c.t)}" maxlength="60" placeholder="제목" aria-label="제목" autocomplete="off"><input class="ci-a" value="${esc(c.a)}" maxlength="40" placeholder="아티스트를 적어 주세요" aria-label="아티스트" autocomplete="off"></div></li>`,
+  seg: (name, opts, cur, cls = '') => `<div class="seg ${cls}" role="group">${opts.map(([v, l]) => `<button type="button" data-seg="${name}" data-v="${v}" aria-pressed="${v === cur}">${esc(l)}</button>`).join('')}</div>`,
 }
 
 /* ════════ 피드 · 아코디언 ════════ */
@@ -485,7 +595,7 @@ function layout(now) {
     const d = i - f
     const p = pose(d)
     let e = 1
-    if (!introDone) { e = clamp((now - introStart - i * 55) / 460, 0, 1); if (e < 1) busy = true; e = backOut(e) }
+    if (!introDone) { e = clamp((now - introStart - clamp(i - Math.round(target), 0, 8) * 60) / 480, 0, 1); if (e < 1) busy = true; e = backOut(e) }
     const b = bumps[i] || 0
     const rot = p.rot * e - b * 5
     const ty = p.ty * e + (1 - e) * G.sh * 0.75 + b * 6
@@ -527,10 +637,48 @@ function tick(t) {
   for (let i = 0; i < N(); i++) if (bumps[i]) { bumps[i] *= Math.exp(-dt * 7); if (bumps[i] < 0.002) bumps[i] = 0 }
   crossing()
   layout(t)
+  if (!dragging && f === target && introDone && route.cur === '') setAmbient(PL[clamp(Math.round(f), 0, N() - 1)])
   if (dragging || f !== target || !introDone || bumps.some(Boolean)) kick()
   else last = 0
 }
 function kick() { if (!raf) raf = requestAnimationFrame(tick) }
+function replayIntro() {
+  if (RM) return
+  introDone = false
+  introStart = performance.now()
+  last = 0
+  layout(introStart)
+  kick()
+  if (actx && soundOn) for (let k = 0; k < Math.min(5, N()); k++) setTimeout(() => flick(0.45), 120 + k * 60)
+}
+
+/* ════════ 배경: 멈춘 파일의 색·그림 (그림은 흐리게, 색은 Apple Music처럼 번진 색) ════════ */
+const amb = $('#amb')
+let ambKey = null, ambI = 0
+function ambCanvas(hex) {
+  const c = document.createElement('canvas'); c.width = 90; c.height = 120
+  const g = c.getContext('2d'), [h, sat, l] = toHsl(hex)
+  g.fillStyle = hex; g.fillRect(0, 0, 90, 120)
+  const blobs = [[24, 10, 16, 18, 22], [-28, 12, -16, 78, 34], [48, -6, 24, 30, 96], [-60, 14, -8, 82, 104], [0, 18, 30, 52, 62]]
+  for (const [dh, ds, dl, x, y] of blobs) {
+    const col = `hsl(${(h + dh + 360) % 360} ${clamp(sat + ds, 12, 92)}% ${clamp(l + dl, 10, 90)}%`
+    const rg = g.createRadialGradient(x, y, 0, x, y, 58)
+    rg.addColorStop(0, `${col} / 1)`); rg.addColorStop(1, `${col} / 0)`)
+    g.fillStyle = rg; g.fillRect(0, 0, 90, 120)
+  }
+  return c
+}
+function setAmbient(p) {
+  const key = p ? `${p.id}|${p.cover.v.length}|${p.cover.v.slice(-24)}` : ''
+  if (key === ambKey) return
+  ambKey = key
+  const layers = amb.children, next = layers[(ambI ^= 1)], prev = layers[ambI ^ 1]
+  next.innerHTML = ''
+  if (p && isImg(p)) { const d = document.createElement('div'); d.className = 'amb-img'; d.style.setProperty('--img', `url('${p.cover.v}')`); next.append(d) }
+  else if (p) next.append(ambCanvas(p.cover.v))
+  next.classList.add('on')
+  prev.classList.remove('on')
+}
 function goTo(i) { target = clamp(i, 0, N() - 1); kick() }
 
 let down = null, samples = []
@@ -546,7 +694,7 @@ stage.addEventListener('pointermove', (e) => {
   const dy = e.clientY - down.y
   if (!down.moved && Math.hypot(dy, e.clientX - down.x) > 6) { down.moved = true; dragging = true; stage.classList.add('dragging'); vel = 0 }
   if (!dragging) return
-  let nf = down.f0 - dy / G.step
+  let nf = down.f0 + dy / G.step
   if (nf < 0) nf *= 0.35
   if (nf > N() - 1) nf = N() - 1 + (nf - (N() - 1)) * 0.35
   f = nf
@@ -564,7 +712,7 @@ function endDrag(e, cancelled) {
   stage.classList.remove('dragging')
   const a = samples[0], b = samples[samples.length - 1]
   const dt = Math.max(0.016, (b.t - a.t) / 1000)
-  vel = clamp(-((b.y - a.y) / dt) / G.step, -40, 40)
+  vel = clamp(((b.y - a.y) / dt) / G.step, -40, 40)
   target = clamp(Math.round(f + vel * 0.17), 0, N() - 1)
   kick()
 }
@@ -588,7 +736,7 @@ stage.addEventListener('wheel', (e) => {
   e.preventDefault()
   if (openId) return
   wheelAcc += e.deltaMode === 1 ? e.deltaY * 30 : e.deltaY
-  while (Math.abs(wheelAcc) >= 55) { const s = Math.sign(wheelAcc); target = clamp(target + s, 0, N() - 1); wheelAcc -= s * 55 }
+  while (Math.abs(wheelAcc) >= 55) { const s = Math.sign(wheelAcc); target = clamp(target - s, 0, N() - 1); wheelAcc -= s * 55 }
   kick()
 }, { passive: false })
 stage.addEventListener('keydown', (e) => {
@@ -597,7 +745,7 @@ stage.addEventListener('keydown', (e) => {
   else if (e.key === 'Enter' && e.target === stage) { e.preventDefault(); if (Math.abs(f - target) < 0.08) openDetail(PL[Math.round(target)].id) }
 })
 const idxOf = (id) => PL.findIndex((p) => p.id === id)
-function refreshFile(id) { const i = idxOf(id); if (i >= 0) renderPocket(i); layout(performance.now()) }
+function refreshFile(id) { const i = idxOf(id); if (i >= 0) renderPocket(i); layout(performance.now()); kick() }
 
 /* ════════ 상세 (열린 파일) ════════ */
 const dl = $('#dl'), detail = $('#detail')
@@ -697,10 +845,18 @@ function toggleLike(id) {
   refreshFile(id)
   if (openId === id) renderDetail('[data-act="like"]')
 }
+const SHARE_BASE = 'https://claude.ai/artifact/T3CuToCF2UEwHveMEjfQ4j'
 function share(id) {
-  const link = `https://example.com/kanqaroo/p/${id}`
-  const ok = () => toast('공유 링크를 복사했어요')
-  try { navigator.clipboard.writeText(link).then(ok, () => toast(`링크: ${link}`)) } catch { toast(`링크: ${link}`) }
+  const p = byId(id), link = `${SHARE_BASE}#${id}`
+  const text = `${p.owner}님의 플레이리스트 ‘${p.title}’`
+  openBS(`<div class="handle"></div>
+    <div class="bs-head"><h2 class="t-title-m" id="bs-title">‘${esc(p.title)}’ 공유</h2><p class="t-body-s">링크를 열면 이 플레이리스트가 바로 열려요.</p></div>
+    <div class="tf"><label for="sh-link">링크</label><input id="sh-link" value="${esc(link)}" readonly></div>
+    <div class="row2">${C.btn('링크 복사', { v: 'primary', size: 'l', ic: 'copy', act: 'copy-link' })}<a class="btn secondary l" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}" target="_blank" rel="noopener">${icon('x-logo')}X에 올리기</a></div>`, null, '[data-act="copy-link"]')
+}
+function copyText(text, okMsg, field) {
+  const fail = () => { if (field) { field.focus(); field.select() } toast(field ? '링크를 길게 눌러 복사해 주세요' : text) }
+  try { navigator.clipboard.writeText(text).then(() => toast(okMsg), fail) } catch { fail() }
 }
 function openListen(k) {
   const s = byId(openId).songs[k]
@@ -715,14 +871,16 @@ function openListen(k) {
 /* ════════ 곡 넣기 · 편집 (BottomSheet) ════════ */
 const bs = $('#bs'), bsheet = $('#bsheet')
 let bsSubmit = null
-function openBS(html, onSubmit = null) {
+function openBS(html, onSubmit = null, focusSel = '') {
   bsheet.innerHTML = html
   bsSubmit = onSubmit
+  delete bsheet.dataset.ocr
+  const wasOpen = !bs.hidden
   bs.hidden = false
-  if (!RM) { bsheet.animate([{ transform: 'translateY(100%)' }, { transform: 'none' }], { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)' }); $('.dim', bs).animate([{ opacity: 0 }, { opacity: 1 }], { duration: 280 }) }
-  ;($('input', bsheet) || $('a, button', bsheet))?.focus({ preventScroll: true })
+  if (!RM && !wasOpen) { bsheet.animate([{ transform: 'translateY(100%)' }, { transform: 'none' }], { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)' }); $('.dim', bs).animate([{ opacity: 0 }, { opacity: 1 }], { duration: 280 }) }
+  ;((focusSel && $(focusSel, bsheet)) || $('input:not([type="file"])', bsheet) || $('a, button', bsheet))?.focus({ preventScroll: true })
 }
-function closeBS() { bs.hidden = true; bsheet.innerHTML = ''; bsSubmit = null }
+function closeBS() { bs.hidden = true; bsheet.innerHTML = ''; bsSubmit = null; delete bsheet.dataset.ocr }
 function songForm({ title, sub, withName, s = {}, cta }) {
   return `<form id="sf" novalidate style="display:grid;gap:16px"><div class="handle"></div>
     <div class="bs-head"><h2 class="t-title-m" id="bs-title">${esc(title)}</h2>${sub ? `<p class="t-body-s">${esc(sub)}</p>` : ''}</div>
@@ -739,21 +897,167 @@ function readSong(withName) {
   if (!t || !a || (withName && !n)) { $('.tf.err input', bsheet)?.focus(); return null }
   return { t, a, n }
 }
+const pickBtn = (label, id, v = 'secondary') => `<label class="btn ${v} l pick">${icon('scan')}${esc(label)}<input type="file" accept="image/*" id="${id}" aria-label="${esc(label)}"></label>`
 function openAdd(id, { owner = false } = {}) {
   const p = byId(id)
-  openBS(songForm({ title: `‘${p.title}’에 곡 넣기`, sub: owner ? '' : '넣은 곡은 맨 아래에 들어가요. 넣은 뒤 끌어서 자리를 옮길 수 있어요.', withName: !owner, cta: '넣기' }), () => {
+  openBS(`<form id="sf" novalidate class="sf"><div class="handle"></div>
+    <div class="bs-head"><h2 class="t-title-m" id="bs-title">‘${esc(p.title)}’에 곡 넣기</h2>${owner ? '' : '<p class="t-body-s">넣은 곡은 맨 아래에 들어가요. 넣은 뒤 끌어서 자리를 옮길 수 있어요.</p>'}</div>
+    ${pickBtn('스크린샷으로 한 번에 넣기', 'f-img')}
+    <p class="or t-caption">또는 직접 적기</p>
+    ${C.tf('f-t', '제목', { ph: '예: Kyoto' })}
+    ${C.tf('f-a', '아티스트', { ph: '예: Phoebe Bridgers', max: 40 })}
+    ${owner ? '' : C.tf('f-n', '내 이름', { value: myName, ph: '넣은 곡에 함께 보여요', max: 12 })}
+    <button type="submit" class="btn primary xl">넣기</button></form>`, () => {
     const v = readSong(!owner)
     if (!v) return
-    if (!owner) { myName = v.n; store.set('name', myName) }
-    const s = S(v.t, v.a, owner ? null : v.n)
-    p.songs.push(s)
-    closeBS()
-    refreshFile(id)
-    if (openId === id) { renderDetail(); const row = detail.querySelector(`.srow[data-k="${p.songs.length - 1}"]`); row?.classList.add('fresh'); row?.scrollIntoView({ block: 'nearest', behavior: RM ? 'auto' : 'smooth' }) }
-    if (route.cur.startsWith('edit-')) renderEdit(id)
-    bumps[idxOf(id)] = 1; kick()
-    toast(`‘${v.t}’를 넣었어요`)
+    if (!owner) setMyName(v.n)
+    addSongs(id, [S(v.t, v.a, owner ? null : v.n)])
+  }, '#f-t')
+  armOcr(id, owner)
+}
+function armOcr(id, owner) {
+  bsheet.dataset.ocr = `${id}|${owner ? 1 : 0}`
+  bsheet.querySelectorAll('input[type="file"]').forEach((inp) => inp.addEventListener('change', () => { const f0 = inp.files?.[0]; if (f0) startOcr(id, owner, f0) }))
+}
+function addSongs(id, songs) {
+  const p = byId(id), from = p.songs.length
+  p.songs.push(...songs)
+  closeBS()
+  refreshFile(id)
+  if (openId === id) {
+    renderDetail()
+    for (let k = from; k < p.songs.length; k++) detail.querySelector(`.srow[data-k="${k}"]`)?.classList.add('fresh')
+    detail.querySelector(`.srow[data-k="${p.songs.length - 1}"]`)?.scrollIntoView({ block: 'nearest', behavior: RM ? 'auto' : 'smooth' })
+  }
+  if (route.cur.startsWith('edit-')) renderEdit(id)
+  bumps[idxOf(id)] = 1; kick()
+  toast(songs.length === 1 ? `‘${songs[0].t}’를 넣었어요` : `${songs.length}곡을 넣었어요`)
+}
+
+/* ════════ 스크린샷에서 곡 읽기 (Tesseract.js, AI 아님, 이 기기에서만 처리) ════════ */
+const TESS = {
+  lib: 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js',
+  worker: 'https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js',
+  core: 'https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1',
+}
+let ocrWorker = null, ocrProg = () => {}
+const OCR_STEP = { 'loading tesseract core': [0.08, 0.3, '읽기 도구를 받는 중'], 'initializing tesseract': [0.3, 0.34, '읽기 도구를 켜는 중'], 'loading language traineddata': [0.34, 0.5, '한글·영어 글자 모양을 읽는 중'], 'initializing api': [0.5, 0.56, '거의 다 됐어요'], 'recognizing text': [0.56, 0.98, '글자를 읽는 중'] }
+async function getOcr() {
+  if (ocrWorker) return ocrWorker
+  ocrProg(0.04, '읽기 도구를 받는 중 (처음 한 번만 약 10MB)')
+  if (!window.Tesseract) await loadScript(TESS.lib)
+  if (!window.KQ_LANG?.kor) await loadScript('tess/kor.js')
+  if (!window.KQ_LANG?.eng) await loadScript('tess/eng.js')
+  // 언어 데이터는 같이 올린 파일(base64)에서 꺼내 워커 안에서 바로 넘긴다. 다른 사이트로 fetch하지 않음
+  const src = `self.KQ_LANG=${JSON.stringify({ kor: window.KQ_LANG.kor, eng: window.KQ_LANG.eng })};
+const _fetch=self.fetch.bind(self);
+self.fetch=(u,o)=>{const m=String(u).match(/(kor|eng)[.]traineddata[.]gz$/);if(m){const b=atob(self.KQ_LANG[m[1]]),a=new Uint8Array(b.length);for(let i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return Promise.resolve(new Response(a))}return _fetch(u,o)};
+importScripts(${JSON.stringify(TESS.worker)});`
+  const workerPath = URL.createObjectURL(new Blob([src], { type: 'text/javascript' }))
+  ocrWorker = await window.Tesseract.createWorker('kor+eng', 1, {
+    workerPath, workerBlobURL: false, corePath: TESS.core, langPath: 'https://kanqaroo.local/tess', cacheMethod: 'none',
+    logger: (m) => { const st = OCR_STEP[m.status]; if (st) ocrProg(st[0] + (st[1] - st[0]) * (m.progress || 0), st[2]) },
   })
+  await ocrWorker.setParameters({ preserve_interword_spaces: '1', tessedit_pageseg_mode: '4' })
+  return ocrWorker
+}
+async function prepImage(file) {
+  const url = URL.createObjectURL(file)
+  try {
+    const im = await loadImg(url)
+    const k = clamp(1400 / im.naturalWidth, 0.5, 2.5), w = Math.round(im.naturalWidth * k), h = Math.round(im.naturalHeight * k)
+    const c = document.createElement('canvas'); c.width = w; c.height = h
+    const g = c.getContext('2d', { willReadFrequently: true })
+    g.drawImage(im, 0, 0, w, h)
+    const d = g.getImageData(0, 0, w, h), px = d.data
+    let sum = 0
+    for (let i = 0; i < px.length; i += 4) { const y = 0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]; px[i] = px[i + 1] = px[i + 2] = y; sum += y }
+    if (sum / (px.length / 4) < 120) for (let i = 0; i < px.length; i += 4) px[i] = px[i + 1] = px[i + 2] = 255 - px[i]
+    g.putImageData(d, 0, 0)
+    return c
+  } finally { URL.revokeObjectURL(url) }
+}
+const OCR_UI = /^(재생|셔플|임의\s?재생|전체\s?재생|편집|다운로드|플레이리스트|앨범|곡|좋아요|공유|더\s?보기|검색|라이브러리|보관함|홈|둘러보기|라디오|지금\s?듣기|전체\s?선택|play|shuffle|edit|download|playlist|library|search|home|browse|radio|listen now|songs?|albums?|artists?|now playing|up next|share|more|add)$/i
+function ocrClean(t) {
+  return t.replace(/[|｜]/g, ' ').replace(/(^|\s)[ㄱ-ㆎ]{1,3}(?=\s|$)/g, ' ').replace(/\s+/g, ' ').trim()
+    .replace(/^\d{1,3}[.)]\s*/, '').replace(/^\d{1,3}\s+(?=\S)/, '')
+    .replace(/\s*\d{1,2}:\d{2}(:\d{2})?$/, '').replace(/\s*(…|\.{3}|•••|···|⋯)$/, '')
+    .replace(/^[^\p{L}\p{N}(“"'‘[]+/u, '').replace(/[^\p{L}\p{N})”"'’\]!?.]+$/u, '').trim()
+}
+const ocrJunk = (t) => t.length < 2 || OCR_UI.test(t) || !/\p{L}/u.test(t) || /^\d+\s*(곡|분|시간|songs?|min|hr)(\s|,|$)/i.test(t) || /\d+\s*곡.*\d+\s*(분|시간)/.test(t)
+// 한 줄 = 글자 칸. 오른쪽 멀리 떨어진 단어(재생 시간 등)는 잘라 내고, 제목 줄 바로 아래 같은 들여쓰기 줄을 아티스트로 본다
+function ocrLine(l) {
+  const ws = (l.words || []).filter((w) => w.text.trim())
+  if (!ws.length) return null
+  const h0 = ws[0].bbox.y1 - ws[0].bbox.y0
+  let k = ws.length
+  for (let n = 1; n < ws.length; n++) if (ws[n].bbox.x0 - ws[n - 1].bbox.x1 > h0 * 2.2) { k = n; break }
+  let raw = l.text.normalize('NFC').replace(/\s+/g, ' ').trim()
+  for (const w of ws.slice(k).reverse()) { const at = raw.lastIndexOf(w.text.normalize('NFC')); if (at > 0) raw = raw.slice(0, at).trim() }
+  const keep = ws.slice(0, k), y0 = Math.min(...keep.map((w) => w.bbox.y0)), y1 = Math.max(...keep.map((w) => w.bbox.y1))
+  return { raw, t: ocrClean(raw), y0, y1, h: y1 - y0, x0: keep[0].bbox.x0, x1: keep[keep.length - 1].bbox.x1, conf: l.confidence }
+}
+function parseOcr(data) {
+  let lines = (data.lines || []).map(ocrLine).filter((l) => l && l.conf > 30 && !ocrJunk(l.raw) && !ocrJunk(l.t)).sort((a, b) => a.y0 - b.y0)
+  // 같은 자리에 겹쳐 잡힌 줄은 큰 쪽만 남김
+  lines = lines.filter((l) => !lines.some((o) => o !== l && (o.h > l.h * 1.15 || (o.h > l.h * 0.85 && o.conf > l.conf)) && Math.min(o.y1, l.y1) - Math.max(o.y0, l.y0) > Math.min(o.h, l.h) * 0.6 && Math.min(o.x1, l.x1) > Math.max(o.x0, l.x0)))
+  const out = [], seen = new Set()
+  const push = (t, a) => { a = (a || '').split(/\s[•·]\s/)[0].trim(); const key = `${t}|${a}`.toLowerCase(); if (t && !seen.has(key)) { seen.add(key); out.push({ t, a }) } }
+  for (let i = 0; i < lines.length; i++) {
+    const L = lines[i], m = L.t.match(/^(.+?)\s+[-–—]\s+(.+)$/)
+    if (m) { push(m[1], m[2]); continue }
+    const nx = lines[i + 1]
+    if (nx && !/\s[-–—]\s/.test(nx.t) && nx.y0 - L.y1 < L.h * 0.9 && nx.h <= L.h * 1.35 && Math.abs(nx.x0 - L.x0) < L.h * 1.6) { push(L.t, nx.t); i++ } else push(L.t, '')
+  }
+  return out.slice(0, 40)
+}
+const ocrHead = (title, sub) => `<div class="handle"></div><div class="bs-head"><h2 class="t-title-m" id="bs-title">${esc(title)}</h2><p class="t-body-s">${esc(sub)}</p></div>`
+async function startOcr(id, owner, file) {
+  const p = byId(id)
+  bsheet.innerHTML = `${ocrHead('스크린샷에서 곡 찾는 중', '사진 속 글자를 이 기기에서 읽어요. 사진은 어디에도 올라가지 않아요.')}
+    <div class="prog" role="progressbar" aria-labelledby="ocr-st"><i id="ocr-bar"></i></div><p class="t-caption ocr-st" id="ocr-st" aria-live="polite">사진을 정리하는 중</p>`
+  bsSubmit = null
+  const run = (ocrProg = (v, msg) => { if (ocrProg !== run || !$('#ocr-bar')) return; $('#ocr-bar').style.setProperty('--p', `${Math.round(v * 100)}%`); $('#ocr-st').textContent = msg })
+  try {
+    const canvas = await prepImage(file)
+    const w = await getOcr()
+    run(0.56, '글자를 읽는 중')
+    const { data } = await w.recognize(canvas)
+    if (ocrProg !== run || bs.hidden) return
+    showCands(p, owner, parseOcr(data))
+  } catch (err) {
+    console.warn('OCR', err)
+    if (ocrProg === run && !bs.hidden) showOcrFail(p, owner)
+  }
+}
+function showCands(p, owner, cands) {
+  const n = cands.length
+  bsheet.innerHTML = `<form id="sf" novalidate class="sf">${ocrHead(n ? `곡 ${n}개를 찾았어요` : '곡을 찾지 못했어요', n ? '넣을 곡만 골라요. 틀린 글자는 눌러서 고쳐요.' : '곡 목록이 잘 보이게 다시 캡처하거나 직접 적어 주세요.')}
+    ${n ? `<ol class="cands" id="cands">${cands.map((c, i) => C.cand(c, i)).join('')}</ol>` : ''}
+    ${n && !owner ? C.tf('f-n', '내 이름', { value: myName, ph: '넣은 곡에 함께 보여요', max: 12 }) : ''}
+    ${n ? `<button type="submit" class="btn primary xl" id="ocr-go">${cands.filter((c) => c.a).length}곡 넣기</button>` : ''}
+    <div class="row2">${pickBtn('다른 사진', 'f-img')}${C.btn('직접 적기', { v: 'secondary', size: 'l', act: 'ocr-manual' })}</div></form>`
+  bsSubmit = n ? () => submitCands(p, owner) : null
+  armOcr(p.id, owner)
+  $('#cands', bsheet)?.addEventListener('change', () => { const k = bsheet.querySelectorAll('.cand input:checked').length; const b = $('#ocr-go'); b.textContent = k ? `${k}곡 넣기` : '고른 곡이 없어요'; b.disabled = !k })
+}
+function showOcrFail(p, owner) {
+  bsheet.innerHTML = `${ocrHead('글자를 읽지 못했어요', '이 화면에서는 사진 글자 읽기를 쓸 수 없거나, 사진을 열지 못했어요. 제목과 아티스트를 직접 적어 주세요.')}
+    <div class="row2">${pickBtn('다른 사진', 'f-img')}${C.btn('직접 적기', { v: 'primary', size: 'l', act: 'ocr-manual' })}</div>`
+  bsSubmit = null
+  armOcr(p.id, owner)
+}
+function submitCands(p, owner) {
+  const rows = [...bsheet.querySelectorAll('.cand')].filter((r) => r.querySelector('input[type="checkbox"]').checked)
+  let bad = null
+  const picked = rows.map((r) => { const t = r.querySelector('.ci-t').value.trim(), a = r.querySelector('.ci-a').value.trim(); r.classList.toggle('err', !t || !a); if ((!t || !a) && !bad) bad = r.querySelector(t ? '.ci-a' : '.ci-t'); return { t, a } })
+  const n = owner ? '' : $('#f-n').value.trim().replace(/님$/, '')
+  if (!owner) fieldErr('f-n', n ? '' : '이름을 적어 주세요. 넣은 곡에 함께 보여요')
+  if (bad) { bad.focus(); toast('제목이나 아티스트가 빈 곡이 있어요'); return }
+  if (!owner && !n) { $('#f-n').focus(); return }
+  if (!picked.length) return
+  if (!owner) setMyName(n)
+  addSongs(p.id, picked.map((c) => S(c.t, c.a, owner ? null : n)))
 }
 function openEditSong(id, k) {
   const p = byId(id), s = p.songs[k]
@@ -784,6 +1088,17 @@ function toast(msg) {
   toastT = setTimeout(() => { t.hidden = true }, 2200)
 }
 
+/* ════════ 내 이름 ════════ */
+function setMyName(v) {
+  v = String(v).trim().replace(/님$/, '')
+  if (!v) return false
+  myName = v
+  store.set('name', v)
+  PL.forEach((pl, i) => { if (pl.mine) { pl.owner = v; renderPocket(i) } })
+  layout(performance.now())
+  return true
+}
+
 /* ════════ 페이지: 내 플레이리스트 · 편집 · 컴포넌트 ════════ */
 const pgMe = $('#pg-me'), pgEdit = $('#pg-edit'), pgComp = $('#pg-comp')
 const themeNow = () => document.documentElement.dataset.theme || 'system'
@@ -794,26 +1109,98 @@ function renderMe() {
       <div>${C.btn('관리 링크 복사', { v: 'secondary', size: 'm', ic: 'link', act: 'copy-manage' })}</div>
       <div><p class="sec-title">플레이리스트 ${mine.length}개</p><div class="card glass">${mine.length ? mine.map(C.prow).join('') : '<p class="t-body-s" style="padding:16px;color:var(--text-2)">아직 없어요. 아래에서 새로 만들어 보세요.</p>'}</div></div>
       <div><p class="sec-title">설정</p><div class="card glass">
-        <div class="setrow"><span class="t-body-s">내 이름</span><span class="t-body-s" style="color:var(--text-2)">${esc(myName)}</span></div>
+        <div class="setrow"><label class="t-body-s" for="me-name">내 이름</label><span class="set-ed"><input class="set-in" id="me-name" value="${esc(myName)}" maxlength="12" autocomplete="off">${icon('pencil-simple-line', 'ic-ed')}</span></div>
         <div class="setrow"><span class="t-body-s">화면</span>${C.seg('theme', [['system', '시스템'], ['light', '라이트'], ['dark', '다크']], themeNow())}</div>
         <div class="setrow"><span class="t-body-s">넘길 때 소리</span>${C.seg('sound', [['on', '켬'], ['off', '끔']], soundOn ? 'on' : 'off')}</div>
         <button type="button" class="setrow link" data-act="go-comp"><span class="t-body-s">컴포넌트 시트</span>${icon('caret-right')}</button>
       </div></div>
     </div>
     <div class="cta"><div>${C.btn('새 플레이리스트', { v: 'primary', size: 'xl', ic: 'plus', act: 'new-pl' })}</div></div>`
+  const inp = $('#me-name', pgMe)
+  inp.addEventListener('input', () => setMyName(inp.value))
+  inp.addEventListener('blur', () => { inp.value = myName })
+  inp.addEventListener('keydown', (e) => { if (e.key === 'Enter') inp.blur() })
+}
+let edTab = 'color'
+const coverTab = (p) => (p.cover.type === 'color' ? 'color' : p.cover.src === 'draw' ? 'draw' : 'photo')
+const PEN = ['#111111', '#FFFFFF', '#E5484D', '#F76B15', '#FFC53D', '#30A46C', '#0090FF', '#8E4EC6']
+const pad = { color: null, size: 14, erase: false, undo: [] }
+function coverBody(p) {
+  if (edTab === 'color') {
+    return `<div class="swatches" role="group" aria-label="표지 색">${COLORS.map((c) => `<button type="button" class="sw" style="--c:${c};--on:${onColor(c)}" data-act="cover" data-v="${c}" aria-label="색 ${c}" aria-pressed="${p.cover.type === 'color' && p.cover.v === c}">${p.cover.type === 'color' && p.cover.v === c ? icon('check') : ''}</button>`).join('')}</div>`
+  }
+  if (edTab === 'photo') {
+    const has = p.cover.type === 'image' && p.cover.src !== 'draw'
+    return `<label class="upl">${has ? `<span class="upl-img" style="--img:url('${p.cover.v}')"></span>` : `<span class="upl-ph">${icon('image', 'ic-24')}</span>`}
+      <span class="upl-t"><b class="t-body-s" style="font-weight:600">${has ? '다른 사진 고르기' : '사진 고르기'}</b><span class="t-caption">파일 전체가 이 사진으로 덮여요</span></span>
+      <input type="file" accept="image/*" id="e-img" aria-label="표지 사진 고르기"></label>`
+  }
+  return `<div class="pad-w"><div class="pad"><canvas id="pad-base" width="600" height="900"></canvas><canvas id="pad-ink" width="600" height="900" role="img" aria-label="그림판. 손가락이나 마우스로 그려요"></canvas></div>
+    <div class="pad-tools">
+      <div class="pcols" role="group" aria-label="펜 색">${PEN.map((c) => `<button type="button" class="sw s" style="--c:${c}" data-pen="${c}" aria-label="펜 색 ${c}" aria-pressed="false"></button>`).join('')}</div>
+      <div class="pad-row">${C.seg('pen-size', [['6', '가늘게'], ['14', '보통'], ['30', '굵게']], String(pad.size))}<span class="grow"></span>${C.ibtn('eraser', '지우개', { act: 'pad-erase', attrs: 'aria-pressed="false"' })}${C.ibtn('arrow-counter-clockwise', '한 획 되돌리기', { act: 'pad-undo' })}${C.ibtn('trash', '모두 지우기', { act: 'pad-clear' })}</div>
+    </div>
+    ${C.btn('이 그림을 표지로 쓰기', { v: 'primary', size: 'l', ic: 'check', act: 'pad-save' })}</div>`
+}
+function markPad() {
+  pgEdit.querySelectorAll('[data-pen]').forEach((b) => b.setAttribute('aria-pressed', String(!pad.erase && b.dataset.pen === pad.color)))
+  $('[data-act="pad-erase"]', pgEdit)?.setAttribute('aria-pressed', String(pad.erase))
+}
+function initPad(p) {
+  const base = $('#pad-base', pgEdit), ink = $('#pad-ink', pgEdit)
+  if (!base) return
+  const W = base.width, H = base.height, bg = base.getContext('2d'), g = ink.getContext('2d')
+  bg.fillStyle = p.cover.type === 'color' ? p.cover.v : '#FFFFFF'
+  bg.fillRect(0, 0, W, H)
+  if (p.cover.type === 'image') loadImg(p.cover.v).then((im) => drawCover(bg, im, W, H), () => {})
+  if (!pad.color) pad.color = p.cover.type === 'color' ? onColor(p.cover.v) : '#111111'
+  pad.undo = []
+  markPad()
+  let lastPt = null, mid = null
+  const pt = (e) => { const r = ink.getBoundingClientRect(); return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height } }
+  ink.addEventListener('pointerdown', (e) => {
+    if (e.button !== 0) return
+    e.preventDefault()
+    ink.setPointerCapture(e.pointerId)
+    pad.undo.push(g.getImageData(0, 0, W, H)); if (pad.undo.length > 10) pad.undo.shift()
+    lastPt = mid = pt(e)
+    g.globalCompositeOperation = pad.erase ? 'destination-out' : 'source-over'
+    g.strokeStyle = g.fillStyle = pad.color
+    g.lineWidth = pad.size * (pad.erase ? 2 : 1); g.lineCap = 'round'; g.lineJoin = 'round'
+    g.beginPath(); g.arc(lastPt.x, lastPt.y, g.lineWidth / 2, 0, Math.PI * 2); g.fill()
+  })
+  ink.addEventListener('pointermove', (e) => {
+    if (!lastPt) return
+    const q = pt(e), m2 = { x: (lastPt.x + q.x) / 2, y: (lastPt.y + q.y) / 2 }
+    g.beginPath(); g.moveTo(mid.x, mid.y); g.quadraticCurveTo(lastPt.x, lastPt.y, m2.x, m2.y); g.stroke()
+    lastPt = q; mid = m2
+  })
+  const end = () => { lastPt = null }
+  ink.addEventListener('pointerup', end); ink.addEventListener('pointercancel', end)
+}
+function padAction(act, p) {
+  const ink = $('#pad-ink', pgEdit)
+  if (!ink) return
+  const g = ink.getContext('2d')
+  if (act === 'pad-erase') { pad.erase = !pad.erase; markPad() }
+  else if (act === 'pad-undo') { const im = pad.undo.pop(); if (im) g.putImageData(im, 0, 0) }
+  else if (act === 'pad-clear') { pad.undo.push(g.getImageData(0, 0, ink.width, ink.height)); g.clearRect(0, 0, ink.width, ink.height) }
+  else if (act === 'pad-save') {
+    const c = document.createElement('canvas'); c.width = ink.width; c.height = ink.height
+    const cg = c.getContext('2d'); cg.drawImage($('#pad-base', pgEdit), 0, 0); cg.drawImage(ink, 0, 0)
+    p.cover = { type: 'image', v: c.toDataURL('image/jpeg', 0.88), src: 'draw' }
+    renderEdit(p.id); refreshFile(p.id); toast('그림을 표지로 썼어요')
+  }
 }
 function renderEdit(id) {
   const p = byId(id)
   if (!p) { location.hash = 'me'; return }
   const y = pgEdit.scrollTop
+  if (pgEdit.dataset.id !== id) edTab = coverTab(p)
   pgEdit.innerHTML = `<div class="page-in">
       <div class="subbar">${C.btn('내 플레이리스트', { v: 'ghost', size: 'm', ic: 'caret-left', attrs: 'data-go="me"' })}${C.btn('완료', { v: 'secondary', size: 's', attrs: 'data-go="me"' })}</div>
-      <div class="preview">${C.face(p, { rows: 2 })}</div>
-      ${C.tf('e-title', '플레이리스트 제목', { value: p.title, max: 30 })}
-      <div class="tf"><label>표지</label><div class="swatches" role="group" aria-label="표지 색">
-        ${COLORS.map((c) => `<button type="button" class="sw" style="--c:${c};--on:${onColor(c)}" data-act="cover" data-v="${c}" aria-label="색 ${c}" aria-pressed="${p.cover.type === 'color' && p.cover.v === c}">${p.cover.type === 'color' && p.cover.v === c ? icon('check') : ''}</button>`).join('')}
-        <label class="sw up" aria-label="그림 올리기" ${p.cover.type === 'image' ? 'aria-pressed="true"' : ''}>${icon('image')}<input type="file" accept="image/*" id="e-img"></label>
-      </div></div>
+      <div class="preview-w"><div class="preview">${C.face(p, { rows: 2, editable: true })}</div><p class="t-caption hint-ed">제목과 이름은 파일에서 눌러서 바로 고쳐요</p></div>
+      <div class="cp"><p class="sec-title">표지</p>${C.seg('cover-tab', [['color', '색상'], ['photo', '사진'], ['draw', '그림']], edTab, 'full')}${coverBody(p)}</div>
       <div><div class="subbar" style="margin-left:0"><p class="sec-title" style="padding-bottom:0">곡 ${p.songs.length}개</p>${C.btn('곡 추가', { v: 'secondary', size: 's', ic: 'plus', act: 'owner-add' })}</div>
         <div class="card glass" style="margin-top:8px">${p.songs.length ? `<ol class="songs" id="e-songs">${p.songs.map((s, k) => C.songRow(s, k, 'manage')).join('')}</ol>` : '<p class="t-body-s" style="padding:16px;color:var(--text-2)">곡이 없어요.</p>'}</div></div>
       <div class="dz"><p class="sec-title">플레이리스트 삭제</p>${C.btn('이 플레이리스트 삭제', { v: 'danger', size: 'l', ic: 'trash', act: 'del-pl' })}</div>
@@ -822,8 +1209,19 @@ function renderEdit(id) {
   pgEdit.dataset.id = id
   const list = $('#e-songs', pgEdit)
   if (list) enableReorder(list, () => byId(id).songs, () => { renderEdit(id); refreshFile(id) })
-  $('#e-title').addEventListener('input', (e) => { p.title = e.target.value.trim() || '제목 없음'; $('.preview .ttl', pgEdit).textContent = p.title; refreshFile(id) })
-  $('#e-img').addEventListener('change', (e) => { const file0 = e.target.files?.[0]; if (!file0) return; p.cover = { type: 'image', v: URL.createObjectURL(file0) }; renderEdit(id); refreshFile(id); toast('표지 그림을 바꿨어요') })
+  const ti = $('#e-title', pgEdit), oi = $('#e-owner', pgEdit)
+  ti.addEventListener('input', () => { p.title = ti.value.trim() || '제목 없음'; refreshFile(id) })
+  oi.addEventListener('input', () => { oi.size = Math.max(2, oi.value.length + 1); setMyName(oi.value) })
+  ;[ti, oi].forEach((el) => {
+    el.addEventListener('keydown', (e) => { if (e.key === 'Enter') el.blur() })
+    el.addEventListener('blur', () => { ti.value = p.title; oi.value = p.owner })
+  })
+  $('#e-img', pgEdit)?.addEventListener('change', async (e) => {
+    const f0 = e.target.files?.[0]
+    if (!f0) return
+    try { p.cover = { type: 'image', v: await fileToCover(f0), src: 'photo' }; renderEdit(id); refreshFile(id); toast('표지 사진을 바꿨어요') } catch { toast('사진을 열지 못했어요. 다른 사진을 골라 주세요') }
+  })
+  if (edTab === 'draw') initPad(p)
 }
 function renderComp() {
   const sample = PL[0], imgSample = PL[4]
@@ -842,24 +1240,36 @@ function renderComp() {
       <div style="display:flex;flex-wrap:wrap;gap:8px">${['primary', 'secondary', 'ghost', 'danger'].map((v) => C.btn('곡 넣기', { v, size: 'm', ic: 'plus' })).join('')}</div>
       <div style="display:flex;flex-wrap:wrap;gap:8px">${['primary', 'secondary', 'ghost', 'danger'].map((v) => C.btn('완료', { v, size: 's' })).join('')}${C.btn('비활성', { v: 'primary', size: 's', attrs: 'disabled' })}</div></div></section>
     <section class="comp"><p class="sec-title">IconButton (38 · 32)</p><div class="comp-box">${C.ibtn('share-network', '공유')}${C.ibtn('x', '닫기', { v: 'ghost' })}${C.ibtn('pencil-simple', '편집', { size: 's' })}${C.ibtn('trash', '삭제', { size: 's', v: 'ghost danger' })}</div></section>
-    <section class="comp"><p class="sec-title">File (색 · 그림)</p><div class="comp-box"><div class="face-static">${C.face(sample, { rows: 5 })}</div><div class="face-static">${C.face(imgSample, { rows: 5 })}</div></div></section>
+    <section class="comp"><p class="sec-title">File (색 · 사진 · 편집 중)</p><div class="comp-box"><div class="face-static">${C.face(sample, { rows: 5 })}</div><div class="face-static">${C.face(imgSample, { rows: 5 })}</div><div class="face-static" style="height:280px">${C.face(PL.find((x) => x.mine) || sample, { rows: 2, editable: 'demo' })}</div></div></section>
+    <section class="comp"><p class="sec-title">Pager · Ambient(멈춘 파일의 색이 배경으로 번짐)</p><div class="comp-box"><p class="pager glass"><span class="pos">3 / 11</span><span class="hint">아래로 넘기고, 누르면 열어요</span></p></div></section>
     <section class="comp"><p class="sec-title">DetailSheet 머리 + ActionBar</p><div class="comp-box col" style="padding:0;overflow:hidden"><div class="dcover" style="${coverVars(sample)}"><div class="dtop"><span class="t-body-s">${esc(sample.owner)}님의 플레이리스트</span>${C.ibtn('x', '닫기', { v: 'on-cover' })}</div><h2 class="t-title-l">${esc(sample.title)}</h2><p class="t-caption dmeta">${sample.songs.length}곡 · 좋아요 ${sample.likes}</p>${C.actionBar(sample, 'cover')}</div></div></section>
     <section class="comp"><p class="sec-title">SongRow (기본 · 손님이 넣음 · 관리용)</p><div class="comp-box col" style="padding:8px"><ol class="songs">${C.songRow(sample.songs[0], 0, 'show')}${C.songRow(sample.songs[1], 1, 'show')}${C.songRow(sample.songs[2], 2, 'manage')}</ol></div></section>
     <section class="comp"><p class="sec-title">TextField (기본 · 오류)</p><div class="comp-box col">${C.tf('c1', '제목', { ph: '예: Kyoto' })}<div class="tf err"><label>아티스트</label><input value="" placeholder="예: Phoebe Bridgers" aria-label="오류 예시"><p class="msg">아티스트를 적어 주세요</p></div></div></section>
     <section class="comp"><p class="sec-title">ListenOption</p><div class="comp-box col"><div class="lopts">${[['youtube-logo', 'YouTube에서 듣기'], ['spotify-logo', 'Spotify에서 듣기'], ['apple-logo', 'Apple Music에서 듣기']].map(([i, l]) => `<span class="lopt">${icon(i, 'ic-24')}${l}${icon('caret-right')}</span>`).join('')}</div></div></section>
     <section class="comp"><p class="sec-title">PlaylistRow · Segmented</p><div class="comp-box col"><div class="card glass">${C.prow(PL[9])}${C.prow(PL[4])}</div>${C.seg('demo', [['a', '시스템'], ['b', '라이트'], ['c', '다크']], 'a')}</div></section>
-    <section class="comp"><p class="sec-title">CoverPicker</p><div class="comp-box"><div class="swatches">${COLORS.map((c, k) => `<span class="sw" style="--c:${c};--on:${onColor(c)}" ${k === 0 ? 'aria-pressed="true"' : ''}>${k === 0 ? icon('check') : ''}</span>`).join('')}<span class="sw up">${icon('image')}</span></div></div></section>
+    <section class="comp"><p class="sec-title">CoverPicker (색상 · 사진 · 그림)</p><div class="comp-box col">${C.seg('demo2', [['color', '색상'], ['photo', '사진'], ['draw', '그림']], 'color', 'full')}
+      <div class="swatches">${COLORS.map((c, k) => `<span class="sw" style="--c:${c};--on:${onColor(c)}" ${k === 0 ? 'aria-pressed="true"' : ''}>${k === 0 ? icon('check') : ''}</span>`).join('')}</div>
+      <span class="upl"><span class="upl-ph">${icon('image', 'ic-24')}</span><span class="upl-t"><b class="t-body-s" style="font-weight:600">사진 고르기</b><span class="t-caption">파일 전체가 이 사진으로 덮여요</span></span></span>
+      <div class="pcols">${PEN.map((c, k) => `<span class="sw s" style="--c:${c}" ${k === 0 ? 'aria-pressed="true"' : ''}></span>`).join('')}</div>
+      <div class="pad-row">${C.seg('demo3', [['6', '가늘게'], ['14', '보통'], ['30', '굵게']], '14')}<span class="grow"></span>${C.ibtn('eraser', '지우개')}${C.ibtn('arrow-counter-clockwise', '되돌리기')}${C.ibtn('trash', '모두 지우기')}</div></div></section>
+    <section class="comp"><p class="sec-title">스크린샷 곡 넣기 · CandidateRow</p><div class="comp-box col">${pickBtn('스크린샷으로 한 번에 넣기', 'c-img')}<p class="or t-caption">또는 직접 적기</p>
+      <div class="prog"><i style="--p:62%"></i></div>
+      <ol class="cands" style="margin:0">${C.cand({ t: 'Kyoto', a: 'Phoebe Bridgers' }, 0)}${C.cand({ t: 'Motion Sickness', a: '' }, 1)}</ol></div></section>
+    <section class="comp"><p class="sec-title">공유 링크</p><div class="comp-box col"><div class="tf"><label>링크</label><input value="${SHARE_BASE}#p1" readonly aria-label="공유 링크 예시"></div><div class="row2">${C.btn('링크 복사', { v: 'primary', size: 'l', ic: 'copy' })}<span class="btn secondary l">${icon('x-logo')}X에 올리기</span></div></div></section>
     <section class="comp"><p class="sec-title">Toast · Dialog</p><div class="comp-box col"><span class="glass" style="justify-self:start;padding:12px 20px;border-radius:999px;font-size:15px;font-weight:600">‘Kyoto’를 넣었어요</span>
       <div class="dlg glass"><h2 class="t-title-m">플레이리스트를 삭제할까요?</h2><p class="t-body-s">‘퇴근길’과 곡 2개가 사라져요. 되돌릴 수 없어요.</p><div class="row2">${C.btn('취소', { v: 'secondary', size: 'l' })}${C.btn('삭제', { v: 'danger', size: 'l' })}</div></div></div></section>
   </div>`
-  pgComp.querySelectorAll('.comp-box button').forEach((b) => { if (!b.dataset.seg) b.tabIndex = -1 })
+  pgComp.querySelectorAll('.comp-box button, .comp-box input').forEach((b) => { if (!b.dataset.seg) b.tabIndex = -1 })
   const cs = getComputedStyle(document.documentElement)
   pgComp.querySelectorAll('[data-tok]').forEach((c) => { c.textContent = cs.getPropertyValue(`--${c.dataset.tok}`).trim() })
 }
 
 /* ════════ 라우팅 (#me · #edit-<id> · #components) ════════ */
 function route() {
-  const h = location.hash.slice(1)
+  let h = location.hash.slice(1)
+  const shared = byId(h) ? h : null
+  if (shared) { h = ''; try { history.replaceState(null, '', location.pathname + location.search) } catch { /* 주소 정리 안 됨 */ } }
+  const prev = route.cur
   route.cur = h
   if (openId) { dl.hidden = true; detail.innerHTML = ''; openId = null }
   closeBS()
@@ -872,6 +1282,10 @@ function route() {
   else if (h === 'components') renderComp()
   else stage.focus({ preventScroll: true })
   ;[pgMe, pgEdit, pgComp].forEach((pg) => { if (!pg.hidden) pg.scrollTop = 0 })
+  if (h !== '') return
+  if (shared) { const i = idxOf(shared); f = target = i; vel = 0; lastCell = i; posEl.textContent = `${i + 1} / ${N()}` }
+  if (prev !== '' || shared) replayIntro()
+  if (shared) setTimeout(() => { if (!openId && route.cur === '') openDetail(shared) }, RM ? 0 : 750)
 }
 route.cur = ''
 const go = (h) => { if (location.hash.slice(1) === h) route(); else location.hash = h }
@@ -885,12 +1299,17 @@ document.addEventListener('click', (e) => {
     const v = sg.dataset.v
     if (sg.dataset.seg === 'theme') { if (v === 'system') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = v; if (!pgComp.hidden) renderComp() }
     if (sg.dataset.seg === 'sound') { soundOn = v === 'on'; store.set('sound', soundOn); ac(); if (soundOn) flick() }
+    if (sg.dataset.seg === 'cover-tab') { edTab = v; renderEdit(pgEdit.dataset.id); return }
+    if (sg.dataset.seg === 'pen-size') { pad.size = Number(v); pad.erase = false; markPad() }
     sg.parentElement.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === sg)))
     return
   }
+  const pen = e.target.closest('[data-pen]')
+  if (pen) { pad.color = pen.dataset.pen; pad.erase = false; markPad(); return }
   const a = e.target.closest('[data-act]')
   if (!a) return
   const act = a.dataset.act
+  if (act.startsWith('pad-')) { padAction(act, byId(pgEdit.dataset.id)); return }
   if (act === 'close-detail') closeDetail()
   else if (act === 'close-bs') closeBS()
   else if (act === 'close-dg') { dg.hidden = true; dgOk = null }
@@ -905,10 +1324,20 @@ document.addEventListener('click', (e) => {
   else if (act === 'cover') { const p = byId(pgEdit.dataset.id); p.cover = { type: 'color', v: a.dataset.v }; renderEdit(p.id); refreshFile(p.id) }
   else if (act === 'del-pl') { const p = byId(pgEdit.dataset.id); confirmDlg({ title: '플레이리스트를 삭제할까요?', body: `‘${p.title}’과 곡 ${p.songs.length}개가 사라져요. 되돌릴 수 없어요.`, ok: '삭제', onOk: () => { PL.splice(idxOf(p.id), 1); build(); target = f = clamp(Math.round(f), 0, N() - 1); measure(); layout(performance.now()); posEl.textContent = `${Math.round(f) + 1} / ${N()}`; go('me'); toast('플레이리스트를 삭제했어요') } }) }
   else if (act === 'new-pl') { const used = new Set(PL.map((p) => p.cover.v)); const c = COLORS.find((x) => !used.has(x)) || COLORS[0]; const p = { id: 'p' + Date.now().toString(36), title: '새 플레이리스트', owner: myName, mine: true, cover: { type: 'color', v: c }, likes: 0, songs: [] }; PL.unshift(p); build(); f = target = 0; lastCell = 0; measure(); layout(performance.now()); posEl.textContent = `1 / ${N()}`; go(`edit-${p.id}`); toast('새 플레이리스트를 만들었어요') }
-  else if (act === 'copy-manage') { const link = 'https://example.com/kanqaroo/manage/예시'; try { navigator.clipboard.writeText(link).then(() => toast('관리 링크를 복사했어요'), () => toast(`관리 링크: ${link}`)) } catch { toast(`관리 링크: ${link}`) } }
+  else if (act === 'copy-manage') copyText(`${SHARE_BASE}#me`, '관리 링크를 복사했어요', null)
+  else if (act === 'copy-link') copyText($('#sh-link').value, '링크를 복사했어요', $('#sh-link'))
+  else if (act === 'ocr-manual') { const [id, o] = (bsheet.dataset.ocr || '').split('|'); if (id) openAdd(id, { owner: o === '1' }) }
   else if (act === 'go-comp') go('components')
 })
 document.addEventListener('submit', (e) => { if (e.target.id === 'sf') { e.preventDefault(); bsSubmit?.() } })
+document.addEventListener('paste', (e) => {
+  if (bs.hidden || !bsheet.dataset.ocr) return
+  const f0 = [...(e.clipboardData?.files || [])].find((x) => x.type.startsWith('image/'))
+  if (!f0) return
+  e.preventDefault()
+  const [id, o] = bsheet.dataset.ocr.split('|')
+  startOcr(id, o === '1', f0)
+})
 document.addEventListener('keydown', (e) => {
   if (e.key !== 'Escape') return
   if (!dg.hidden) { dg.hidden = true; dgOk = null } else if (!bs.hidden) closeBS()
@@ -924,6 +1353,7 @@ build()
 posEl.textContent = `1 / ${N()}`
 introStart = performance.now()
 layout(introStart)
+setAmbient(PL[0])
 kick()
 if (location.hash) route()
 </script>

@@ -14,17 +14,20 @@
 
 ```bash
 python3 prototype/build.py prototype/accordion.html src/assets/fonts prototype/dist/kanqaroo-accordion.html
+python3 prototype/build_tess.py   # 스크린샷 곡 읽기용 한글·영어 글자 데이터 → prototype/dist/tess/*.js (한 번만)
 ```
 
 Artifact는 외부 폰트를 못 불러와서, `__FONT_400__` 같은 자리표시자를 `src/assets/fonts/`의 Pretendard 서브셋으로 채운다(결과 약 1.4MB). 아이콘은 Phosphor(MIT) Regular 경로를 파일 안에 직접 넣었다.
 
 ## 올리기
 
-빌드 결과를 **같은 Artifact URL**에 다시 publish한다 (새로 만들면 링크가 바뀜). 저장소(capabilities)는 쓰지 않고, 좋아요·이름·소리 설정만 브라우저에 기억한다.
+빌드 결과를 **같은 Artifact URL**에 다시 publish한다 (새로 만들면 링크가 바뀜). `files`로 `tess/kor.js`, `tess/eng.js`를 같이 올린다. 저장소(capabilities)는 쓰지 않고, 좋아요·이름·소리 설정만 브라우저에 기억한다.
+
+스크린샷 곡 읽기는 [Tesseract.js](https://github.com/naptha/tesseract.js) 5.1.1(Apache-2.0)을 jsDelivr에서 스크립트로 불러 쓴다. Artifact는 다른 사이트로 fetch를 못 해서 글자 데이터는 같이 올린 파일에서 꺼내 워커에 넘긴다. Artifact 보안 정책이 WebAssembly를 막으면 "글자를 읽지 못했어요" 안내 후 직접 적기로 돌아간다.
 
 ## 주소
 
-`#me` 내 플레이리스트(관리) · `#edit-<id>` 플레이리스트 편집 · `#components` 컴포넌트 시트
+`#me` 내 플레이리스트(관리) · `#edit-<id>` 플레이리스트 편집 · `#components` 컴포넌트 시트 · `#<플레이리스트id>`(예: `#p3`) 공유 링크, 그 파일을 바로 연다
 
 ## Stage 2 앱과의 관계
 
