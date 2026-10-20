@@ -1,0 +1,45 @@
+# 프로토타입 데모를 GitHub Pages에 올린다 (prototype/build_pages.py → prototype/dist/pages)
+name: Demo (GitHub Pages)
+
+on:
+  push:
+    branches: [claude/focused-hypatia-t276sg, main]
+    paths:
+      - 'prototype/**'
+      - 'src/assets/fonts/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Build demo
+        run: python3 prototype/build_pages.py
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: prototype/dist/pages
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

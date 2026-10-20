@@ -905,14 +905,18 @@ function toggleLike(id) {
   refreshFile(id)
   if (openId === id) renderDetail('[data-act="like"]')
 }
-const SHARE_BASE = 'https://claude.ai/artifact/T3CuToCF2UEwHveMEjfQ4j'
+// 단독 페이지(GitHub Pages 등)면 지금 주소를, Artifact 안(iframe)이면 Artifact 주소를 공유 링크로
+const STANDALONE = window.self === window.top && location.protocol.startsWith('http')
+const SHARE_BASE = STANDALONE ? location.origin + location.pathname : 'https://claude.ai/artifact/T3CuToCF2UEwHveMEjfQ4j'
+const canNativeShare = STANDALONE && typeof navigator.share === 'function'
 function share(id) {
   const p = byId(id), link = `${SHARE_BASE}#${id}`
   const text = `${p.owner}님의 플레이리스트 ‘${p.title}’`
   openBS(`<div class="handle"></div>
     <div class="bs-head"><h2 class="t-title-m" id="bs-title">‘${esc(p.title)}’ 공유</h2><p class="t-body-s">링크를 열면 이 플레이리스트가 바로 열려요.</p></div>
-    <div class="tf"><label for="sh-link">링크</label><input id="sh-link" value="${esc(link)}" readonly></div>
-    <div class="row2">${C.btn('링크 복사', { v: 'primary', size: 'l', ic: 'copy', act: 'copy-link' })}<a class="btn secondary l" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}" target="_blank" rel="noopener">${icon('x-logo')}X에 올리기</a></div>`, null, '[data-act="copy-link"]')
+    <div class="tf"><label for="sh-link">링크</label><input id="sh-link" value="${esc(link)}" readonly data-text="${esc(text)}"></div>
+    ${canNativeShare ? C.btn('다른 앱으로 공유', { v: 'primary', size: 'l', ic: 'share-network', act: 'native-share' }) : ''}
+    <div class="row2">${C.btn('링크 복사', { v: canNativeShare ? 'secondary' : 'primary', size: 'l', ic: 'copy', act: 'copy-link' })}<a class="btn secondary l" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}" target="_blank" rel="noopener">${icon('x-logo')}X에 올리기</a></div>`, null, canNativeShare ? '[data-act="native-share"]' : '[data-act="copy-link"]')
 }
 function copyText(text, okMsg, field) {
   const fail = () => { if (field) { field.focus(); field.select() } toast(field ? '링크를 길게 눌러 복사해 주세요' : text) }
@@ -1388,6 +1392,7 @@ document.addEventListener('click', (e) => {
   else if (act === 'new-pl') { const used = new Set(PL.map((p) => p.cover.v)); const c = COLORS.find((x) => !used.has(x)) || COLORS[0]; const p = { id: 'p' + Date.now().toString(36), title: '새 플레이리스트', owner: myName, mine: true, cover: { type: 'color', v: c }, likes: 0, songs: [] }; PL.unshift(p); build(); f = target = 0; lastCell = 0; measure(); layout(performance.now()); posEl.textContent = `1 / ${N()}`; go(`edit-${p.id}`); toast('새 플레이리스트를 만들었어요') }
   else if (act === 'copy-manage') copyText(`${SHARE_BASE}#me`, '관리 링크를 복사했어요', null)
   else if (act === 'copy-link') copyText($('#sh-link').value, '링크를 복사했어요', $('#sh-link'))
+  else if (act === 'native-share') { const l = $('#sh-link'); navigator.share({ title: 'Kanqaroo', text: l.dataset.text, url: l.value }).then(() => closeBS(), () => {}) }
   else if (act === 'ocr-manual') { const [id, o] = (bsheet.dataset.ocr || '').split('|'); if (id) openAdd(id, { owner: o === '1' }) }
   else if (act === 'go-comp') go('components')
 })

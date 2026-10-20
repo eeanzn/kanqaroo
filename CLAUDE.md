@@ -43,6 +43,7 @@ Stage 2 앱(v1, 폐기 예정): `board` 취향 보드 · `crate` 군집 · `slip
 ```bash
 python3 prototype/build.py prototype/accordion.html src/assets/fonts prototype/dist/kanqaroo-accordion.html  # 프로토타입 빌드 (같은 Artifact URL에 다시 publish)
 python3 prototype/build_tess.py   # OCR 글자 데이터 → prototype/dist/tess/ (Artifact files로 같이 올림)
+python3 prototype/build_pages.py  # GitHub Pages 데모 → prototype/dist/pages/ (푸시하면 pages.yml이 자동 배포)
 npm run dev            # 개발 서버
 npm run lint && npm run typecheck
 npm test               # 단위 테스트 (+ TEST_DATABASE_URL 있으면 DB 통합 테스트)
