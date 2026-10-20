@@ -15,10 +15,13 @@
   --primary: #111111;
   --on-primary: #FFFFFF;
   --danger: #D93A3A;
-  --glass: rgba(255, 255, 255, .78);
-  --glass-edge: rgba(255, 255, 255, .7);
-  --glass-shade: 0 8px 24px rgba(0, 0, 0, .08);
-  --dim: rgba(0, 0, 0, .28);
+  --glass: rgba(255, 255, 255, .24);
+  --glass-thick: rgba(255, 255, 255, .64);
+  --glass-edge: rgba(255, 255, 255, .5);
+  --spec: rgba(255, 255, 255, .95);
+  --glass-shade: 0 8px 24px rgba(0, 0, 0, .10), 0 1px 3px rgba(0, 0, 0, .06);
+  --hbtn: rgba(255, 255, 255, .5);
+  --dim: rgba(0, 0, 0, .16);
   --veil: rgba(255, 255, 255, .42);
   --knock: #FFFFFF;
   --font: 'Pretendard', system-ui, -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
@@ -31,8 +34,8 @@
     --bg: #000000; --text: #F5F5F5; --text-2: #ABABAB; --text-3: #8A8A8A;
     --line: rgba(255, 255, 255, .1); --fill: rgba(255, 255, 255, .08); --fill-2: rgba(255, 255, 255, .12);
     --primary: #F5F5F5; --on-primary: #000000; --danger: #FF6B6B;
-    --glass: rgba(20, 20, 22, .8); --glass-edge: rgba(255, 255, 255, .12);
-    --glass-shade: 0 8px 24px rgba(0, 0, 0, .4); --dim: rgba(0, 0, 0, .5); --veil: rgba(0, 0, 0, .45); --knock: #1C1C1E;
+    --glass: rgba(44, 44, 48, .26); --glass-thick: rgba(28, 28, 30, .68); --glass-edge: rgba(255, 255, 255, .14);
+    --spec: rgba(255, 255, 255, .5); --glass-shade: 0 8px 24px rgba(0, 0, 0, .35), 0 1px 3px rgba(0, 0, 0, .2); --hbtn: rgba(255, 255, 255, .12); --dim: rgba(0, 0, 0, .36); --veil: rgba(0, 0, 0, .45); --knock: #1C1C1E;
   }
 }
 :root[data-theme="dark"] {
@@ -40,8 +43,8 @@
   --bg: #000000; --text: #F5F5F5; --text-2: #ABABAB; --text-3: #8A8A8A;
   --line: rgba(255, 255, 255, .1); --fill: rgba(255, 255, 255, .08); --fill-2: rgba(255, 255, 255, .12);
   --primary: #F5F5F5; --on-primary: #000000; --danger: #FF6B6B;
-  --glass: rgba(20, 20, 22, .8); --glass-edge: rgba(255, 255, 255, .12);
-  --glass-shade: 0 8px 24px rgba(0, 0, 0, .4); --dim: rgba(0, 0, 0, .5); --veil: rgba(0, 0, 0, .45); --knock: #1C1C1E;
+  --glass: rgba(44, 44, 48, .26); --glass-thick: rgba(28, 28, 30, .68); --glass-edge: rgba(255, 255, 255, .14);
+  --spec: rgba(255, 255, 255, .5); --glass-shade: 0 8px 24px rgba(0, 0, 0, .35), 0 1px 3px rgba(0, 0, 0, .2); --hbtn: rgba(255, 255, 255, .12); --dim: rgba(0, 0, 0, .36); --veil: rgba(0, 0, 0, .45); --knock: #1C1C1E;
 }
 @font-face { font-family: 'Pretendard'; font-weight: 400; font-display: swap; src: url(data:font/woff2;base64,__FONT_400__) format('woff2'); }
 @font-face { font-family: 'Pretendard'; font-weight: 600; font-display: swap; src: url(data:font/woff2;base64,__FONT_600__) format('woff2'); }
@@ -69,7 +72,11 @@ ol, ul { padding: 0; list-style: none; }
 .t-caption { font-size: 13px; line-height: 19.5px; }
 
 /* ── 글래스 ── */
-.glass { background: var(--glass); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); border: 1px solid var(--glass-edge); box-shadow: var(--glass-shade); }
+.glass { background: var(--glass); -webkit-backdrop-filter: blur(6px) saturate(190%) brightness(1.04); backdrop-filter: blur(6px) saturate(190%) brightness(1.04); border: 0; box-shadow: var(--glass-shade), inset 0 0 0 1px var(--glass-edge), inset 0 1px 0 var(--spec); }
+.glass.thick { background: var(--glass-thick); -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%); }
+/* 반사광 테두리: 왼쪽 위가 밝고 오른쪽 아래로 옅어지는 1.5px 띠 */
+.lg { position: relative; }
+.lg::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px; pointer-events: none; background: linear-gradient(140deg, var(--spec), rgba(255, 255, 255, .12) 30%, rgba(255, 255, 255, 0) 55%, rgba(255, 255, 255, .1) 78%, var(--glass-edge)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
 
 /* ── Ambient: 멈춘 파일의 색·그림을 흐리게 깐 배경. 0.7초에 걸쳐 바뀜 ── */
 .amb { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
@@ -82,12 +89,13 @@ ol, ul { padding: 0; list-style: none; }
 @keyframes drift { from { transform: scale(1.08) rotate(0deg); } to { transform: scale(1.28) rotate(9deg) translate(2%, -3%); } }
 
 /* ── Header ── */
+.edge { position: fixed; z-index: 35; left: 0; right: 0; top: 0; height: calc(var(--stage-top) + 4px); background: linear-gradient(var(--bg) 62%, color-mix(in srgb, var(--bg) 0%, transparent)); pointer-events: none; }
 .hdr { position: fixed; z-index: 40; top: var(--hdr-top); left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); max-width: 560px; margin: 0 auto; height: 56px; border-radius: 999px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px 0 16px; }
 .logo { display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 4px; margin-left: -4px; border: 0; background: none; cursor: pointer; font-size: 17px; font-weight: 700; letter-spacing: -0.02em; border-radius: 8px; }
 .logo svg { width: 28px; height: 28px; }
-.hbtn { width: 40px; height: 40px; border-radius: 999px; border: 0; background: var(--fill); display: grid; place-items: center; cursor: pointer; }
+.hbtn { width: 40px; height: 40px; border-radius: 999px; border: 0; background: var(--hbtn); box-shadow: inset 0 0 0 1px var(--glass-edge), inset 0 1px 0 var(--spec); display: grid; place-items: center; cursor: pointer; }
 .hbtn:active { background: var(--fill-2); }
-.hbtn[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); }
+.hbtn[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); box-shadow: none; }
 
 /* ── Button · IconButton ── */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap; text-decoration: none; }
@@ -106,7 +114,7 @@ ol, ul { padding: 0; list-style: none; }
 .ibtn.s { width: 32px; height: 32px; }
 .ibtn.ghost { background: transparent; }
 .ibtn.danger { color: var(--danger); }
-.on-cover { background: rgba(255, 255, 255, .24); color: var(--on); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.on-cover { background: var(--oc, rgba(255, 255, 255, .24)); color: var(--on); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22), inset 0 1px 0 rgba(255, 255, 255, .4); }
 .btn.on-cover-primary { background: var(--on); color: var(--c); }
 
 /* ── ActionBar ── */
@@ -128,32 +136,34 @@ ol, ul { padding: 0; list-style: none; }
 
 /* ── File (아코디언 파일) ── */
 .pocket { position: absolute; left: 50%; bottom: var(--hingeB, 16px); width: var(--W, 340px); height: var(--H, 460px); margin-left: calc(var(--W, 340px) / -2); transform-origin: 50% 100%; will-change: transform; }
-.face { position: absolute; inset: 0; border-radius: 8px; overflow: hidden; background: var(--c); color: var(--on); isolation: isolate; box-shadow: 0 12px 32px rgba(0, 0, 0, .16); }
+.face { position: absolute; inset: 0; border-radius: 8px; overflow: hidden; background: var(--c); color: var(--on); isolation: isolate; box-shadow: 0 14px 34px rgba(0, 0, 0, .18), 0 2px 6px rgba(0, 0, 0, .08); }
+.face::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; background: linear-gradient(158deg, rgba(255, 255, 255, .28) 0%, rgba(255, 255, 255, .08) 26%, rgba(255, 255, 255, 0) 48%, rgba(255, 255, 255, 0) 80%, rgba(255, 255, 255, .1) 100%); }
 .face .cv-img { position: absolute; inset: 0; background: var(--img) center / cover; }
-.face .rim { position: absolute; inset: 0; border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .28), inset 0 1px 0 rgba(255, 255, 255, .45); pointer-events: none; z-index: 3; }
-.strip { position: relative; z-index: 1; height: 56px; padding: 12px 16px 0; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.face .rim { position: absolute; inset: 0; border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .18), inset 0 -1px 0 rgba(0, 0, 0, .14); pointer-events: none; z-index: 3; }
+.face .rim::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 1.5px; background: linear-gradient(150deg, rgba(255, 255, 255, .9), rgba(255, 255, 255, .16) 26%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, .08) 76%, rgba(255, 255, 255, .45)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+.strip { position: relative; z-index: 2; height: 56px; padding: 12px 16px 0; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .is-img .strip { background: rgba(0, 0, 0, .45); }
 .strip .ttl { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .strip .cnt { flex: none; font-size: 13px; font-weight: 600; opacity: .8; }
-.pocketfront { position: absolute; left: 0; right: 0; bottom: 0; top: 56px; z-index: 1; padding: 12px 12px 12px; display: flex; flex-direction: column; gap: 12px; background: rgba(255, 255, 255, .12); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 -1px 0 rgba(0, 0, 0, .14); }
+.pocketfront { position: absolute; left: 0; right: 0; bottom: 0; top: 56px; z-index: 2; padding: 12px 12px 12px; display: flex; flex-direction: column; gap: 12px; background: rgba(255, 255, 255, .1); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .55), inset 0 10px 18px -12px rgba(255, 255, 255, .45), 0 -1px 0 rgba(0, 0, 0, .14); }
 .is-img .pocketfront { background: none; overflow: hidden; isolation: isolate; }
 .is-img .pocketfront::before { content: ""; position: absolute; inset: -20px; z-index: -1; background: var(--img) center / cover; filter: blur(16px) brightness(.6) saturate(1.2); }
 .owner { padding: 0 4px; font-size: 15px; line-height: 22.5px; font-weight: 600; display: flex; justify-content: space-between; gap: 12px; }
 .owner span:last-child { font-weight: 400; opacity: .8; white-space: nowrap; }
-.panel { position: relative; flex: 1; min-height: 0; border-radius: 8px; padding: 8px 12px 12px; display: flex; flex-direction: column; background: var(--glass); color: var(--text); box-shadow: inset 0 0 0 1px var(--glass-edge); overflow: hidden; isolation: isolate; }
-.is-img .panel::before { content: ""; position: absolute; inset: -24px; z-index: -1; background: var(--img) center / cover; filter: blur(18px) saturate(1.2); opacity: .55; }
+.panel { position: relative; flex: 1; min-height: 0; border-radius: 8px; padding: 8px 12px 12px; display: flex; flex-direction: column; background: var(--pv); color: var(--on); box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2), inset 0 1px 0 rgba(255, 255, 255, .4), 0 1px 0 rgba(255, 255, 255, .12); overflow: hidden; isolation: isolate; }
+.is-img .panel::before { content: ""; position: absolute; inset: -24px; z-index: -1; background: var(--img) center / cover; filter: blur(18px) brightness(.5) saturate(1.2); }
 .pv { flex: 1; min-height: 0; overflow: hidden; }
-.pv li { display: flex; align-items: baseline; gap: 8px; height: 36px; padding-top: 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.pv li { display: flex; align-items: baseline; gap: 8px; height: 36px; padding-top: 6px; border-bottom: 1px solid color-mix(in srgb, var(--on) 16%, transparent); white-space: nowrap; }
 .pv li:last-child { border-bottom: 0; }
-.pv .n { flex: none; width: 18px; font-size: 13px; color: var(--text-2); }
+.pv .n { flex: none; width: 18px; font-size: 13px; color: var(--on-2); }
 .pv b { font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
-.pv i { font-style: normal; font-size: 13px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
-.pv .by { flex: none; font-size: 13px; font-weight: 600; color: var(--text-2); }
-.pv .more { font-size: 13px; color: var(--text-2); border: 0; height: 30px; }
-.pv-empty { display: grid; place-items: center; height: 100%; font-size: 15px; color: var(--text-2); }
+.pv i { font-style: normal; font-size: 13px; color: var(--on-2); overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
+.pv .by { flex: none; font-size: 13px; font-weight: 600; color: var(--on-2); }
+.pv .more { font-size: 13px; color: var(--on-2); border: 0; height: 30px; }
+.pv-empty { display: grid; place-items: center; height: 100%; font-size: 15px; color: var(--on-2); }
 .panel .abar { padding-top: 8px; }
 .shade { position: absolute; inset: 0; border-radius: 8px; background: #000; opacity: var(--shade, 0); pointer-events: none; z-index: 4; }
-.pocket.is-back .pocketfront, .pocket.is-back .strip { visibility: hidden; }
+.pocket.is-back .pocketfront, .pocket.is-back .strip, .pocket.is-rear .pocketfront { visibility: hidden; }
 .pocket:not(.is-focus) .panel .abar { pointer-events: none; }
 .ed { font: inherit; color: inherit; letter-spacing: inherit; background: transparent; border: 0; margin: 0; padding: 0 2px; border-radius: 4px; outline: none; min-width: 0; box-shadow: inset 0 -1px 0 color-mix(in srgb, currentColor 45%, transparent); }
 .ed:focus { background: color-mix(in srgb, currentColor 14%, transparent); box-shadow: inset 0 -2px 0 currentColor; }
@@ -168,7 +178,6 @@ ol, ul { padding: 0; list-style: none; }
 .dim { position: absolute; inset: 0; background: var(--dim); }
 .detail-wrap { position: absolute; inset: calc(env(safe-area-inset-top, 0px) + 12px) max(12px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 12px) max(12px, env(safe-area-inset-left, 0px)); display: flex; justify-content: center; pointer-events: none; }
 .detail { pointer-events: auto; width: min(100%, 480px); height: 100%; display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; transform-origin: 0 0; }
-.detail.glass { -webkit-backdrop-filter: blur(40px) saturate(180%); backdrop-filter: blur(40px) saturate(180%); }
 .dcover { position: relative; flex: none; padding: 16px 16px 16px 20px; background: var(--c); color: var(--on); display: grid; gap: 4px; isolation: isolate; }
 .dcover .cv-img { position: absolute; inset: 0; z-index: -1; background: var(--img) center / cover; }
 .dcover.is-img::after { content: ""; position: absolute; inset: 0; z-index: -1; background: rgba(0, 0, 0, .45); }
@@ -326,7 +335,8 @@ ol, ul { padding: 0; list-style: none; }
 
 <div class="amb" id="amb" aria-hidden="true"><div class="amb-l"></div><div class="amb-l"></div></div>
 
-<header class="hdr glass" id="hdr">
+<div class="edge" id="edge" hidden></div>
+<header class="hdr glass lg" id="hdr">
   <button class="logo" data-go="" aria-label="kanqaroo, 피드로"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 11c0-2.2 1.8-4 4-4h12c2.2 0 4 1.8 4 4v5c0 6.1-4.9 11-11 11h-.1C9.4 27 6 23.6 6 19.1V11Z" fill="currentColor"/><path d="M9 13.5c2.2 1.4 4.5 2 7 2s4.8-.6 7-2" stroke="var(--knock)" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="14" cy="21.5" r="2.2" fill="var(--knock)"/><path d="M16.2 21.5V15.8l3.6-1" stroke="var(--knock)" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>kanqaroo</button>
   <button class="hbtn" id="me-btn" data-go="me" aria-label="내 플레이리스트 관리" aria-pressed="false"><svg class="ic" viewBox="0 0 256 256" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg></button>
 </header>
@@ -335,7 +345,7 @@ ol, ul { padding: 0; list-style: none; }
   <div class="stage" id="stage" role="application" aria-label="플레이리스트 피드. 아래로 끌어 넘기고, 누르면 열어요. 방향키와 Enter도 돼요" tabindex="0">
     <div class="file" id="file"></div>
   </div>
-  <div class="foot"><p class="pager glass"><span class="pos" id="pos" aria-live="polite">1 / 11</span><span class="hint" id="hint">아래로 넘기고, 누르면 열어요</span></p></div>
+  <div class="foot"><p class="pager glass lg"><span class="pos" id="pos" aria-live="polite">1 / 11</span><span class="hint" id="hint">아래로 넘기고, 누르면 열어요</span></p></div>
 </main>
 
 <section class="page" id="pg-me" hidden aria-label="내 플레이리스트"></section>
@@ -344,17 +354,17 @@ ol, ul { padding: 0; list-style: none; }
 
 <div class="layer" id="dl" hidden>
   <div class="dim" data-act="close-detail"></div>
-  <div class="detail-wrap"><article class="detail glass" id="detail" role="dialog" aria-modal="true" aria-labelledby="d-title"></article></div>
+  <div class="detail-wrap"><article class="detail glass thick" id="detail" role="dialog" aria-modal="true" aria-labelledby="d-title"></article></div>
 </div>
 <div class="layer" id="bs" hidden>
   <div class="dim" data-act="close-bs"></div>
-  <section class="bsheet glass" id="bsheet" role="dialog" aria-modal="true" aria-labelledby="bs-title"></section>
+  <section class="bsheet glass thick" id="bsheet" role="dialog" aria-modal="true" aria-labelledby="bs-title"></section>
 </div>
 <div class="layer" id="dg" hidden>
   <div class="dim" data-act="close-dg"></div>
-  <div class="dlg-wrap"><section class="dlg glass" id="dlg" role="alertdialog" aria-modal="true" aria-labelledby="dg-title"></section></div>
+  <div class="dlg-wrap"><section class="dlg glass thick" id="dlg" role="alertdialog" aria-modal="true" aria-labelledby="dg-title"></section></div>
 </div>
-<div class="toast glass" id="toast" role="status" hidden></div>
+<div class="toast glass thick" id="toast" role="status" hidden></div>
 
 <script>
 'use strict'
@@ -434,9 +444,13 @@ const PL = [
 ]
 const liked = new Set(store.get('liked', []))
 const byId = (id) => PL.find((p) => p.id === id)
+// 패널 유리: 흰 글자 표지는 살짝 어둡게, 검은 글자 표지는 살짝 밝게 (12색 모두 보조 글자 대비 4.5 이상)
+const glassVars = (on) => (on === '#FFFFFF'
+  ? '--pv:rgba(0,0,0,.18);--on-2:rgba(255,255,255,.78);--oc:rgba(255,255,255,.2)'
+  : '--pv:rgba(255,255,255,.26);--on-2:rgba(17,17,17,.78);--oc:rgba(255,255,255,.42)')
 const coverVars = (p) => p.cover.type === 'image'
-  ? `--c:#333;--on:#FFFFFF;--img:url('${p.cover.v}')`
-  : `--c:${p.cover.v};--on:${onColor(p.cover.v)}`
+  ? `--c:#333;--on:#FFFFFF;--img:url('${p.cover.v}');${glassVars('#FFFFFF')}`
+  : `--c:${p.cover.v};--on:${onColor(p.cover.v)};${glassVars(onColor(p.cover.v))}`
 const isImg = (p) => p.cover.type === 'image'
 
 /* ════════ 소리 (0ddb584 그대로: WebAudio로 즉석 합성) ════════ */
@@ -489,10 +503,10 @@ const C = {
         <button type="button" class="btn m on-cover-primary" data-act="add" data-id="${p.id}">${icon('plus')}곡 넣기</button></div>`
     }
     return `<div class="abar">
-      <button type="button" class="btn secondary m like" data-fa="like" tabindex="-1" aria-pressed="${on}" aria-label="좋아요 ${p.likes}">${icon(on ? 'heart-fill' : 'heart')}<span>${p.likes}</span></button>
-      <button type="button" class="ibtn m" data-fa="share" tabindex="-1" aria-label="공유">${icon('share-network')}</button>
+      <button type="button" class="btn on-cover m like" data-fa="like" tabindex="-1" aria-pressed="${on}" aria-label="좋아요 ${p.likes}">${icon(on ? 'heart-fill' : 'heart')}<span>${p.likes}</span></button>
+      <button type="button" class="ibtn m on-cover" data-fa="share" tabindex="-1" aria-label="공유">${icon('share-network')}</button>
       <span class="grow"></span>
-      <button type="button" class="btn primary m" data-fa="add" tabindex="-1">${icon('plus')}곡 넣기</button></div>`
+      <button type="button" class="btn m on-cover-primary" data-fa="add" tabindex="-1">${icon('plus')}곡 넣기</button></div>`
   },
   face(p, { rows = 5, editable = false } = {}) {
     const extra = p.songs.length - rows
@@ -542,7 +556,7 @@ const N = () => PL.length
 function renderPocket(i) {
   const p = POCKETS[i]
   p.innerHTML = C.face(PL[i], { rows: G.rows }) + '<div class="shade"></div>'
-  p._back = p._focus = undefined
+  p._back = p._focus = p._rear = undefined
 }
 function build() {
   file.innerHTML = ''
@@ -605,6 +619,8 @@ function layout(now) {
     el.style.setProperty('--shade', p.shade.toFixed(3))
     el.style.zIndex = d >= 0 ? 500 - Math.round(d * 10) : 600 + i
     const back = rot < -70
+    const rear = d >= 0.999
+    if (el._rear !== rear) { el._rear = rear; el.classList.toggle('is-rear', rear) }
     if (el._back !== back) { el._back = back; el.classList.toggle('is-back', back) }
     const focus = settled && i === cell
     if (el._focus !== focus) { el._focus = focus; el.classList.toggle('is-focus', focus); el.setAttribute('aria-hidden', String(!focus)) }
@@ -1107,8 +1123,8 @@ function renderMe() {
   pgMe.innerHTML = `<div class="page-in">
       <div class="ph"><h1 class="t-title-l">내 플레이리스트</h1><p class="t-body-s">이 기기에서 만든 플레이리스트예요. 다른 기기에서도 관리하려면 관리 링크를 저장해 두세요.</p></div>
       <div>${C.btn('관리 링크 복사', { v: 'secondary', size: 'm', ic: 'link', act: 'copy-manage' })}</div>
-      <div><p class="sec-title">플레이리스트 ${mine.length}개</p><div class="card glass">${mine.length ? mine.map(C.prow).join('') : '<p class="t-body-s" style="padding:16px;color:var(--text-2)">아직 없어요. 아래에서 새로 만들어 보세요.</p>'}</div></div>
-      <div><p class="sec-title">설정</p><div class="card glass">
+      <div><p class="sec-title">플레이리스트 ${mine.length}개</p><div class="card glass thick">${mine.length ? mine.map(C.prow).join('') : '<p class="t-body-s" style="padding:16px;color:var(--text-2)">아직 없어요. 아래에서 새로 만들어 보세요.</p>'}</div></div>
+      <div><p class="sec-title">설정</p><div class="card glass thick">
         <div class="setrow"><label class="t-body-s" for="me-name">내 이름</label><span class="set-ed"><input class="set-in" id="me-name" value="${esc(myName)}" maxlength="12" autocomplete="off">${icon('pencil-simple-line', 'ic-ed')}</span></div>
         <div class="setrow"><span class="t-body-s">화면</span>${C.seg('theme', [['system', '시스템'], ['light', '라이트'], ['dark', '다크']], themeNow())}</div>
         <div class="setrow"><span class="t-body-s">넘길 때 소리</span>${C.seg('sound', [['on', '켬'], ['off', '끔']], soundOn ? 'on' : 'off')}</div>
@@ -1202,7 +1218,7 @@ function renderEdit(id) {
       <div class="preview-w"><div class="preview">${C.face(p, { rows: 2, editable: true })}</div><p class="t-caption hint-ed">제목과 이름은 파일에서 눌러서 바로 고쳐요</p></div>
       <div class="cp"><p class="sec-title">표지</p>${C.seg('cover-tab', [['color', '색상'], ['photo', '사진'], ['draw', '그림']], edTab, 'full')}${coverBody(p)}</div>
       <div><div class="subbar" style="margin-left:0"><p class="sec-title" style="padding-bottom:0">곡 ${p.songs.length}개</p>${C.btn('곡 추가', { v: 'secondary', size: 's', ic: 'plus', act: 'owner-add' })}</div>
-        <div class="card glass" style="margin-top:8px">${p.songs.length ? `<ol class="songs" id="e-songs">${p.songs.map((s, k) => C.songRow(s, k, 'manage')).join('')}</ol>` : '<p class="t-body-s" style="padding:16px;color:var(--text-2)">곡이 없어요.</p>'}</div></div>
+        <div class="card glass thick" style="margin-top:8px">${p.songs.length ? `<ol class="songs" id="e-songs">${p.songs.map((s, k) => C.songRow(s, k, 'manage')).join('')}</ol>` : '<p class="t-body-s" style="padding:16px;color:var(--text-2)">곡이 없어요.</p>'}</div></div>
       <div class="dz"><p class="sec-title">플레이리스트 삭제</p>${C.btn('이 플레이리스트 삭제', { v: 'danger', size: 'l', ic: 'trash', act: 'del-pl' })}</div>
     </div>`
   pgEdit.scrollTop = y
@@ -1229,10 +1245,10 @@ function renderComp() {
   pgComp.innerHTML = `<div class="page-in">
     <div class="subbar">${C.btn('내 플레이리스트', { v: 'ghost', size: 'm', ic: 'caret-left', attrs: 'data-go="me"' })}${C.seg('theme', [['system', '시스템'], ['light', '라이트'], ['dark', '다크']], themeNow())}</div>
     <div class="ph"><h1 class="t-title-l">컴포넌트</h1><p class="t-body-s">화면은 이 부품들로만 만들어요. 이름은 Figma 컴포넌트 이름과 같아요.</p></div>
-    <section class="comp"><p class="sec-title">색 토큰 (지금 테마)</p><div class="comp-box"><div class="toks">${['bg', 'text', 'text-2', 'text-3', 'fill', 'line', 'primary', 'danger', 'glass'].map((k) => tok(k, `var(--${k})`)).join('')}</div></div></section>
+    <section class="comp"><p class="sec-title">색 토큰 (지금 테마)</p><div class="comp-box"><div class="toks">${['bg', 'text', 'text-2', 'text-3', 'fill', 'line', 'primary', 'danger', 'glass', 'glass-thick'].map((k) => tok(k, `var(--${k})`)).join('')}</div></div></section>
     <section class="comp"><p class="sec-title">글자 (TDS T 스케일)</p><div class="comp-box col">
       <p class="t-title-l">title-l 26/35 · 새벽 운전</p><p class="t-title-m">title-m 20/29 · 새벽 운전</p><p class="t-body">body 17/25.5 · Nights</p><p class="t-body-s">body-s 15/22.5 · Frank Ocean</p><p class="t-caption">caption 13/19.5 · 민지님이 넣음</p></div></section>
-    <section class="comp"><p class="sec-title">Header · HeaderButton</p><div class="comp-box col"><div class="hdr glass static"><span class="logo">${LOGO}kanqaroo</span><span class="hbtn">${icon('user')}</span></div>
+    <section class="comp"><p class="sec-title">Header · HeaderButton</p><div class="comp-box col"><div class="hdr glass lg static"><span class="logo">${LOGO}kanqaroo</span><span class="hbtn">${icon('user')}</span></div>
       <div style="display:flex;gap:12px"><span class="hbtn">${icon('user')}</span><span class="hbtn" style="background:var(--primary);color:var(--on-primary)">${icon('user')}</span></div></div></section>
     <section class="comp"><p class="sec-title">Button (primary · secondary · ghost · danger / 56 · 48 · 38 · 32)</p><div class="comp-box col">
       ${C.btn('새 플레이리스트', { v: 'primary', size: 'xl', ic: 'plus' })}
@@ -1241,12 +1257,12 @@ function renderComp() {
       <div style="display:flex;flex-wrap:wrap;gap:8px">${['primary', 'secondary', 'ghost', 'danger'].map((v) => C.btn('완료', { v, size: 's' })).join('')}${C.btn('비활성', { v: 'primary', size: 's', attrs: 'disabled' })}</div></div></section>
     <section class="comp"><p class="sec-title">IconButton (38 · 32)</p><div class="comp-box">${C.ibtn('share-network', '공유')}${C.ibtn('x', '닫기', { v: 'ghost' })}${C.ibtn('pencil-simple', '편집', { size: 's' })}${C.ibtn('trash', '삭제', { size: 's', v: 'ghost danger' })}</div></section>
     <section class="comp"><p class="sec-title">File (색 · 사진 · 편집 중)</p><div class="comp-box"><div class="face-static">${C.face(sample, { rows: 5 })}</div><div class="face-static">${C.face(imgSample, { rows: 5 })}</div><div class="face-static" style="height:280px">${C.face(PL.find((x) => x.mine) || sample, { rows: 2, editable: 'demo' })}</div></div></section>
-    <section class="comp"><p class="sec-title">Pager · Ambient(멈춘 파일의 색이 배경으로 번짐)</p><div class="comp-box"><p class="pager glass"><span class="pos">3 / 11</span><span class="hint">아래로 넘기고, 누르면 열어요</span></p></div></section>
+    <section class="comp"><p class="sec-title">Pager · Ambient(멈춘 파일의 색이 배경으로 번짐)</p><div class="comp-box"><p class="pager glass lg"><span class="pos">3 / 11</span><span class="hint">아래로 넘기고, 누르면 열어요</span></p></div></section>
     <section class="comp"><p class="sec-title">DetailSheet 머리 + ActionBar</p><div class="comp-box col" style="padding:0;overflow:hidden"><div class="dcover" style="${coverVars(sample)}"><div class="dtop"><span class="t-body-s">${esc(sample.owner)}님의 플레이리스트</span>${C.ibtn('x', '닫기', { v: 'on-cover' })}</div><h2 class="t-title-l">${esc(sample.title)}</h2><p class="t-caption dmeta">${sample.songs.length}곡 · 좋아요 ${sample.likes}</p>${C.actionBar(sample, 'cover')}</div></div></section>
     <section class="comp"><p class="sec-title">SongRow (기본 · 손님이 넣음 · 관리용)</p><div class="comp-box col" style="padding:8px"><ol class="songs">${C.songRow(sample.songs[0], 0, 'show')}${C.songRow(sample.songs[1], 1, 'show')}${C.songRow(sample.songs[2], 2, 'manage')}</ol></div></section>
     <section class="comp"><p class="sec-title">TextField (기본 · 오류)</p><div class="comp-box col">${C.tf('c1', '제목', { ph: '예: Kyoto' })}<div class="tf err"><label>아티스트</label><input value="" placeholder="예: Phoebe Bridgers" aria-label="오류 예시"><p class="msg">아티스트를 적어 주세요</p></div></div></section>
     <section class="comp"><p class="sec-title">ListenOption</p><div class="comp-box col"><div class="lopts">${[['youtube-logo', 'YouTube에서 듣기'], ['spotify-logo', 'Spotify에서 듣기'], ['apple-logo', 'Apple Music에서 듣기']].map(([i, l]) => `<span class="lopt">${icon(i, 'ic-24')}${l}${icon('caret-right')}</span>`).join('')}</div></div></section>
-    <section class="comp"><p class="sec-title">PlaylistRow · Segmented</p><div class="comp-box col"><div class="card glass">${C.prow(PL[9])}${C.prow(PL[4])}</div>${C.seg('demo', [['a', '시스템'], ['b', '라이트'], ['c', '다크']], 'a')}</div></section>
+    <section class="comp"><p class="sec-title">PlaylistRow · Segmented</p><div class="comp-box col"><div class="card glass thick">${C.prow(PL[9])}${C.prow(PL[4])}</div>${C.seg('demo', [['a', '시스템'], ['b', '라이트'], ['c', '다크']], 'a')}</div></section>
     <section class="comp"><p class="sec-title">CoverPicker (색상 · 사진 · 그림)</p><div class="comp-box col">${C.seg('demo2', [['color', '색상'], ['photo', '사진'], ['draw', '그림']], 'color', 'full')}
       <div class="swatches">${COLORS.map((c, k) => `<span class="sw" style="--c:${c};--on:${onColor(c)}" ${k === 0 ? 'aria-pressed="true"' : ''}>${k === 0 ? icon('check') : ''}</span>`).join('')}</div>
       <span class="upl"><span class="upl-ph">${icon('image', 'ic-24')}</span><span class="upl-t"><b class="t-body-s" style="font-weight:600">사진 고르기</b><span class="t-caption">파일 전체가 이 사진으로 덮여요</span></span></span>
@@ -1256,8 +1272,8 @@ function renderComp() {
       <div class="prog"><i style="--p:62%"></i></div>
       <ol class="cands" style="margin:0">${C.cand({ t: 'Kyoto', a: 'Phoebe Bridgers' }, 0)}${C.cand({ t: 'Motion Sickness', a: '' }, 1)}</ol></div></section>
     <section class="comp"><p class="sec-title">공유 링크</p><div class="comp-box col"><div class="tf"><label>링크</label><input value="${SHARE_BASE}#p1" readonly aria-label="공유 링크 예시"></div><div class="row2">${C.btn('링크 복사', { v: 'primary', size: 'l', ic: 'copy' })}<span class="btn secondary l">${icon('x-logo')}X에 올리기</span></div></div></section>
-    <section class="comp"><p class="sec-title">Toast · Dialog</p><div class="comp-box col"><span class="glass" style="justify-self:start;padding:12px 20px;border-radius:999px;font-size:15px;font-weight:600">‘Kyoto’를 넣었어요</span>
-      <div class="dlg glass"><h2 class="t-title-m">플레이리스트를 삭제할까요?</h2><p class="t-body-s">‘퇴근길’과 곡 2개가 사라져요. 되돌릴 수 없어요.</p><div class="row2">${C.btn('취소', { v: 'secondary', size: 'l' })}${C.btn('삭제', { v: 'danger', size: 'l' })}</div></div></div></section>
+    <section class="comp"><p class="sec-title">Toast · Dialog</p><div class="comp-box col"><span class="glass thick" style="justify-self:start;padding:12px 20px;border-radius:999px;font-size:15px;font-weight:600">‘Kyoto’를 넣었어요</span>
+      <div class="dlg glass thick"><h2 class="t-title-m">플레이리스트를 삭제할까요?</h2><p class="t-body-s">‘퇴근길’과 곡 2개가 사라져요. 되돌릴 수 없어요.</p><div class="row2">${C.btn('취소', { v: 'secondary', size: 'l' })}${C.btn('삭제', { v: 'danger', size: 'l' })}</div></div></div></section>
   </div>`
   pgComp.querySelectorAll('.comp-box button, .comp-box input').forEach((b) => { if (!b.dataset.seg) b.tabIndex = -1 })
   const cs = getComputedStyle(document.documentElement)
@@ -1276,6 +1292,7 @@ function route() {
   pgMe.hidden = h !== 'me'
   pgEdit.hidden = !h.startsWith('edit-')
   pgComp.hidden = h !== 'components'
+  $('#edge').hidden = h === ''
   $('#me-btn').setAttribute('aria-pressed', String(h !== ''))
   if (h === 'me') renderMe()
   else if (h.startsWith('edit-')) renderEdit(h.slice(5))
