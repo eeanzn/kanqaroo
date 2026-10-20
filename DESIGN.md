@@ -87,7 +87,8 @@
 ## 화면 (컴포넌트 조합)
 
 - **피드**: `Ambient` + `Header` + 아코디언 무대(`File` 여러 장) + `Pager`.
-  - 브라우저 위·아래 막대(iOS Safari 상태 막대·주소 막대, Android theme-color)도 `Ambient`가 화면 가장자리에 보이는 색(덮개·딤·시트까지 겹친 색)을 따라가요. 관리 페이지에선 `bg`.
+  - iOS Safari 상태 막대·주소 막대 뒤로 `Ambient`가 그대로 비쳐요. 화면 위·아래 끝 `10px` 안에는 fixed 요소를 두지 않아요(닿으면 Safari가 막대를 한 색으로 칠함). 문서는 화면보다 위아래로 `240px`씩 길고 가운데에 고정돼 있어요.
+  - 상세·시트·다이얼로그가 열리면 막대는 한 색이 되는데, 그때 색은 화면 가장자리에 보이는 색(덮개·딤·시트까지 겹친 색)에 맞춰요. Android theme-color도 같은 색. 관리 페이지에선 `bg`.
 - **상세**: 피드 위에 `DetailSheet`. 머리에 제목·주인·메타·`ActionBar`, 아래 `SongRow` 목록.
 - **곡 넣기**: `BottomSheet` + `ScanButton` + 또는 직접 적기: `TextField` 3개(제목, 아티스트, 내 이름) + `Button` primary 56.
 - **곡 넣기(스크린샷)**: `BottomSheet` + 진행 막대 → `CandidateRow` 목록 + `TextField`(내 이름) + `Button` primary 56 "N곡 넣기".

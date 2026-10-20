@@ -33,6 +33,8 @@
   --font: 'Pretendard', system-ui, -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
   --hdr-top: calc(env(safe-area-inset-top, 0px) + 8px);
   --stage-top: calc(var(--hdr-top) + 56px + 12px);
+  --bleed: 240px; /* 문서를 화면보다 위아래로 이만큼 길게: Safari 막대 뒤로 비칠 배경이 놓일 자리 */
+  --edge: 10px; /* fixed 요소는 화면 위·아래 끝에서 이만큼 떨어뜨림 (닿으면 Safari가 막대를 한 색으로 칠함) */
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
@@ -58,8 +60,8 @@
 @font-face { font-family: 'Pretendard'; font-weight: 800; font-display: swap; src: url(data:font/woff2;base64,__FONT_800__) format('woff2'); }
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
-html { height: 100%; transition: --tint .7s ease; }
-body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); transition: background-color .7s ease; color: var(--text); font-family: var(--font); font-size: 17px; line-height: 1.5; word-break: keep-all; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
+html { overflow: hidden; transition: --tint .7s ease; }
+body { position: relative; height: calc(100vh + 2 * var(--bleed)); margin: 0; background: var(--bg); transition: background-color .7s ease; color: var(--text); font-family: var(--font); font-size: 17px; line-height: 1.5; word-break: keep-all; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
 button, input { font: inherit; color: inherit; }
 canvas { display: block; }
 button { -webkit-tap-highlight-color: transparent; }
@@ -84,15 +86,16 @@ ol, ul { padding: 0; list-style: none; }
 .lg { box-shadow: var(--glass-shade), inset 0 0 0 0.5px var(--rim-edge); }
 .lg::before { content: ""; position: absolute; inset: 0; border-radius: inherit; padding: 0.75px; pointer-events: none; background: linear-gradient(140deg, var(--rim-hi), var(--rim-mid) 30%, transparent 55%, var(--rim-mid) 78%, var(--rim-lo)); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
 
-/* ── Ambient: 멈춘 파일의 색·그림을 흐리게 깐 배경. 0.7초에 걸쳐 바뀜 ── */
-.amb { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+/* ── Ambient: 멈춘 파일의 색·그림을 흐리게 깐 배경. 0.7초에 걸쳐 바뀜 ──
+   iOS Safari 막대 뒤로 비치도록 fixed가 아니라 문서 안에, 화면 위아래 밖 140px까지 깔아요 */
+.amb { position: absolute; left: 0; right: 0; top: calc(var(--bleed) - 140px); bottom: calc(var(--bleed) - 140px); z-index: 0; overflow: hidden; pointer-events: none; }
 .amb-l { position: absolute; inset: -15%; opacity: 0; transition: opacity .7s ease; }
 .amb-l.on { opacity: 1; }
 .amb-l > * { position: absolute; inset: 0; width: 100%; height: 100%; animation: drift 28s ease-in-out infinite alternate; }
 .amb-img { background: var(--img) center / cover; filter: blur(56px) saturate(1.4); }
 .amb-l canvas { filter: blur(28px) saturate(1.25); }
 .amb::after { content: ""; position: absolute; inset: 0; background: var(--veil); }
-/* Safari 26은 theme-color 대신 화면 위·아래 가장자리 색을 샘플링해 상태 막대·주소 막대를 칠해요. 안 보이는(opacity 0) 띠로 그 색을 알려 줘요 */
+/* 레이어(화면 전체 fixed)가 열리면 Safari가 막대를 한 색으로 칠해요. 그때만 안 보이는(opacity 0) 띠로 그 색을 알려 줘요 */
 .chrome-tint { position: fixed; z-index: 69; left: 0; right: 0; height: 12px; opacity: 0; pointer-events: none; transition: background-color .7s ease; }
 .chrome-tint.top { top: 0; }
 .chrome-tint.bot { bottom: 0; }
@@ -133,15 +136,15 @@ ol, ul { padding: 0; list-style: none; }
 .like[aria-pressed="true"] .ic { color: inherit; }
 
 /* ── 무대 (아코디언) ── */
-.stage { position: fixed; inset: 0; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab;
-  -webkit-mask-image: linear-gradient(to bottom, transparent env(safe-area-inset-top, 0px), #000 calc(var(--hdr-top) + 48px)); mask-image: linear-gradient(to bottom, transparent env(safe-area-inset-top, 0px), #000 calc(var(--hdr-top) + 48px)); }
+.stage { position: fixed; inset: var(--edge) 0; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab;
+  -webkit-mask-image: linear-gradient(to bottom, transparent calc(env(safe-area-inset-top, 0px) - var(--edge)), #000 calc(var(--hdr-top) + 48px - var(--edge)), #000 calc(100% - 12px), transparent); mask-image: linear-gradient(to bottom, transparent calc(env(safe-area-inset-top, 0px) - var(--edge)), #000 calc(var(--hdr-top) + 48px - var(--edge)), #000 calc(100% - 12px), transparent); }
 /* 파일 크기·위치를 재는 기준 칸: 헤더 아래 ~ 아래 여백 위 */
 .stage-box { position: fixed; left: 0; right: 0; top: var(--stage-top); bottom: calc(env(safe-area-inset-bottom, 0px) + 44px); visibility: hidden; pointer-events: none; }
 .stage.dragging { cursor: grabbing; }
 .stage:focus-visible { outline: none; }
 .stage:focus-visible .pocket.is-focus .face { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text); }
 .file { position: absolute; inset: 0; perspective: 1500px; perspective-origin: 50% var(--po, 0px); }
-.foot { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 6px); display: flex; justify-content: center; pointer-events: none; }
+.foot { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + var(--edge)); display: flex; justify-content: center; pointer-events: none; }
 .pager { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border-radius: 999px; font-size: 13px; line-height: 19.5px; }
 .pager .pos { font-weight: 600; }
 .pager .hint { color: var(--text-2); }
@@ -781,9 +784,10 @@ function setAmbient(p) {
   prev.classList.remove('on')
 }
 
-/* ════════ Safari 위·아래 막대 색: 멈춘 파일의 배경을 따라가요 ════════
-   Safari 26(iOS)은 theme-color를 무시하고 body 배경이나 가장자리에 붙은 fixed 요소 색으로 막대를 칠해요.
-   배경 그림에서 화면 위·아래 가장자리에 보이는 색을 뽑고, 덮개(veil)·딤·시트까지 겹친 색을 띠·body·theme-color에 넣어요 */
+/* ════════ Safari 위·아래 막대 ════════
+   iOS 26 Safari는 화면 끝에 fixed 요소가 닿으면 막대를 그 색 한 가지로 칠하고, 아니면 막대 뒤로 문서를 비쳐 보여 줘요.
+   그래서 문서를 화면보다 위아래로 --bleed만큼 길게 만들어 가운데에 세워 두고(손으로는 안 움직임), 배경을 그 밖까지 깔아요.
+   레이어가 열렸을 때·Android(theme-color)·body 배경용으로는 화면 위·아래 가장자리에 보이는 색을 뽑아 둬요 */
 const ctTop = $('#ct-top'), ctBot = $('#ct-bot')
 const metaTheme = document.querySelector('meta[name="theme-color"]') || document.head.appendChild(Object.assign(document.createElement('meta'), { name: 'theme-color' }))
 let ambSrc = null, ambEdge = null
@@ -798,23 +802,28 @@ function saturate([r, g, b], s) { // CSS saturate()와 같은 행렬
 }
 function sampleEdges(src, cover) {
   ambSrc = { src, cover }
-  const W = 24, H = clamp(Math.round(W * innerHeight / Math.max(1, innerWidth)), 12, 64)
+  const r = amb.firstElementChild.getBoundingClientRect()
+  if (!r.width || !r.height) return
+  const W = 24, H = clamp(Math.round(W * r.height / r.width), 12, 96)
   const t = document.createElement('canvas'); t.width = W; t.height = H
   const g = t.getContext('2d', { willReadFrequently: true })
   if (cover) drawCover(g, src, W, H); else g.drawImage(src, 0, 0, W, H) // 그림은 cover, 색 캔버스는 늘려서 깔려요
-  // 배경 층은 화면보다 크게(inset -15%, drift 확대) 깔려서 화면 가장자리는 원본의 17%·83% 줄쯤
-  const band = (cy) => {
-    const y0 = Math.floor(H * (cy - 0.07)), y1 = Math.ceil(H * (cy + 0.07)), x0 = Math.floor(W * 0.17), x1 = Math.ceil(W * 0.83)
+  // 배경 층 안에서 화면 가장자리가 놓인 자리. drift가 가운데 기준으로 1.08~1.28배 키우니 평균 1.18배로 봐요
+  const fy = (y) => clamp(0.5 + ((y - r.top) / r.height - 0.5) / 1.18, 0.03, 0.97)
+  const fx = (x) => clamp(0.5 + ((x - r.left) / r.width - 0.5) / 1.18, 0, 1)
+  const band = (y) => {
+    const cy = fy(y), y0 = Math.floor(H * (cy - 0.03)), y1 = Math.ceil(H * (cy + 0.03)), x0 = Math.floor(W * fx(0)), x1 = Math.ceil(W * fx(innerWidth))
     const d = g.getImageData(x0, y0, x1 - x0, y1 - y0).data, n = d.length / 4, c = [0, 0, 0]
     for (let i = 0; i < d.length; i += 4) { c[0] += d[i]; c[1] += d[i + 1]; c[2] += d[i + 2] }
     return saturate(c.map((v) => v / n), cover ? 1.4 : 1.25)
   }
-  try { ambEdge = { top: band(0.17), bot: band(0.83) } } catch { return } // 읽을 수 없는 그림이면 이전 색 그대로
+  try { ambEdge = { top: band(0), bot: band(innerHeight) } } catch { return } // 읽을 수 없는 그림이면 이전 색 그대로
   paintChrome()
 }
 function paintChrome() {
   const home = route.cur === '' && ambEdge
-  ctTop.hidden = ctBot.hidden = !home
+  // 피드에선 막대 뒤로 배경이 그대로 비쳐요. 띠는 레이어가 열려 Safari가 막대를 한 색으로 칠할 때만 써요
+  ctTop.hidden = ctBot.hidden = !home || (dl.hidden && bs.hidden && dg.hidden)
   const cs = getComputedStyle(document.documentElement), tok = (n) => rgbaOf(cs.getPropertyValue(n))
   if (!home) { document.body.style.backgroundColor = ''; metaTheme.content = cs.getPropertyValue('--bg').trim(); return }
   const veil = tok('--veil'), dim = tok('--dim')
@@ -1504,6 +1513,13 @@ document.addEventListener('keydown', (e) => {
 window.addEventListener('hashchange', route)
 window.addEventListener('resize', () => { measure(); layout(performance.now()) })
 
+{ const BLEED = 240 // CSS --bleed와 같게
+  const typing = () => document.activeElement?.matches('input, textarea, [contenteditable]')
+  const pin = () => { if (!typing() && Math.abs(scrollY - BLEED) > 0.5) scrollTo(0, BLEED) }
+  try { history.scrollRestoration = 'manual' } catch { /* 지원 안 함 */ }
+  pin(); addEventListener('load', pin); addEventListener('resize', pin); addEventListener('scroll', pin, { passive: true })
+  document.addEventListener('focusout', () => setTimeout(pin, 300)) // 키보드가 내려간 뒤 제자리로
+  window.visualViewport?.addEventListener('resize', () => setTimeout(pin, 100)) }
 { const mo = new MutationObserver(() => paintChrome())
   for (const el of [dl, bs, dg, pgMe, pgEdit, pgComp]) mo.observe(el, { attributes: true, attributeFilter: ['hidden'] })
   mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
