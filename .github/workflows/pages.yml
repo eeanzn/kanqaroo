@@ -3,10 +3,9 @@ name: Demo (GitHub Pages)
 
 on:
   push:
-    branches: [claude/focused-hypatia-t276sg, main]
+    branches: [main]
     paths:
       - 'prototype/**'
-      - 'src/assets/fonts/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 

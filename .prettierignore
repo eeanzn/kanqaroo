@@ -1,12 +1,12 @@
-.next
 node_modules
-drizzle/meta
-package-lock.json
+.next
+archive/stage2-app/drizzle/meta
+archive/stage2-app/package-lock.json
+prototype/dist
 
 # 프로토타입 원본은 게시본과 바이트 단위로 같게 유지
-prototype/src.html
-prototype/folder.html
 prototype/accordion.html
+archive/prototype-v2
 
 # 외부에서 가져온 에이전트 스킬 (impeccable, 원본 그대로 유지)
 .claude/skills/impeccable

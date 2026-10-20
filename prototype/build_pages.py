@@ -12,7 +12,7 @@ dist = here / 'dist'
 pages = dist / 'pages'
 built = dist / 'kanqaroo-accordion.html'
 
-subprocess.run([sys.executable, str(here / 'build.py'), str(here / 'accordion.html'), str(here.parent / 'src/assets/fonts'), str(built)], check=True)
+subprocess.run([sys.executable, str(here / 'build.py'), str(here / 'accordion.html'), str(here / 'fonts'), str(built)], check=True)
 if not all((dist / 'tess' / f).exists() for f in ['kor.js', 'eng.js']):
     subprocess.run([sys.executable, str(here / 'build_tess.py')], check=True)
 

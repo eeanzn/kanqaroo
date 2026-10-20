@@ -280,6 +280,7 @@ ol, ul { padding: 0; list-style: none; }
 .prow > .ic { color: var(--text-3); }
 .setrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 0 8px; }
 .setrow + .setrow { border-top: 1px solid var(--line); }
+.set-note { display: block; font-size: 13px; line-height: 19.5px; color: var(--text-2); }
 .setrow.link { width: 100%; border: 0; border-radius: 0; background: none; color: var(--text); font: inherit; cursor: pointer; text-align: left; }
 .setrow.link .ic { color: var(--text-3); }
 .set-ed { display: inline-flex; align-items: center; gap: 2px; color: var(--text-2); }
@@ -391,6 +392,7 @@ const clamp = (v, a, b) => Math.max(a, Math.min(b, v))
 const ease = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2)
 const backOut = (t) => { const c = 1.5; return 1 + (c + 1) * (t - 1) ** 3 + c * (t - 1) ** 2 }
 const store = { get(k, d) { try { const v = localStorage.getItem('kq.' + k); return v == null ? d : JSON.parse(v) } catch { return d } }, set(k, v) { try { localStorage.setItem('kq.' + k, JSON.stringify(v)) } catch { /* 저장 안 됨 */ } } }
+{ const th = store.get('theme', 'system'); if (th === 'light' || th === 'dark') document.documentElement.dataset.theme = th }
 function lum(hex) { const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((x) => (x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2] }
 const onColor = (hex) => { const L = lum(hex); return (L + 0.05) / 0.05 > 1.05 / (L + 0.05) ? '#111111' : '#FFFFFF' }
 function toHsl(hex) {
@@ -467,6 +469,34 @@ const PL = [
   { id: 'p11', title: '퇴근길', owner: myName, mine: true, cover: { type: 'color', v: '#E9E4D8' }, likes: 6, songs: [S('Sunday Morning', 'Maroon 5'), S('밤양갱', '비비')] },
 ]
 const liked = new Set(store.get('liked', []))
+
+/* ════════ 이 기기에 저장 (서버 없음: 플레이리스트·곡·순서·표지·제목·좋아요가 이 브라우저에만 남음) ════════ */
+const SAVE_V = 1
+const imgToken = (v) => (v === IMG.stripes.v ? 'img:stripes' : v === IMG.dots.v ? 'img:dots' : v)
+const imgFrom = (v) => (v === 'img:stripes' ? IMG.stripes.v : v === 'img:dots' ? IMG.dots.v : v)
+{
+  const saved = store.get('pl', null)
+  if (saved && saved.v === SAVE_V && Array.isArray(saved.pl) && saved.pl.length) {
+    PL.splice(0, PL.length, ...saved.pl.map((pl) => ({ ...pl, cover: { ...pl.cover, v: imgFrom(pl.cover.v) } })))
+    SEQ = Math.max(SEQ, saved.seq || 1)
+  }
+}
+let saveT = 0, saveWarned = false, saveOff = false
+function persist() {
+  if (saveOff) return
+  clearTimeout(saveT)
+  saveT = setTimeout(() => {
+    try { localStorage.setItem('kq.pl', JSON.stringify({ v: SAVE_V, seq: SEQ, pl: PL.map((pl) => ({ ...pl, cover: { ...pl.cover, v: imgToken(pl.cover.v) } })) })) }
+    catch { if (!saveWarned) { saveWarned = true; toast('이 기기 저장 공간이 부족해서 마지막 변경은 저장하지 못했어요') } }
+  }, 250)
+}
+function resetDemo() {
+  saveOff = true
+  clearTimeout(saveT)
+  try { localStorage.removeItem('kq.pl'); localStorage.removeItem('kq.liked') } catch { /* 저장 안 됨 */ }
+  try { history.replaceState(null, '', location.pathname + location.search) } catch { /* 주소 정리 안 됨 */ }
+  location.reload()
+}
 const byId = (id) => PL.find((p) => p.id === id)
 // 패널 유리: 흰 글자 표지는 살짝 어둡게, 검은 글자 표지는 살짝 밝게 (12색 모두 보조 글자 대비 4.5 이상)
 const glassVars = (on) => (on === '#FFFFFF'
@@ -588,7 +618,9 @@ function build() {
   POCKETS = PL.map((pl, i) => { const el = document.createElement('div'); el.className = 'pocket'; el.dataset.i = i; file.append(el); return el })
   POCKETS.forEach((_, i) => renderPocket(i))
   bumps = new Array(N()).fill(0)
+  if (booted) persist()
 }
+let booted = false
 
 let f = 0, vel = 0, target = 0, dragging = false, raf = 0, last = 0, lastCell = 0, flips = 0
 let introStart = 0, introDone = RM, bumps = []
@@ -805,7 +837,7 @@ stage.addEventListener('keydown', (e) => {
   else if (e.key === 'Enter' && e.target === stage) { e.preventDefault(); if (Math.abs(f - target) < 0.08) openDetail(PL[Math.round(target)].id) }
 })
 const idxOf = (id) => PL.findIndex((p) => p.id === id)
-function refreshFile(id) { const i = idxOf(id); if (i >= 0) renderPocket(i); layout(performance.now()); kick() }
+function refreshFile(id) { const i = idxOf(id); if (i >= 0) renderPocket(i); layout(performance.now()); kick(); persist() }
 
 /* ════════ 상세 (열린 파일) ════════ */
 const dl = $('#dl'), detail = $('#detail')
@@ -913,7 +945,7 @@ function share(id) {
   const p = byId(id), link = `${SHARE_BASE}#${id}`
   const text = `${p.owner}님의 플레이리스트 ‘${p.title}’`
   openBS(`<div class="handle"></div>
-    <div class="bs-head"><h2 class="t-title-m" id="bs-title">‘${esc(p.title)}’ 공유</h2><p class="t-body-s">링크를 열면 이 플레이리스트가 바로 열려요.</p></div>
+    <div class="bs-head"><h2 class="t-title-m" id="bs-title">‘${esc(p.title)}’ 공유</h2><p class="t-body-s">링크를 열면 이 플레이리스트가 바로 열려요. 데모라서 내가 바꾼 곡과 순서는 이 기기에만 있어요.</p></div>
     <div class="tf"><label for="sh-link">링크</label><input id="sh-link" value="${esc(link)}" readonly data-text="${esc(text)}"></div>
     ${canNativeShare ? C.btn('다른 앱으로 공유', { v: 'primary', size: 'l', ic: 'share-network', act: 'native-share' }) : ''}
     <div class="row2">${C.btn('링크 복사', { v: canNativeShare ? 'secondary' : 'primary', size: 'l', ic: 'copy', act: 'copy-link' })}<a class="btn secondary l" href="https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(link)}" target="_blank" rel="noopener">${icon('x-logo')}X에 올리기</a></div>`, null, canNativeShare ? '[data-act="native-share"]' : '[data-act="copy-link"]')
@@ -1160,6 +1192,7 @@ function setMyName(v) {
   store.set('name', v)
   PL.forEach((pl, i) => { if (pl.mine) { pl.owner = v; renderPocket(i) } })
   layout(performance.now())
+  persist()
   return true
 }
 
@@ -1176,6 +1209,7 @@ function renderMe() {
         <div class="setrow"><label class="t-body-s" for="me-name">내 이름</label><span class="set-ed"><input class="set-in" id="me-name" value="${esc(myName)}" maxlength="12" autocomplete="off">${icon('pencil-simple-line', 'ic-ed')}</span></div>
         <div class="setrow"><span class="t-body-s">화면</span>${C.seg('theme', [['system', '시스템'], ['light', '라이트'], ['dark', '다크']], themeNow())}</div>
         <div class="setrow"><span class="t-body-s">넘길 때 소리</span>${C.seg('sound', [['on', '켬'], ['off', '끔']], soundOn ? 'on' : 'off')}</div>
+        <div class="setrow"><span class="t-body-s">데모 데이터<span class="set-note">넣은 곡·순서·표지는 이 기기에만 저장돼요</span></span>${C.btn('처음 상태로', { v: 'secondary', size: 's', act: 'reset-demo' })}</div>
         <button type="button" class="setrow link" data-act="go-comp"><span class="t-body-s">컴포넌트 시트</span>${icon('caret-right')}</button>
       </div></div>
     </div>
@@ -1363,7 +1397,7 @@ document.addEventListener('click', (e) => {
   const sg = e.target.closest('[data-seg]')
   if (sg) {
     const v = sg.dataset.v
-    if (sg.dataset.seg === 'theme') { if (v === 'system') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = v; if (!pgComp.hidden) renderComp() }
+    if (sg.dataset.seg === 'theme') { if (v === 'system') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = v; store.set('theme', v); if (!pgComp.hidden) renderComp() }
     if (sg.dataset.seg === 'sound') { soundOn = v === 'on'; store.set('sound', soundOn); ac(); if (soundOn) flick() }
     if (sg.dataset.seg === 'cover-tab') { edTab = v; renderEdit(pgEdit.dataset.id); return }
     if (sg.dataset.seg === 'pen-size') { pad.size = Number(v); pad.erase = false; markPad() }
@@ -1395,6 +1429,7 @@ document.addEventListener('click', (e) => {
   else if (act === 'native-share') { const l = $('#sh-link'); navigator.share({ title: 'Kanqaroo', text: l.dataset.text, url: l.value }).then(() => closeBS(), () => {}) }
   else if (act === 'ocr-manual') { const [id, o] = (bsheet.dataset.ocr || '').split('|'); if (id) openAdd(id, { owner: o === '1' }) }
   else if (act === 'go-comp') go('components')
+  else if (act === 'reset-demo') confirmDlg({ title: '처음 상태로 되돌릴까요?', body: '이 기기에 저장된 플레이리스트·곡·순서·좋아요가 예시 데이터로 돌아가요. 이름과 화면 설정은 그대로예요.', ok: '되돌리기', onOk: resetDemo })
 })
 document.addEventListener('submit', (e) => { if (e.target.id === 'sf') { e.preventDefault(); bsSubmit?.() } })
 document.addEventListener('paste', (e) => {
@@ -1422,5 +1457,6 @@ introStart = performance.now()
 layout(introStart)
 setAmbient(PL[0])
 kick()
+booted = true
 if (location.hash) route()
 </script>
