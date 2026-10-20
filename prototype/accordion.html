@@ -54,7 +54,6 @@
 [hidden] { display: none !important; }
 html { height: 100%; }
 body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 17px; line-height: 1.5; word-break: keep-all; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
-body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 45; background: var(--bg); }
 button, input { font: inherit; color: inherit; }
 canvas { display: block; }
 button { -webkit-tap-highlight-color: transparent; }
@@ -123,11 +122,14 @@ ol, ul { padding: 0; list-style: none; }
 .like[aria-pressed="true"] .ic { color: inherit; }
 
 /* ── 무대 (아코디언) ── */
-.stage { position: fixed; left: 0; right: 0; top: var(--stage-top); bottom: calc(env(safe-area-inset-bottom, 0px) + 44px); overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+.stage { position: fixed; inset: 0; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab;
+  -webkit-mask-image: linear-gradient(to bottom, transparent env(safe-area-inset-top, 0px), #000 calc(var(--hdr-top) + 48px)); mask-image: linear-gradient(to bottom, transparent env(safe-area-inset-top, 0px), #000 calc(var(--hdr-top) + 48px)); }
+/* 파일 크기·위치를 재는 기준 칸: 헤더 아래 ~ 아래 여백 위 */
+.stage-box { position: fixed; left: 0; right: 0; top: var(--stage-top); bottom: calc(env(safe-area-inset-bottom, 0px) + 44px); visibility: hidden; pointer-events: none; }
 .stage.dragging { cursor: grabbing; }
 .stage:focus-visible { outline: none; }
 .stage:focus-visible .pocket.is-focus .face { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text); }
-.file { position: absolute; inset: 0; perspective: 1500px; perspective-origin: 50% 0%; }
+.file { position: absolute; inset: 0; perspective: 1500px; perspective-origin: 50% var(--po, 0px); }
 .foot { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 6px); display: flex; justify-content: center; pointer-events: none; }
 .pager { display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 14px; border-radius: 999px; font-size: 13px; line-height: 19.5px; }
 .pager .pos { font-weight: 600; }
@@ -345,6 +347,7 @@ ol, ul { padding: 0; list-style: none; }
   <div class="stage" id="stage" role="application" aria-label="플레이리스트 피드. 아래로 끌어 넘기고, 누르면 열어요. 방향키와 Enter도 돼요" tabindex="0">
     <div class="file" id="file"></div>
   </div>
+  <div class="stage-box" id="stage-box" aria-hidden="true"></div>
   <div class="foot"><p class="pager glass lg"><span class="pos" id="pos" aria-live="polite">1 / 11</span><span class="hint" id="hint">아래로 넘기고, 누르면 열어요</span></p></div>
 </main>
 
@@ -570,33 +573,49 @@ let introStart = 0, introDone = RM, bumps = []
 let openId = null
 const STRIP = 44, VIS = 4
 let G = { sh: 640, W: 340, H: 460, step: 70, rows: 5 }
+// 지나간 파일: 경첩에서 90°를 살짝 넘겨 앞 파일 뒤로 접어 넣고, 아랫변만 앞 파일 아래로 D px 보이게 (아랫변이 z=0에 오도록 뒤로 밀어서 폭이 파일 폭 그대로)
+function passPoses(H, B) {
+  const out = []
+  for (let k = 0; k < 6; k++) {
+    const D = B * Math.min(0.9, 0.22 + k * 0.13), a = Math.asin(Math.min(0.5, D / H))
+    out.push({ rot: -(90 + (a * 180) / Math.PI), tz: -H * Math.cos(a) })
+  }
+  return out
+}
 function measure() {
-  const r = stage.getBoundingClientRect()
+  const r = stage.getBoundingClientRect(), box = $('#stage-box').getBoundingClientRect()
+  const top = box.top - r.top, ch = box.height
   const W = Math.min(r.width - 40, 420)
-  const hinge = Math.max(12, r.height * 0.03)
-  const H = Math.max(300, Math.min(r.height - hinge - STRIP * VIS - 4, W * 1.5))
+  const hinge = Math.max(12, ch * 0.03)
+  const H = Math.max(300, Math.min(ch - hinge - STRIP * VIS - 4, W * 1.5))
   const rows = clamp(Math.floor((H - 56 - 12 - 22.5 - 12 - 20 - 46 - 12) / 36), 2, 7)
   const changed = rows !== G.rows
-  G = { sh: r.height, W, H, step: clamp(r.height * 0.1, 54, 88), rows }
+  const hingeB = r.bottom - box.bottom + hinge
+  G = { sh: ch, W, H, step: clamp(ch * 0.1, 54, 88), rows, pass: passPoses(H, hingeB) }
   file.style.setProperty('--W', `${W}px`)
   file.style.setProperty('--H', `${H}px`)
-  file.style.setProperty('--hingeB', `${hinge}px`)
+  file.style.setProperty('--hingeB', `${hingeB}px`)
+  file.style.setProperty('--po', `${top}px`)
   if (changed && POCKETS.length) POCKETS.forEach((_, i) => renderPocket(i))
 }
-const FLAT = -84
+// 뒤 파일: 띠 44px씩 위로, 헤더 뒤까지 6장. 지나간 파일: 경첩 아래로 주름처럼 겹쳐 조금씩 보임
 function pose(d) {
-  let rot, ty, tz, shade, op = 1
+  let rot, ty = 0, tz = 0, shade, op = 1
   if (d >= 0) {
-    const k = Math.min(d, VIS + 1)
-    rot = 2 + k * 1.6; ty = -k * STRIP; tz = -k * 22; shade = Math.min(0.45, k * 0.08)
-    if (d > VIS) op = Math.max(0, VIS + 1 - d)
+    const k = Math.min(d, VIS + 3)
+    rot = 2 + k * 1.6; ty = -k * STRIP; tz = -k * 22; shade = Math.min(0.5, k * 0.08)
+    if (d > VIS + 2) op = Math.max(0, VIS + 3 - d)
   } else if (d > -1) {
-    const t = ease(-d)
-    rot = 2 + (FLAT - 2) * t; ty = 8 * t; tz = 20 * t; shade = 0.3 * t
+    // 앞으로 넘어가다가 바닥(−88°)을 지나면 뒤로 밀려 앞 파일 뒤에 접혀 들어감
+    const t = ease(-d), p0 = G.pass[0]
+    rot = 2 + (p0.rot - 2) * t
+    tz = rot > -88 ? 0 : p0.tz * clamp((-88 - rot) / (-88 - p0.rot), 0, 1)
+    shade = 0.3 * t
   } else {
-    const k = Math.min(-d - 1, 6)
-    rot = FLAT - k * 1.2; ty = 8 + k * 5; tz = 20 + k * 3; shade = 0.36 + k * 0.03
-    if (-d > 6) op = Math.max(0, 7 + d)
+    const k = Math.min(-d - 1, 5), k0 = Math.floor(k), fr = k - k0, a = G.pass[k0], c = G.pass[Math.min(k0 + 1, 5)]
+    rot = a.rot + (c.rot - a.rot) * fr; tz = a.tz + (c.tz - a.tz) * fr
+    shade = Math.min(0.6, 0.34 + k * 0.06)
+    if (-d > 5) op = Math.max(0, 6 + d)
   }
   return { rot, ty, tz, shade, op }
 }
@@ -617,8 +636,8 @@ function layout(now) {
     el.style.opacity = p.op
     el.style.visibility = p.op < 0.01 ? 'hidden' : ''
     el.style.setProperty('--shade', p.shade.toFixed(3))
-    el.style.zIndex = d >= 0 ? 500 - Math.round(d * 10) : 600 + i
-    const back = rot < -70
+    el.style.zIndex = d >= 0 ? 500 - Math.round(d * 10) : rot > -89 ? 600 + i : 100 + i
+    const back = d < -0.8
     const rear = d >= 0.999
     if (el._rear !== rear) { el._rear = rear; el.classList.toggle('is-rear', rear) }
     if (el._back !== back) { el._back = back; el.classList.toggle('is-back', back) }
