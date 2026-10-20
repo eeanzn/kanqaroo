@@ -1,18 +1,46 @@
-<title>Kanqaroo 아코디언 파일철</title>
+<title>Kanqaroo</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <style>
-/* Layout: 한 화면 무대. 아코디언 파일철을 살짝 위에서 내려다봄. 칸막이(플레이리스트)가 바닥 경첩에서 앞으로 넘어간다.
-   흑백 단색, Pretendard 하나, 각진 모서리. 라이트 단일 테마로 고정 */
+/* Layout: 떠 있는 알약 헤더 아래 한 화면 무대. 플레이리스트 = 아코디언 파일, 바닥 경첩에서 앞으로 넘어간다.
+   중립 무채색 UI + 글래스. 색과 그림은 파일(플레이리스트)만. 8px 라운드, 헤더만 완전히 둥글게. 토큰 원본은 DESIGN.md */
 :root {
   color-scheme: light;
-  --bg: #e8e8e8;
-  --ink: #111111;
-  --ink-2: #555555;
-  --ink-3: #8c8c8c;
-  --white: #ffffff;
-  --divider: #f0f0f0;
-  --edge: 2px solid var(--ink);
+  --bg: #FFFFFF;
+  --text: #111111;
+  --text-2: #555555;
+  --text-3: #767676;
+  --line: rgba(0, 0, 0, .08);
+  --fill: rgba(0, 0, 0, .05);
+  --fill-2: rgba(0, 0, 0, .08);
+  --primary: #111111;
+  --on-primary: #FFFFFF;
+  --danger: #D93A3A;
+  --glass: rgba(255, 255, 255, .78);
+  --glass-edge: rgba(255, 255, 255, .7);
+  --glass-shade: 0 8px 24px rgba(0, 0, 0, .08);
+  --dim: rgba(0, 0, 0, .28);
+  --knock: #FFFFFF;
   --font: 'Pretendard', system-ui, -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  --hdr-top: calc(env(safe-area-inset-top, 0px) + 8px);
+  --stage-top: calc(var(--hdr-top) + 56px + 12px);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #000000; --text: #F5F5F5; --text-2: #ABABAB; --text-3: #8A8A8A;
+    --line: rgba(255, 255, 255, .1); --fill: rgba(255, 255, 255, .08); --fill-2: rgba(255, 255, 255, .12);
+    --primary: #F5F5F5; --on-primary: #000000; --danger: #FF6B6B;
+    --glass: rgba(20, 20, 22, .8); --glass-edge: rgba(255, 255, 255, .12);
+    --glass-shade: 0 8px 24px rgba(0, 0, 0, .4); --dim: rgba(0, 0, 0, .5); --knock: #1C1C1E;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #000000; --text: #F5F5F5; --text-2: #ABABAB; --text-3: #8A8A8A;
+  --line: rgba(255, 255, 255, .1); --fill: rgba(255, 255, 255, .08); --fill-2: rgba(255, 255, 255, .12);
+  --primary: #F5F5F5; --on-primary: #000000; --danger: #FF6B6B;
+  --glass: rgba(20, 20, 22, .8); --glass-edge: rgba(255, 255, 255, .12);
+  --glass-shade: 0 8px 24px rgba(0, 0, 0, .4); --dim: rgba(0, 0, 0, .5); --knock: #1C1C1E;
 }
 @font-face { font-family: 'Pretendard'; font-weight: 400; font-display: swap; src: url(data:font/woff2;base64,__FONT_400__) format('woff2'); }
 @font-face { font-family: 'Pretendard'; font-weight: 600; font-display: swap; src: url(data:font/woff2;base64,__FONT_600__) format('woff2'); }
@@ -21,139 +49,297 @@
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { height: 100%; }
-body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); color: var(--ink); font-family: var(--font); word-break: keep-all; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
-body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 17px; line-height: 1.5; word-break: keep-all; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 45; background: var(--bg); }
 button, input { font: inherit; color: inherit; }
-:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+button { -webkit-tap-highlight-color: transparent; }
+:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+h1, h2, h3, p, ol, ul { margin: 0; }
+ol, ul { padding: 0; list-style: none; }
+.ic { width: 20px; height: 20px; flex: none; fill: currentColor; }
+.ic-24 { width: 24px; height: 24px; }
 
-.app { height: 100%; display: flex; flex-direction: column; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
-.bar { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 52px; }
-.mark { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
-.count { font-size: 13px; font-weight: 600; color: var(--ink-2); }
-.chip { height: 32px; padding: 0 12px; border: 1.5px solid var(--ink); background: transparent; font-size: 13px; font-weight: 600; cursor: pointer; }
-.chip:hover { background: var(--ink); color: var(--white); }
-.chip[aria-pressed="false"] { color: var(--ink-3); border-color: var(--ink-3); }
+/* ── 글자 (TDS T 스케일) ── */
+.t-title-l { font-size: 26px; line-height: 35px; font-weight: 700; letter-spacing: -0.02em; }
+.t-title-m { font-size: 20px; line-height: 29px; font-weight: 700; letter-spacing: -0.01em; }
+.t-body { font-size: 17px; line-height: 25.5px; }
+.t-body-s { font-size: 15px; line-height: 22.5px; }
+.t-caption { font-size: 13px; line-height: 19.5px; }
 
-.stage { position: relative; flex: 1; min-height: 0; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+/* ── 글래스 ── */
+.glass { background: var(--glass); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); border: 1px solid var(--glass-edge); box-shadow: var(--glass-shade); }
+
+/* ── Header ── */
+.hdr { position: fixed; z-index: 40; top: var(--hdr-top); left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); max-width: 560px; margin: 0 auto; height: 56px; border-radius: 999px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px 0 16px; }
+.logo { display: inline-flex; align-items: center; gap: 6px; height: 44px; padding: 0 4px; margin-left: -4px; border: 0; background: none; cursor: pointer; font-size: 17px; font-weight: 700; letter-spacing: -0.02em; border-radius: 8px; }
+.logo svg { width: 28px; height: 28px; }
+.hbtn { width: 40px; height: 40px; border-radius: 999px; border: 0; background: var(--fill); display: grid; place-items: center; cursor: pointer; }
+.hbtn:active { background: var(--fill-2); }
+.hbtn[aria-pressed="true"] { background: var(--primary); color: var(--on-primary); }
+
+/* ── Button · IconButton ── */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 0; border-radius: 8px; font-weight: 600; cursor: pointer; white-space: nowrap; text-decoration: none; }
+.btn.xl { height: 56px; padding: 0 20px; font-size: 17px; width: 100%; }
+.btn.l { height: 48px; padding: 0 16px; font-size: 17px; }
+.btn.m { height: 38px; padding: 0 14px; font-size: 15px; }
+.btn.s { height: 32px; padding: 0 12px; font-size: 13px; }
+.btn.primary { background: var(--primary); color: var(--on-primary); }
+.btn.secondary { background: var(--fill); color: var(--text); }
+.btn.ghost { background: transparent; color: var(--text); }
+.btn.danger { background: var(--fill); color: var(--danger); }
+.btn:active:not(:disabled) { transform: scale(.98); }
+.btn:disabled { opacity: .4; cursor: default; }
+.ibtn { display: inline-grid; place-items: center; flex: none; border: 0; border-radius: 8px; cursor: pointer; background: var(--fill); color: var(--text); }
+.ibtn.m { width: 38px; height: 38px; }
+.ibtn.s { width: 32px; height: 32px; }
+.ibtn.ghost { background: transparent; }
+.ibtn.danger { color: var(--danger); }
+.on-cover { background: rgba(255, 255, 255, .24); color: var(--on); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.btn.on-cover-primary { background: var(--on); color: var(--c); }
+
+/* ── ActionBar ── */
+.abar { display: flex; align-items: center; gap: 8px; }
+.abar .grow { flex: 1; }
+.like[aria-pressed="true"] .ic { color: inherit; }
+
+/* ── 무대 (아코디언) ── */
+.stage { position: fixed; left: 0; right: 0; top: var(--stage-top); bottom: calc(env(safe-area-inset-bottom, 0px) + 44px); overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
 .stage.dragging { cursor: grabbing; }
+.stage:focus-visible { outline: none; }
+.stage:focus-visible .pocket.is-focus .face { box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--text); }
 .file { position: absolute; inset: 0; perspective: 1500px; perspective-origin: 50% 0%; }
-.hint { position: absolute; left: 0; right: 0; bottom: 2.5%; margin: 0; text-align: center; font-size: 14px; font-weight: 600; color: var(--ink-2); pointer-events: none; transition: opacity .4s; }
-.hint.gone { opacity: 0; }
+.foot { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 10px); display: grid; justify-items: center; gap: 2px; pointer-events: none; }
+.foot .hint { font-size: 13px; color: var(--text-2); transition: opacity .4s; }
+.foot .hint.gone { opacity: 0; }
+.foot .pos { font-size: 13px; font-weight: 600; color: var(--text-3); }
 
-/* ── 칸막이(포켓) ── */
-.pocket { position: absolute; left: 50%; bottom: var(--hingeB, 10%); width: var(--W, 340px); height: var(--H, 440px); margin-left: calc(var(--W, 340px) / -2); transform-origin: 50% 100%; will-change: transform; }
-.pocket > .back { position: absolute; inset: 0; background: var(--divider); border: var(--edge); }
-.tab { position: absolute; top: -32px; height: 34px; width: 38%; padding: 0 12px; display: flex; align-items: center; background: var(--divider); border: var(--edge); border-bottom: 0; font-size: 15px; font-weight: 700; white-space: nowrap; }
-.tab span { overflow: hidden; text-overflow: ellipsis; }
-.paper { position: absolute; left: 6%; right: 6%; top: 4.5%; bottom: 6%; padding: 10px 12px; background: var(--white); border: 1.5px solid var(--ink); font-size: 13px; line-height: 1.8; overflow: hidden; }
-.paper p { margin: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.paper b { color: var(--ink-3); font-weight: 700; margin-right: 6px; }
-.peeks { position: absolute; left: 6%; right: 6%; top: calc(22% - 26px); height: 60px; }
-.peek { position: absolute; top: var(--lift); width: 31%; height: 50px; padding: 6px 9px; background: var(--ink); color: var(--white); font-size: 14px; font-weight: 700; line-height: 1.2; transform: rotate(var(--r)); white-space: nowrap; overflow: hidden; }
-.peek.fresh { animation: peekpop .5s cubic-bezier(.3,1.6,.5,1); }
-@keyframes peekpop { from { transform: translateY(26px) rotate(var(--r)); } }
-.front { position: absolute; left: 0; right: 0; bottom: 0; height: 78%; background: var(--white); border: var(--edge); }
-.front::before { content: ""; position: absolute; left: 0; right: 0; top: 10px; border-top: 1.5px solid var(--ink); }
-.label { position: absolute; top: 18%; left: 8%; right: 8%; }
-.l-title { margin: 0; font-size: clamp(26px, 9vw, 40px); font-weight: 800; line-height: 1.1; letter-spacing: -0.03em; text-wrap: balance; }
-.l-who { margin: 10px 0 0; font-size: 15px; font-weight: 600; color: var(--ink-2); }
-.l-meta { margin: 2px 0 0; font-size: 14px; color: var(--ink-3); }
-.front-hint { position: absolute; left: 8%; bottom: 7%; margin: 0; font-size: 14px; font-weight: 700; opacity: 0; transition: opacity .25s; }
-.pocket.is-focus .front-hint { opacity: 1; }
-.shade { position: absolute; inset: -32px 0 0 0; background: #000; opacity: var(--shade, 0); pointer-events: none; }
-.pocket.is-back .paper, .pocket.is-back .peeks, .pocket.is-back .front, .pocket.is-back .tab span { visibility: hidden; }
-.pocket.pulled .paper, .pocket.pulled .peeks { visibility: hidden; }
+/* ── File (아코디언 파일) ── */
+.pocket { position: absolute; left: 50%; bottom: var(--hingeB, 16px); width: var(--W, 340px); height: var(--H, 460px); margin-left: calc(var(--W, 340px) / -2); transform-origin: 50% 100%; will-change: transform; }
+.face { position: absolute; inset: 0; border-radius: 8px; overflow: hidden; background: var(--c); color: var(--on); isolation: isolate; }
+.face .cv-img { position: absolute; inset: 0; background: var(--img) center / cover; }
+.face .rim { position: absolute; inset: 0; border-radius: 8px; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .28), inset 0 1px 0 rgba(255, 255, 255, .45); pointer-events: none; z-index: 3; }
+.strip { position: relative; z-index: 1; height: 56px; padding: 12px 16px 0; display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.is-img .strip { background: rgba(0, 0, 0, .36); }
+.strip .ttl { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.strip .cnt { flex: none; font-size: 13px; font-weight: 600; opacity: .8; }
+.pocketfront { position: absolute; left: 0; right: 0; bottom: 0; top: 56px; z-index: 1; padding: 12px 12px 12px; display: flex; flex-direction: column; gap: 12px; background: rgba(255, 255, 255, .12); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .45), 0 -1px 0 rgba(0, 0, 0, .14); }
+.is-img .pocketfront { background: rgba(0, 0, 0, .08); }
+.owner { padding: 0 4px; font-size: 15px; line-height: 22.5px; font-weight: 600; display: flex; justify-content: space-between; gap: 12px; }
+.owner span:last-child { font-weight: 400; opacity: .8; white-space: nowrap; }
+.panel { position: relative; flex: 1; min-height: 0; border-radius: 8px; padding: 8px 12px 12px; display: flex; flex-direction: column; background: var(--glass); color: var(--text); box-shadow: inset 0 0 0 1px var(--glass-edge); overflow: hidden; isolation: isolate; }
+.is-img .panel::before { content: ""; position: absolute; inset: -24px; z-index: -1; background: var(--img) center / cover; filter: blur(18px) saturate(1.2); opacity: .55; }
+.pv { flex: 1; min-height: 0; overflow: hidden; }
+.pv li { display: flex; align-items: baseline; gap: 8px; height: 36px; padding-top: 6px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.pv li:last-child { border-bottom: 0; }
+.pv .n { flex: none; width: 18px; font-size: 13px; color: var(--text-2); }
+.pv b { font-size: 15px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.pv i { font-style: normal; font-size: 13px; color: var(--text-2); overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1; }
+.pv .by { flex: none; font-size: 13px; font-weight: 600; color: var(--text-2); }
+.pv .more { font-size: 13px; color: var(--text-2); border: 0; height: 30px; }
+.pv-empty { display: grid; place-items: center; height: 100%; font-size: 15px; color: var(--text-2); }
+.panel .abar { padding-top: 8px; }
+.shade { position: absolute; inset: 0; border-radius: 8px; background: #000; opacity: var(--shade, 0); pointer-events: none; z-index: 4; }
+.pocket.is-back .pocketfront, .pocket.is-back .strip { visibility: hidden; }
+.pocket:not(.is-focus) .panel .abar { pointer-events: none; }
 
-/* ── 꺼낸 시트 ── */
-.layer { position: fixed; inset: 0; z-index: 50; display: flex; align-items: center; justify-content: center; padding: calc(16px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); }
-.backdrop { position: absolute; inset: 0; background: rgb(17 17 17 / .55); }
-.card { position: relative; width: min(100%, 460px); max-height: 100%; display: flex; flex-direction: column; background: var(--white); color: var(--ink); border: var(--edge); transform-origin: 0 0; overflow: hidden; }
-.card-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 14px 14px 14px 18px; background: var(--ink); color: var(--white); }
-.card-title { margin: 0; font-size: 24px; font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; min-width: 0; }
-.put-back { flex: none; height: 34px; padding: 0 12px; border: 1.5px solid var(--white); background: transparent; font-size: 13px; font-weight: 700; cursor: pointer; }
-.put-back:hover { background: var(--white); color: var(--ink); }
-.card-body { flex: 1; min-height: 0; overflow-y: auto; padding: 12px 18px 8px; overscroll-behavior: contain; }
-.card-who { margin: 0 0 6px; font-size: 13px; color: var(--ink-2); }
-.lines { margin: 0; padding: 0; list-style: none; }
-.lines li { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 11px 2px; border-bottom: 1px solid var(--ink); }
-.lines li:last-child { border-bottom: 0; }
-.lines .n { font-size: 13px; font-weight: 700; color: var(--ink-3); }
-.lines .s b { display: block; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lines .s i { display: block; font-style: normal; font-size: 13px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lines li.slip { margin: 6px -8px; padding: 11px 12px; border-bottom: 0; background: var(--ink); color: var(--white); transform: rotate(var(--r)); }
-.lines li.slip .n, .lines li.slip .s i { color: rgb(255 255 255 / .62); }
-.lines .who { font-size: 13px; font-weight: 700; white-space: nowrap; }
-.card-foot { flex: none; padding: 10px 18px 18px; }
-.add { width: 100%; height: 50px; border: 0; background: var(--ink); color: var(--white); font-size: 17px; font-weight: 800; cursor: pointer; }
-.slip-form { flex: none; margin: 0 16px 16px; padding: 14px; background: var(--ink); color: var(--white); transform: rotate(-0.8deg); display: grid; gap: 4px; }
-.slip-form .form-h { margin: 0 0 4px; font-size: 15px; font-weight: 800; }
-.slip-form input { width: 100%; height: 42px; padding: 0 2px; border: 0; border-bottom: 1.5px solid rgb(255 255 255 / .45); background: transparent; color: var(--white); font-size: 17px; font-weight: 600; outline: none; }
-.slip-form input::placeholder { color: rgb(255 255 255 / .45); }
-.slip-form input:focus { border-bottom-color: var(--white); }
-.sf-err { min-height: 18px; margin: 4px 0 0; font-size: 13px; font-weight: 700; }
-.sf-row { display: grid; grid-template-columns: auto 1fr; gap: 8px; margin-top: 4px; }
-.sf-row button { height: 44px; padding: 0 16px; font-weight: 800; cursor: pointer; }
-.sf-cancel { border: 1.5px solid var(--white); background: transparent; color: var(--white); }
-.sf-go { border: 0; background: var(--white); color: var(--ink); font-size: 16px; }
+/* ── 레이어 (상세 · 시트 · 다이얼로그) ── */
+.layer { position: fixed; inset: 0; z-index: 50; }
+.dim { position: absolute; inset: 0; background: var(--dim); }
+.detail-wrap { position: absolute; inset: calc(env(safe-area-inset-top, 0px) + 12px) max(12px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 12px) max(12px, env(safe-area-inset-left, 0px)); display: flex; justify-content: center; pointer-events: none; }
+.detail { pointer-events: auto; width: min(100%, 480px); height: 100%; display: flex; flex-direction: column; border-radius: 12px; overflow: hidden; transform-origin: 0 0; }
+.detail.glass { -webkit-backdrop-filter: blur(40px) saturate(180%); backdrop-filter: blur(40px) saturate(180%); }
+.dcover { position: relative; flex: none; padding: 16px 16px 16px 20px; background: var(--c); color: var(--on); display: grid; gap: 4px; isolation: isolate; }
+.dcover .cv-img { position: absolute; inset: 0; z-index: -1; background: var(--img) center / cover; }
+.dcover.is-img::after { content: ""; position: absolute; inset: 0; z-index: -1; background: rgba(0, 0, 0, .38); }
+.dtop { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 38px; }
+.dtop .t-body-s { font-weight: 600; opacity: .9; }
+.dmeta { opacity: .85; }
+.dcover .abar { margin-top: 12px; }
+.dbody { flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; padding: 4px 8px 16px; }
+.dhint { padding: 12px 12px 0; color: var(--text-3); }
 
-.flyer { position: fixed; left: 0; top: 0; z-index: 60; width: 168px; height: 92px; padding: 10px 12px; display: flex; flex-direction: column; justify-content: space-between; background: var(--ink); color: var(--white); pointer-events: none; }
-.flyer b { font-size: 17px; font-weight: 800; line-height: 1.15; overflow: hidden; }
-.flyer span { font-size: 13px; font-weight: 700; text-align: right; }
-.pop { position: fixed; z-index: 61; margin: 0; font-size: 30px; font-weight: 800; color: var(--ink); pointer-events: none; }
+/* ── SongRow ── */
+.songs { display: grid; }
+.srow { position: relative; display: flex; align-items: center; gap: 4px; height: 64px; border-radius: 8px; background: transparent; }
+.srow + .srow::before { content: ""; position: absolute; left: 64px; right: 12px; top: 0; border-top: 1px solid var(--line); }
+.srow-main { flex: 1; min-width: 0; height: 100%; display: flex; align-items: center; gap: 12px; padding: 0 0 0 12px; border: 0; background: none; text-align: left; cursor: pointer; border-radius: 8px; }
+.thumb { flex: none; width: 40px; height: 40px; border-radius: 6px; display: grid; place-items: center; background: var(--fill-2); color: var(--text-3); }
+.stxt { min-width: 0; display: grid; }
+.stxt b { font-size: 17px; line-height: 25.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ssub { display: flex; align-items: center; gap: 6px; min-width: 0; font-size: 15px; line-height: 22.5px; color: var(--text-2); }
+.ssub .ar { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.badge { flex: none; height: 20px; padding: 0 6px; border-radius: 6px; background: var(--fill-2); color: var(--text); font-size: 13px; line-height: 20px; font-weight: 600; white-space: nowrap; }
+.grip { flex: none; width: 44px; height: 44px; border: 0; background: none; color: var(--text-3); display: grid; place-items: center; cursor: grab; touch-action: none; border-radius: 8px; }
+.srow.dragging { z-index: 2; background: var(--bg); box-shadow: 0 8px 24px rgba(0, 0, 0, .16); }
+.srow.dragging::before, .srow.dragging + .srow::before { display: none; }
+.srow.dragging .grip { cursor: grabbing; color: var(--text); }
+.srow.fresh { animation: fresh 1.6s ease-out; }
+@keyframes fresh { 0%, 40% { background: var(--fill-2); } 100% { background: transparent; } }
+.srow .tools { display: flex; gap: 4px; padding-right: 4px; }
+
+/* ── BottomSheet · Dialog · Toast ── */
+.bsheet { position: absolute; left: 0; right: 0; bottom: 0; max-width: 480px; margin: 0 auto; border-radius: 12px 12px 0 0; border-bottom: 0; padding: 8px 20px calc(18px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 16px; max-height: calc(100% - 40px); overflow-y: auto; }
+.handle { justify-self: center; width: 36px; height: 4px; border-radius: 2px; background: var(--fill-2); }
+.bs-head { display: grid; gap: 2px; }
+.bs-head p { color: var(--text-2); }
+.tf { display: grid; gap: 6px; }
+.tf label { font-size: 13px; line-height: 19.5px; font-weight: 600; color: var(--text-2); }
+.tf input { height: 48px; width: 100%; border-radius: 8px; border: 1px solid transparent; background: var(--fill); padding: 0 14px; font-size: 17px; outline: none; }
+.tf input::placeholder { color: var(--text-3); }
+.tf input:focus { border-color: var(--text); background: var(--bg); }
+.tf.err input { border-color: var(--danger); }
+.tf .msg { font-size: 13px; line-height: 19.5px; color: var(--danger); }
+.lopt { display: flex; align-items: center; gap: 12px; height: 56px; padding: 0 12px; border-radius: 8px; background: var(--fill); color: var(--text); text-decoration: none; font-size: 17px; font-weight: 600; }
+.lopt .ic:last-child { margin-left: auto; color: var(--text-3); }
+.lopts { display: grid; gap: 8px; }
+.dlg-wrap { position: absolute; inset: 0; display: grid; place-items: center; padding: 20px; }
+.dlg { width: min(100%, 340px); border-radius: 12px; padding: 20px; display: grid; gap: 8px; }
+.dlg p { color: var(--text-2); }
+.dlg .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+.toast { position: fixed; z-index: 70; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); transform: translateX(-50%); width: max-content; max-width: calc(100% - 40px); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 12px 20px; border-radius: 999px; font-size: 15px; line-height: 22.5px; font-weight: 600; text-align: center; }
+
+/* ── 페이지 (관리 · 편집 · 컴포넌트) ── */
+.page { position: fixed; inset: 0; z-index: 30; overflow-y: auto; background: var(--bg); padding: var(--stage-top) 0 calc(env(safe-area-inset-bottom, 0px) + 112px); }
+.page-in { max-width: 560px; margin: 0 auto; padding: 8px max(20px, env(safe-area-inset-right, 0px)) 0 max(20px, env(safe-area-inset-left, 0px)); display: grid; gap: 24px; }
+.ph { display: grid; gap: 4px; }
+.ph p { color: var(--text-2); }
+.card { border-radius: 8px; padding: 8px; }
+.sec-title { font-size: 13px; line-height: 19.5px; font-weight: 600; color: var(--text-2); padding: 0 4px 8px; }
+.prow { display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; align-items: center; gap: 12px; padding: 8px; width: 100%; border: 0; background: none; border-radius: 8px; text-align: left; cursor: pointer; color: var(--text); }
+.prow + .prow { border-top: 1px solid var(--line); border-radius: 0 0 8px 8px; }
+.pthumb { width: 54px; height: 54px; border-radius: 6px; background: var(--c); color: var(--on); display: grid; place-items: center; overflow: hidden; position: relative; }
+.pthumb .cv-img { position: absolute; inset: 0; background: var(--img) center / cover; }
+.prow b { display: block; font-size: 17px; line-height: 25.5px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.prow span.meta { font-size: 13px; line-height: 19.5px; color: var(--text-2); }
+.prow > .ic { color: var(--text-3); }
+.setrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 56px; padding: 0 8px; }
+.setrow + .setrow { border-top: 1px solid var(--line); }
+.setrow.link { width: 100%; border: 0; border-radius: 0; background: none; color: var(--text); font: inherit; cursor: pointer; text-align: left; }
+.setrow.link .ic { color: var(--text-3); }
+.seg { display: inline-flex; padding: 2px; border-radius: 8px; background: var(--fill); }
+.seg button { height: 32px; padding: 0 12px; border: 0; border-radius: 6px; background: transparent; font-size: 13px; font-weight: 600; color: var(--text-2); cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--bg); color: var(--text); box-shadow: 0 1px 3px rgba(0, 0, 0, .12); }
+.cta { position: fixed; z-index: 31; left: 0; right: 0; bottom: 0; padding: 16px max(20px, env(safe-area-inset-right, 0px)) calc(env(safe-area-inset-bottom, 0px) + 18px) max(20px, env(safe-area-inset-left, 0px)); background: linear-gradient(to top, var(--bg) 70%, transparent); }
+.cta > * { max-width: 520px; margin: 0 auto; display: flex; }
+.subbar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-left: -12px; }
+.preview { height: 280px; position: relative; }
+.preview .face { position: relative; height: 100%; }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.sw { width: 40px; height: 40px; border-radius: 6px; border: 0; background: var(--c); cursor: pointer; box-shadow: inset 0 0 0 1px var(--line); display: grid; place-items: center; color: var(--on); }
+.sw[aria-pressed="true"] { outline: 2px solid var(--text); outline-offset: 2px; }
+.sw.up { background: var(--fill); color: var(--text-2); position: relative; overflow: hidden; }
+.sw.up input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.dz { display: grid; gap: 8px; }
+
+/* 컴포넌트 시트 */
+.comp { display: grid; gap: 12px; }
+.comp-box { border-radius: 8px; padding: 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; border: 1px dashed var(--line); }
+.comp-box.col { display: grid; }
+.tok { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: center; font-size: 13px; line-height: 19.5px; }
+.tok i { width: 40px; height: 40px; border-radius: 6px; background: var(--v); box-shadow: inset 0 0 0 1px var(--line); }
+.tok code { color: var(--text-2); }
+.toks { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; width: 100%; }
+.hdr.static { position: relative; top: 0; left: 0; right: 0; width: 100%; }
+.face-static { position: relative; width: 100%; max-width: 335px; height: 400px; }
+
 @media (prefers-reduced-motion: reduce) {
-  .hint, .front-hint { transition: none; }
-  .peek.fresh { animation: none; }
+  .foot .hint { transition: none; }
+  .srow.fresh { animation: none; }
 }
 </style>
 
-<div class="app">
-  <header class="bar">
-    <span class="mark">kanqaroo</span>
-    <span class="count" id="count" aria-live="polite">01 / 10</span>
-    <button class="chip" id="sound" aria-pressed="true">소리 켬</button>
-  </header>
-  <div class="stage" id="stage" role="application" aria-label="플레이리스트 파일철. 위아래로 넘기고, 누르면 꺼내 봐요. 방향키와 Enter도 돼요" tabindex="0">
+<header class="hdr glass" id="hdr">
+  <button class="logo" data-go="" aria-label="kanqaroo, 피드로"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 11c0-2.2 1.8-4 4-4h12c2.2 0 4 1.8 4 4v5c0 6.1-4.9 11-11 11h-.1C9.4 27 6 23.6 6 19.1V11Z" fill="currentColor"/><path d="M9 13.5c2.2 1.4 4.5 2 7 2s4.8-.6 7-2" stroke="var(--knock)" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="14" cy="21.5" r="2.2" fill="var(--knock)"/><path d="M16.2 21.5V15.8l3.6-1" stroke="var(--knock)" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>kanqaroo</button>
+  <button class="hbtn" id="me-btn" data-go="me" aria-label="내 플레이리스트 관리" aria-pressed="false"><svg class="ic" viewBox="0 0 256 256" aria-hidden="true"><path d="M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z"/></svg></button>
+</header>
+
+<main>
+  <div class="stage" id="stage" role="application" aria-label="플레이리스트 피드. 위아래로 넘기고, 누르면 열어요. 방향키와 Enter도 돼요" tabindex="0">
     <div class="file" id="file"></div>
-    <p class="hint" id="hint">↑ 위로 쓸어 넘기고, 누르면 꺼내 봐요</p>
   </div>
+  <div class="foot"><p class="hint" id="hint">위아래로 넘기고, 누르면 열어요</p><p class="pos" id="pos" aria-live="polite">1 / 11</p></div>
+</main>
+
+<section class="page" id="pg-me" hidden aria-label="내 플레이리스트"></section>
+<section class="page" id="pg-edit" hidden aria-label="플레이리스트 편집"></section>
+<section class="page" id="pg-comp" hidden aria-label="컴포넌트"></section>
+
+<div class="layer" id="dl" hidden>
+  <div class="dim" data-act="close-detail"></div>
+  <div class="detail-wrap"><article class="detail glass" id="detail" role="dialog" aria-modal="true" aria-labelledby="d-title"></article></div>
 </div>
-<div class="layer" id="layer" hidden>
-  <div class="backdrop" id="backdrop" data-act="close-sheet"></div>
-  <article class="card" id="card" role="dialog" aria-modal="true" aria-labelledby="card-title"></article>
+<div class="layer" id="bs" hidden>
+  <div class="dim" data-act="close-bs"></div>
+  <section class="bsheet glass" id="bsheet" role="dialog" aria-modal="true" aria-labelledby="bs-title"></section>
 </div>
+<div class="layer" id="dg" hidden>
+  <div class="dim" data-act="close-dg"></div>
+  <div class="dlg-wrap"><section class="dlg glass" id="dlg" role="alertdialog" aria-modal="true" aria-labelledby="dg-title"></section></div>
+</div>
+<div class="toast glass" id="toast" role="status" hidden></div>
 
 <script>
 'use strict'
-/* ════════ 데이터 (예시) ════════ */
-const NOW = Date.now(), MIN = 60e3, HOUR = 60 * MIN
-const S = (t, a, by = null, ago = 0) => ({ t, a, by, at: NOW - ago })
-const LISTS = [
-  { title: '새벽 운전', owner: '지우', songs: [S('Nights', 'Frank Ocean'), S('Kyoto', 'Phoebe Bridgers', '민지', 2 * HOUR), S('Square (2017)', '백예린'), S('Antifreeze', '검정치마'), S('Plastic Love', '竹内まりや', '민준', 20 * MIN), S('Space Song', 'Beach House'), S('밤편지', '아이유')] },
-  { title: '첫 자취방', owner: '준호', songs: [S('별일 없이 산다', '장기하와 얼굴들'), S('위잉위잉', '혁오'), S('난춘', '새소년', '민지', 40 * MIN), S('NO PAIN', '실리카겔'), S('주저하는 연인들을 위해', '잔나비')] },
-  { title: '헬스장 금지곡', owner: '도윤', songs: [S('Lose Yourself', 'Eminem'), S('Stronger', 'Kanye West'), S('Numb', 'Linkin Park'), S('말달리자', '크라잉넛', '서준', 5 * HOUR), S('낭만고양이', '체리필터', '유나', 3 * HOUR), S('고백 (Go Back)', '다이나믹 듀오')] },
-  { title: '비 오는 날 작업용', owner: '민지', songs: [S('No Surprises', 'Radiohead'), S('Weird Fishes/Arpeggi', 'Radiohead'), S('Chamber of Reflection', 'Mac DeMarco', '하늘', 9 * HOUR), S('기억을 걷는 시간', '넬'), S('바람이 분다', '이소라'), S('산책', '백예린', '지우', 5 * HOUR)] },
-  { title: '출근길 30분', owner: '서연', songs: [S('Blinding Lights', 'The Weeknd'), S('Hype Boy', 'NewJeans'), S('우주를 줄게', '볼빨간사춘기'), S('Yellow', 'Coldplay', '도윤', 30 * HOUR), S('봄이 좋냐??', '10cm')] },
-  { title: '여름 끝물', owner: '하늘', songs: [S('Maria También', 'Khruangbin'), S('The Less I Know The Better', 'Tame Impala'), S('TOMBOY', '혁오'), S('Ditto', 'NewJeans', '서연', 50 * HOUR), S('Get Lucky', 'Daft Punk')] },
-  { title: '이별 후 3일차', owner: '유나', songs: [S('너의 모든 순간', '성시경'), S('모든 날, 모든 순간', '폴킴', '지우', 7 * HOUR), S('Someone Like You', 'Adele'), S('서른 즈음에', '김광석'), S('Paris in the Rain', 'Lauv', '민준', HOUR)] },
-  { title: '노래방 18번', owner: '서준', songs: [S('가시', '버즈'), S('Tears', '소찬휘', '수아', 2 * HOUR), S('하하하쏭', '자우림'), S('해변의 여인', '쿨'), S('소녀시대', '이승철', '도윤', 12 * HOUR)] },
-  { title: '고양이랑 낮잠', owner: '수아', songs: [S("Don't Know Why", 'Norah Jones'), S('My Funny Valentine', 'Chet Baker'), S('공드리', '혁오', '유나', 4 * HOUR), S('무릎', '아이유')] },
-  { title: '시험 기간', owner: '지호', songs: [S('Aruarian Dance', 'Nujabes'), S('Summer', '久石譲'), S('사건의 지평선', '윤하', '서준', 6 * HOUR), S('Fix You', 'Coldplay')] },
-]
-const N = LISTS.length
-function hash(s) { let h = 0; for (const ch of String(s)) h = (h * 31 + ch.codePointAt(0)) | 0; return Math.abs(h) }
-const slipTilt = (s) => ((hash(s.t + s.by) % 5) - 2) * 0.5
+/* ════════ 아이콘 (Phosphor Regular, MIT) · 로고 ════════ */
+const IC = {"user":"M230.92,212c-15.23-26.33-38.7-45.21-66.09-54.16a72,72,0,1,0-73.66,0C63.78,166.78,40.31,185.66,25.08,212a8,8,0,1,0,13.85,8c18.84-32.56,52.14-52,89.07-52s70.23,19.44,89.07,52a8,8,0,1,0,13.85-8ZM72,96a56,56,0,1,1,56,56A56.06,56.06,0,0,1,72,96Z","heart":"M178,40c-20.65,0-38.73,8.88-50,23.89C116.73,48.88,98.65,40,78,40a62.07,62.07,0,0,0-62,62c0,70,103.79,126.66,108.21,129a8,8,0,0,0,7.58,0C136.21,228.66,240,172,240,102A62.07,62.07,0,0,0,178,40ZM128,214.8C109.74,204.16,32,155.69,32,102A46.06,46.06,0,0,1,78,56c19.45,0,35.78,10.36,42.6,27a8,8,0,0,0,14.8,0c6.82-16.67,23.15-27,42.6-27a46.06,46.06,0,0,1,46,46C224,155.61,146.24,204.15,128,214.8Z","share-network":"M176,160a39.89,39.89,0,0,0-28.62,12.09l-46.1-29.63a39.8,39.8,0,0,0,0-28.92l46.1-29.63a40,40,0,1,0-8.66-13.45l-46.1,29.63a40,40,0,1,0,0,55.82l46.1,29.63A40,40,0,1,0,176,160Zm0-128a24,24,0,1,1-24,24A24,24,0,0,1,176,32ZM64,152a24,24,0,1,1,24-24A24,24,0,0,1,64,152Zm112,72a24,24,0,1,1,24-24A24,24,0,0,1,176,224Z","plus":"M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z","dots-six-vertical":"M104,60A12,12,0,1,1,92,48,12,12,0,0,1,104,60Zm60,12a12,12,0,1,0-12-12A12,12,0,0,0,164,72ZM92,116a12,12,0,1,0,12,12A12,12,0,0,0,92,116Zm72,0a12,12,0,1,0,12,12A12,12,0,0,0,164,116ZM92,184a12,12,0,1,0,12,12A12,12,0,0,0,92,184Zm72,0a12,12,0,1,0,12,12A12,12,0,0,0,164,184Z","x":"M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z","trash":"M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z","pencil-simple":"M227.31,73.37,182.63,28.68a16,16,0,0,0-22.63,0L36.69,152A15.86,15.86,0,0,0,32,163.31V208a16,16,0,0,0,16,16H92.69A15.86,15.86,0,0,0,104,219.31L227.31,96a16,16,0,0,0,0-22.63ZM92.69,208H48V163.31l88-88L180.69,120ZM192,108.68,147.31,64l24-24L216,84.68Z","image":"M216,40H40A16,16,0,0,0,24,56V200a16,16,0,0,0,16,16H216a16,16,0,0,0,16-16V56A16,16,0,0,0,216,40Zm0,16V158.75l-26.07-26.06a16,16,0,0,0-22.63,0l-20,20-44-44a16,16,0,0,0-22.62,0L40,149.37V56ZM40,172l52-52,80,80H40Zm176,28H194.63l-36-36,20-20L216,181.38V200ZM144,100a12,12,0,1,1,12,12A12,12,0,0,1,144,100Z","check":"M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z","caret-left":"M165.66,202.34a8,8,0,0,1-11.32,11.32l-80-80a8,8,0,0,1,0-11.32l80-80a8,8,0,0,1,11.32,11.32L91.31,128Z","caret-right":"M181.66,133.66l-80,80a8,8,0,0,1-11.32-11.32L164.69,128,90.34,53.66a8,8,0,0,1,11.32-11.32l80,80A8,8,0,0,1,181.66,133.66Z","link":"M240,88.23a54.43,54.43,0,0,1-16,37L189.25,160a54.27,54.27,0,0,1-38.63,16h-.05A54.63,54.63,0,0,1,96,119.84a8,8,0,0,1,16,.45A38.62,38.62,0,0,0,150.58,160h0a38.39,38.39,0,0,0,27.31-11.31l34.75-34.75a38.63,38.63,0,0,0-54.63-54.63l-11,11A8,8,0,0,1,135.7,59l11-11A54.65,54.65,0,0,1,224,48,54.86,54.86,0,0,1,240,88.23ZM109,185.66l-11,11A38.41,38.41,0,0,1,70.6,208h0a38.63,38.63,0,0,1-27.29-65.94L78,107.31A38.63,38.63,0,0,1,144,135.71a8,8,0,0,0,16,.45A54.86,54.86,0,0,0,144,96a54.65,54.65,0,0,0-77.27,0L32,130.75A54.62,54.62,0,0,0,70.56,224h0a54.28,54.28,0,0,0,38.64-16l11-11A8,8,0,0,0,109,185.66Z","music-note":"M210.3,56.34l-80-24A8,8,0,0,0,120,40V148.26A48,48,0,1,0,136,184V98.75l69.7,20.91A8,8,0,0,0,216,112V64A8,8,0,0,0,210.3,56.34ZM88,216a32,32,0,1,1,32-32A32,32,0,0,1,88,216ZM200,101.25l-64-19.2V50.75L200,70Z","youtube-logo":"M164.44,121.34l-48-32A8,8,0,0,0,104,96v64a8,8,0,0,0,12.44,6.66l48-32a8,8,0,0,0,0-13.32ZM120,145.05V111l25.58,17ZM234.33,69.52a24,24,0,0,0-14.49-16.4C185.56,39.88,131,40,128,40s-57.56-.12-91.84,13.12a24,24,0,0,0-14.49,16.4C19.08,79.5,16,97.74,16,128s3.08,48.5,5.67,58.48a24,24,0,0,0,14.49,16.41C69,215.56,120.4,216,127.34,216h1.32c6.94,0,58.37-.44,91.18-13.11a24,24,0,0,0,14.49-16.41c2.59-10,5.67-28.22,5.67-58.48S236.92,79.5,234.33,69.52Zm-15.49,113a8,8,0,0,1-4.77,5.49c-31.65,12.22-85.48,12-86,12H128c-.54,0-54.33.2-86-12a8,8,0,0,1-4.77-5.49C34.8,173.39,32,156.57,32,128s2.8-45.39,5.16-54.47A8,8,0,0,1,41.93,68c30.52-11.79,81.66-12,85.85-12h.27c.54,0,54.38-.18,86,12a8,8,0,0,1,4.77,5.49C221.2,82.61,224,99.43,224,128S221.2,173.39,218.84,182.47Z","spotify-logo":"M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm31.07-46.26a8,8,0,0,1-10.81,3.33,42.79,42.79,0,0,0-40.52,0,8,8,0,0,1-7.48-14.14,59.33,59.33,0,0,1,55.48,0A8,8,0,0,1,159.07,169.74Zm32-56a8,8,0,0,1-10.83,3.29,110.62,110.62,0,0,0-104.46,0,8,8,0,0,1-7.54-14.12,126.67,126.67,0,0,1,119.54,0A8,8,0,0,1,191.06,113.76Zm-16,28a8,8,0,0,1-10.82,3.3,77,77,0,0,0-72.48,0,8,8,0,0,1-7.52-14.12,93,93,0,0,1,87.52,0A8,8,0,0,1,175.06,141.76Z","apple-logo":"M223.3,169.59a8.07,8.07,0,0,0-2.8-3.4C203.53,154.53,200,134.64,200,120c0-17.67,13.47-33.06,21.5-40.67a8,8,0,0,0,0-11.62C208.82,55.74,187.82,48,168,48a72.2,72.2,0,0,0-40,12.13,71.56,71.56,0,0,0-90.71,9.09A74.63,74.63,0,0,0,16,123.4a127.06,127.06,0,0,0,40.14,89.73A39.8,39.8,0,0,0,83.59,224h87.68a39.84,39.84,0,0,0,29.12-12.57,125,125,0,0,0,17.82-24.6C225.23,174,224.33,172,223.3,169.59Zm-34.63,30.94a23.76,23.76,0,0,1-17.4,7.47H83.59a23.82,23.82,0,0,1-16.44-6.51A111.14,111.14,0,0,1,32,123,58.5,58.5,0,0,1,48.65,80.47,54.81,54.81,0,0,1,88,64h.78A55.45,55.45,0,0,1,123,76.28a8,8,0,0,0,10,0A55.44,55.44,0,0,1,168,64a70.64,70.64,0,0,1,36,10.35c-13,14.52-20,30.47-20,45.65,0,23.77,7.64,42.73,22.18,55.3A105.82,105.82,0,0,1,188.67,200.53ZM128.23,30A40,40,0,0,1,167,0h1a8,8,0,0,1,0,16h-1a24,24,0,0,0-23.24,18,8,8,0,1,1-15.5-4Z","speaker-high":"M155.51,24.81a8,8,0,0,0-8.42.88L77.25,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H77.25l69.84,54.31A8,8,0,0,0,160,224V32A8,8,0,0,0,155.51,24.81ZM32,96H72v64H32ZM144,207.64,88,164.09V91.91l56-43.55Zm54-106.08a40,40,0,0,1,0,52.88,8,8,0,0,1-12-10.58,24,24,0,0,0,0-31.72,8,8,0,0,1,12-10.58ZM248,128a79.9,79.9,0,0,1-20.37,53.34,8,8,0,0,1-11.92-10.67,64,64,0,0,0,0-85.33,8,8,0,1,1,11.92-10.67A79.83,79.83,0,0,1,248,128Z","speaker-slash":"M53.92,34.62A8,8,0,1,0,42.08,45.38L73.55,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H77.25l69.84,54.31A8,8,0,0,0,160,224V175.09l42.08,46.29a8,8,0,1,0,11.84-10.76ZM32,96H72v64H32ZM144,207.64,88,164.09V95.89l56,61.6Zm42-63.77a24,24,0,0,0,0-31.72,8,8,0,1,1,12-10.57,40,40,0,0,1,0,52.88,8,8,0,0,1-12-10.59Zm-80.16-76a8,8,0,0,1,1.4-11.23l39.85-31A8,8,0,0,1,160,32v74.83a8,8,0,0,1-16,0V48.36l-26.94,21A8,8,0,0,1,105.84,67.91ZM248,128a79.9,79.9,0,0,1-20.37,53.34,8,8,0,0,1-11.92-10.67,64,64,0,0,0,0-85.33,8,8,0,1,1,11.92-10.67A79.83,79.83,0,0,1,248,128Z","moon":"M233.54,142.23a8,8,0,0,0-8-2,88.08,88.08,0,0,1-109.8-109.8,8,8,0,0,0-10-10,104.84,104.84,0,0,0-52.91,37A104,104,0,0,0,136,224a103.09,103.09,0,0,0,62.52-20.88,104.84,104.84,0,0,0,37-52.91A8,8,0,0,0,233.54,142.23ZM188.9,190.34A88,88,0,0,1,65.66,67.11a89,89,0,0,1,31.4-26A106,106,0,0,0,96,56,104.11,104.11,0,0,0,200,160a106,106,0,0,0,14.92-1.06A89,89,0,0,1,188.9,190.34Z","sun":"M120,40V16a8,8,0,0,1,16,0V40a8,8,0,0,1-16,0Zm72,88a64,64,0,1,1-64-64A64.07,64.07,0,0,1,192,128Zm-16,0a48,48,0,1,0-48,48A48.05,48.05,0,0,0,176,128ZM58.34,69.66A8,8,0,0,0,69.66,58.34l-16-16A8,8,0,0,0,42.34,53.66Zm0,116.68-16,16a8,8,0,0,0,11.32,11.32l16-16a8,8,0,0,0-11.32-11.32ZM192,72a8,8,0,0,0,5.66-2.34l16-16a8,8,0,0,0-11.32-11.32l-16,16A8,8,0,0,0,192,72Zm5.66,114.34a8,8,0,0,0-11.32,11.32l16,16a8,8,0,0,0,11.32-11.32ZM48,128a8,8,0,0,0-8-8H16a8,8,0,0,0,0,16H40A8,8,0,0,0,48,128Zm80,80a8,8,0,0,0-8,8v24a8,8,0,0,0,16,0V216A8,8,0,0,0,128,208Zm112-88H216a8,8,0,0,0,0,16h24a8,8,0,0,0,0-16Z","play":"M232.4,114.49,88.32,26.35a16,16,0,0,0-16.2-.3A15.86,15.86,0,0,0,64,39.87V216.13A15.94,15.94,0,0,0,80,232a16.07,16.07,0,0,0,8.36-2.35L232.4,141.51a15.81,15.81,0,0,0,0-27ZM80,215.94V40l143.83,88Z","heart-fill":"M240,102c0,70-103.79,126.66-108.21,129a8,8,0,0,1-7.58,0C119.79,228.66,16,172,16,102A62.07,62.07,0,0,1,78,40c20.65,0,38.73,8.88,50,23.89C139.27,48.88,157.35,40,178,40A62.07,62.07,0,0,1,240,102Z"}
+const icon = (k, cls = '') => `<svg class="ic ${cls}" viewBox="0 0 256 256" aria-hidden="true">${IC[k].split('|').map((d) => `<path d="${d}"/>`).join('')}</svg>`
+const LOGO = '<svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 11c0-2.2 1.8-4 4-4h12c2.2 0 4 1.8 4 4v5c0 6.1-4.9 11-11 11h-.1C9.4 27 6 23.6 6 19.1V11Z" fill="currentColor"/><path d="M9 13.5c2.2 1.4 4.5 2 7 2s4.8-.6 7-2" stroke="var(--knock)" stroke-width="2" stroke-linecap="round" fill="none"/><circle cx="14" cy="21.5" r="2.2" fill="var(--knock)"/><path d="M16.2 21.5V15.8l3.6-1" stroke="var(--knock)" stroke-width="1.8" stroke-linecap="round" fill="none"/></svg>'
 
 /* ════════ 유틸 ════════ */
 const RM = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const $ = (s, r = document) => r.querySelector(s)
 const esc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
-const pad = (n) => String(n).padStart(2, '0')
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v))
 const ease = (t) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2)
 const backOut = (t) => { const c = 1.5; return 1 + (c + 1) * (t - 1) ** 3 + c * (t - 1) ** 2 }
+const store = { get(k, d) { try { const v = localStorage.getItem('kq.' + k); return v == null ? d : JSON.parse(v) } catch { return d } }, set(k, v) { try { localStorage.setItem('kq.' + k, JSON.stringify(v)) } catch { /* 저장 안 됨 */ } } }
+function lum(hex) { const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16) / 255).map((x) => (x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4)); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2] }
+const onColor = (hex) => { const L = lum(hex); return (L + 0.05) / 0.05 > 1.05 / (L + 0.05) ? '#111111' : '#FFFFFF' }
 
-/* ════════ 소리 (WebAudio로 즉석 합성, 첫 터치 뒤부터) ════════ */
-let actx = null, noise = null, soundOn = true, lastFlick = 0
+/* ════════ 표지 그림 예시 (캔버스로 그림) ════════ */
+function pattern(kind) {
+  const c = document.createElement('canvas'); c.width = 480; c.height = 640
+  const g = c.getContext('2d')
+  if (kind === 'stripes') {
+    g.fillStyle = '#F2C14E'; g.fillRect(0, 0, 480, 640)
+    g.fillStyle = '#E4572E'
+    for (let x = -640; x < 480; x += 90) { g.beginPath(); g.moveTo(x, 640); g.lineTo(x + 45, 640); g.lineTo(x + 685, 0); g.lineTo(x + 640, 0); g.closePath(); g.fill() }
+  } else {
+    g.fillStyle = '#EDE6DA'; g.fillRect(0, 0, 480, 640)
+    const cols = ['#C9A27E', '#8DA399', '#D98C7A', '#5B6C8F']
+    for (let i = 0; i < 14; i++) { g.fillStyle = cols[i % 4]; g.beginPath(); g.arc((i * 137) % 480, (i * 211) % 640, 40 + (i * 23) % 70, 0, Math.PI * 2); g.fill() }
+  }
+  try { return c.toDataURL('image/jpeg', 0.85) } catch { return '' }
+}
+
+/* ════════ 데이터 (예시) ════════ */
+let SEQ = 1
+const S = (t, a, by = null) => ({ id: 's' + SEQ++, t, a, by })
+const COLORS = ['#1F3A5F', '#2F6B4F', '#C2412D', '#E3B23C', '#6B4FA0', '#D9779B', '#3E8EB8', '#8A5A3C', '#222222', '#E9E4D8', '#7FA37A', '#F06A3A']
+let myName = store.get('name', '하린')
+const IMG = { stripes: pattern('stripes'), dots: pattern('dots') }
+const PL = [
+  { id: 'p1', title: '새벽 운전', owner: '지우', cover: { type: 'color', v: '#1F3A5F' }, likes: 128, songs: [S('Nights', 'Frank Ocean'), S('Kyoto', 'Phoebe Bridgers', '민지'), S('Square (2017)', '백예린'), S('Antifreeze', '검정치마'), S('Plastic Love', '竹内まりや', '민준'), S('Space Song', 'Beach House'), S('밤편지', '아이유')] },
+  { id: 'p2', title: '첫 자취방', owner: '준호', cover: { type: 'color', v: '#E3B23C' }, likes: 42, songs: [S('별일 없이 산다', '장기하와 얼굴들'), S('위잉위잉', '혁오'), S('난춘', '새소년', '민지'), S('NO PAIN', '실리카겔'), S('주저하는 연인들을 위해', '잔나비')] },
+  { id: 'p3', title: '헬스장 금지곡', owner: '도윤', cover: { type: 'color', v: '#C2412D' }, likes: 77, songs: [S('Lose Yourself', 'Eminem'), S('Stronger', 'Kanye West'), S('Numb', 'Linkin Park'), S('말달리자', '크라잉넛', '서준'), S('낭만고양이', '체리필터', '유나'), S('고백 (Go Back)', '다이나믹 듀오')] },
+  { id: 'p4', title: '비 오는 날 작업용', owner: '민지', cover: { type: 'color', v: '#7FA37A' }, likes: 63, songs: [S('No Surprises', 'Radiohead'), S('Weird Fishes/Arpeggi', 'Radiohead'), S('Chamber of Reflection', 'Mac DeMarco', '하늘'), S('기억을 걷는 시간', '넬'), S('바람이 분다', '이소라'), S('산책', '백예린', '지우')] },
+  { id: 'p5', title: '여름 끝물', owner: '하늘', cover: { type: 'image', v: IMG.stripes }, likes: 91, songs: [S('Maria También', 'Khruangbin'), S('The Less I Know The Better', 'Tame Impala'), S('TOMBOY', '혁오'), S('Ditto', 'NewJeans', '서연'), S('Get Lucky', 'Daft Punk')] },
+  { id: 'p6', title: '출근길 30분', owner: '서연', cover: { type: 'color', v: '#3E8EB8' }, likes: 35, songs: [S('Blinding Lights', 'The Weeknd'), S('Hype Boy', 'NewJeans'), S('우주를 줄게', '볼빨간사춘기'), S('Yellow', 'Coldplay', '도윤'), S('봄이 좋냐??', '10cm')] },
+  { id: 'p7', title: '이별 후 3일차', owner: '유나', cover: { type: 'color', v: '#6B4FA0' }, likes: 54, songs: [S('너의 모든 순간', '성시경'), S('모든 날, 모든 순간', '폴킴', '지우'), S('Someone Like You', 'Adele'), S('서른 즈음에', '김광석'), S('Paris in the Rain', 'Lauv', '민준')] },
+  { id: 'p8', title: '노래방 18번', owner: '서준', cover: { type: 'color', v: '#F06A3A' }, likes: 88, songs: [S('가시', '버즈'), S('Tears', '소찬휘', '수아'), S('하하하쏭', '자우림'), S('해변의 여인', '쿨'), S('소녀시대', '이승철', '도윤')] },
+  { id: 'p9', title: '고양이랑 낮잠', owner: '수아', cover: { type: 'image', v: IMG.dots }, likes: 47, songs: [S("Don't Know Why", 'Norah Jones'), S('My Funny Valentine', 'Chet Baker'), S('공드리', '혁오', '유나'), S('무릎', '아이유')] },
+  { id: 'p10', title: '요즘 듣는 거', owner: myName, mine: true, cover: { type: 'color', v: '#222222' }, likes: 19, songs: [S('Ivy', 'Frank Ocean'), S('Hollywood', '검정치마'), S('Motion Sickness', 'Phoebe Bridgers', '지우'), S('Panda Bear', '혁오'), S('Everything', '검정치마', '민지')] },
+  { id: 'p11', title: '퇴근길', owner: myName, mine: true, cover: { type: 'color', v: '#E9E4D8' }, likes: 6, songs: [S('Sunday Morning', 'Maroon 5'), S('밤양갱', '비비')] },
+]
+const liked = new Set(store.get('liked', []))
+const byId = (id) => PL.find((p) => p.id === id)
+const coverVars = (p) => p.cover.type === 'image'
+  ? `--c:#333;--on:#FFFFFF;--img:url('${p.cover.v}')`
+  : `--c:${p.cover.v};--on:${onColor(p.cover.v)}`
+const isImg = (p) => p.cover.type === 'image'
+
+/* ════════ 소리 (0ddb584 그대로: WebAudio로 즉석 합성) ════════ */
+let actx = null, noise = null, soundOn = store.get('sound', true), lastFlick = 0
 function ac() {
   if (!actx) {
     try {
@@ -178,14 +364,6 @@ function burst({ type = 'bandpass', freq = 2500, freqTo = null, q = 1, gain = 0.
   src.connect(fl).connect(g).connect(ctx.destination)
   src.start(t, Math.random() * 0.3, dur + 0.05)
 }
-function tone(f0, f1, dur, gain, type = 'sine') {
-  const ctx = soundOn && actx && ac()
-  if (!ctx) return
-  const t = ctx.currentTime
-  const o = ctx.createOscillator(); o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f1, t + dur)
-  const g = ctx.createGain(); g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur)
-  o.connect(g).connect(ctx.destination); o.start(t); o.stop(t + dur + 0.02)
-}
 function flick(strength = 1) {
   const now = performance.now()
   if (now - lastFlick < 26) return
@@ -193,68 +371,107 @@ function flick(strength = 1) {
   burst({ freq: 1800 + Math.random() * 2200, q: 0.8, gain: 0.16 * strength, dur: 0.055 })
   try { navigator.vibrate?.(6) } catch { /* 진동 미지원 */ }
 }
-const thud = () => { burst({ type: 'lowpass', freq: 520, q: 0.7, gain: 0.35, dur: 0.14 }); tone(130, 62, 0.16, 0.22) }
 const swish = (back = false) => burst({ freq: back ? 2600 : 700, freqTo: back ? 700 : 2600, q: 0.6, gain: 0.08, dur: 0.24, attack: 0.05 })
+const tick2 = () => burst({ freq: 3200, q: 2, gain: 0.08, dur: 0.03 })
 
-/* ════════ 무대 만들기 ════════ */
-const stage = $('#stage'), file = $('#file'), hint = $('#hint'), countEl = $('#count')
-const POCKETS = []
-function pocketInner(l, i, freshLast = false) {
-  const slips = l.songs.filter((s) => s.by)
-  const shown = slips.slice(-3)
-  const peeks = shown.map((s, k) => `<span class="peek${freshLast && k === shown.length - 1 ? ' fresh' : ''}" style="left:${3 + k * 34}%;--r:${[-3, 2, -1.5][k]}deg;--lift:${[0, 7, 3][k]}px">${esc(s.by)}</span>`).join('')
-  const lines = l.songs.slice(0, 3).map((s, k) => `<p><b>${pad(k + 1)}</b>${esc(s.t)} — ${esc(s.a)}</p>`).join('')
-  return `<div class="back"></div>
-    <div class="tab" style="left:${(i % 4) * 20.6}%"><span>${esc(l.title)}</span></div>
-    <div class="paper">${lines}</div>
-    <div class="peeks">${peeks}</div>
-    <div class="front"><div class="label"><p class="l-title">${esc(l.title)}</p><p class="l-who">${esc(l.owner)}님의 플레이리스트</p><p class="l-meta">${l.songs.length}곡 · 쪽지 ${slips.length}장</p></div><p class="front-hint">눌러서 꺼내기 →</p></div>
-    <div class="shade"></div>`
+/* ════════ 컴포넌트 (HTML) ════════ */
+const C = {
+  btn: (label, { v = 'secondary', size = 'm', ic = '', act = '', attrs = '' } = {}) => `<button type="button" class="btn ${v} ${size}" ${act ? `data-act="${act}"` : ''} ${attrs}>${ic ? icon(ic) : ''}${label ? esc(label) : ''}</button>`,
+  ibtn: (ic, label, { v = '', size = 'm', act = '', attrs = '' } = {}) => `<button type="button" class="ibtn ${size} ${v}" aria-label="${esc(label)}" ${act ? `data-act="${act}"` : ''} ${attrs}>${icon(ic)}</button>`,
+  actionBar(p, where) {
+    const on = liked.has(p.id)
+    if (where === 'cover') {
+      return `<div class="abar">
+        <button type="button" class="btn on-cover m like" data-act="like" data-id="${p.id}" aria-pressed="${on}" aria-label="좋아요 ${p.likes}">${icon(on ? 'heart-fill' : 'heart')}<span>${p.likes}</span></button>
+        <button type="button" class="ibtn m on-cover" data-act="share" data-id="${p.id}" aria-label="공유">${icon('share-network')}</button>
+        <span class="grow"></span>
+        <button type="button" class="btn m on-cover-primary" data-act="add" data-id="${p.id}">${icon('plus')}곡 넣기</button></div>`
+    }
+    return `<div class="abar">
+      <button type="button" class="btn secondary m like" data-fa="like" tabindex="-1" aria-pressed="${on}" aria-label="좋아요 ${p.likes}">${icon(on ? 'heart-fill' : 'heart')}<span>${p.likes}</span></button>
+      <button type="button" class="ibtn m" data-fa="share" tabindex="-1" aria-label="공유">${icon('share-network')}</button>
+      <span class="grow"></span>
+      <button type="button" class="btn primary m" data-fa="add" tabindex="-1">${icon('plus')}곡 넣기</button></div>`
+  },
+  face(p, { rows = 5 } = {}) {
+    const extra = p.songs.length - rows
+    const list = p.songs.length
+      ? `<ol class="pv">${p.songs.slice(0, rows).map((s, k) => `<li><span class="n">${k + 1}</span><b>${esc(s.t)}</b><i>${esc(s.a)}</i>${s.by ? `<span class="by">${esc(s.by)}</span>` : ''}</li>`).join('')}${extra > 0 ? `<li class="more">외 ${extra}곡</li>` : ''}</ol>`
+      : '<div class="pv-empty">아직 곡이 없어요</div>'
+    return `<div class="face${isImg(p) ? ' is-img' : ''}" style="${coverVars(p)}">
+      ${isImg(p) ? '<div class="cv-img"></div>' : ''}
+      <div class="strip"><b class="ttl t-title-m">${esc(p.title)}</b><span class="cnt">${p.songs.length}곡</span></div>
+      <div class="pocketfront">
+        <p class="owner"><span>${esc(p.owner)}님의 플레이리스트</span><span>좋아요 ${p.likes}</span></p>
+        <div class="panel">${list}${C.actionBar(p, 'panel')}</div>
+      </div>
+      <div class="rim"></div></div>`
+  },
+  songRow(s, k, mode = 'feed') {
+    const tools = mode === 'manage'
+      ? `<span class="tools">${C.ibtn('pencil-simple', `‘${s.t}’ 편집`, { size: 's', v: 'ghost', act: 'edit-song', attrs: `data-k="${k}"` })}${C.ibtn('trash', `‘${s.t}’ 삭제`, { size: 's', v: 'ghost danger', act: 'del-song', attrs: `data-k="${k}"` })}</span>`
+      : ''
+    return `<li class="srow" data-k="${k}">
+      <button type="button" class="srow-main" ${mode === 'feed' ? `data-act="listen" data-k="${k}"` : 'tabindex="-1"'} aria-label="${esc(s.t)}, ${esc(s.a)}${s.by ? `, ${esc(s.by)}님이 넣음` : ''}">
+        <span class="thumb">${icon('music-note')}</span>
+        <span class="stxt"><b>${esc(s.t)}</b><span class="ssub"><span class="ar">${esc(s.a)}</span>${s.by ? `<span class="badge">${esc(s.by)}님이 넣음</span>` : ''}</span></span>
+      </button>${tools}
+      <button type="button" class="grip" data-grip aria-label="‘${esc(s.t)}’ 순서 바꾸기. 위아래 방향키로 옮겨요">${icon('dots-six-vertical')}</button></li>`
+  },
+  prow: (p) => `<button type="button" class="prow" data-go="edit-${p.id}">
+      <span class="pthumb${isImg(p) ? ' is-img' : ''}" style="${coverVars(p)}">${isImg(p) ? '<span class="cv-img"></span>' : icon('music-note')}</span>
+      <span><b>${esc(p.title)}</b><span class="meta">${p.songs.length}곡 · 좋아요 ${p.likes}</span></span>${icon('caret-right')}</button>`,
+  tf: (id, label, { value = '', ph = '', max = 60 } = {}) => `<div class="tf" id="${id}-w"><label for="${id}">${esc(label)}</label><input id="${id}" value="${esc(value)}" placeholder="${esc(ph)}" maxlength="${max}" autocomplete="off"><p class="msg" id="${id}-m" hidden></p></div>`,
+  seg: (name, opts, cur) => `<div class="seg" role="group">${opts.map(([v, l]) => `<button type="button" data-seg="${name}" data-v="${v}" aria-pressed="${v === cur}">${esc(l)}</button>`).join('')}</div>`,
+}
+
+/* ════════ 피드 · 아코디언 ════════ */
+const stage = $('#stage'), file = $('#file'), hint = $('#hint'), posEl = $('#pos')
+let POCKETS = []
+const N = () => PL.length
+function renderPocket(i) {
+  const p = POCKETS[i]
+  p.innerHTML = C.face(PL[i], { rows: G.rows }) + '<div class="shade"></div>'
+  p._back = p._focus = undefined
 }
 function build() {
-  LISTS.forEach((l, i) => {
-    const p = document.createElement('div')
-    p.className = 'pocket'
-    p.dataset.i = i
-    p.innerHTML = pocketInner(l, i)
-    file.append(p)
-    POCKETS.push(p)
-  })
+  file.innerHTML = ''
+  POCKETS = PL.map((pl, i) => { const el = document.createElement('div'); el.className = 'pocket'; el.dataset.i = i; file.append(el); return el })
+  POCKETS.forEach((_, i) => renderPocket(i))
+  bumps = new Array(N()).fill(0)
 }
 
-/* ════════ 상태 · 물리 ════════ */
-let f = 0, vel = 0, target = 0
-let dragging = false, raf = 0, last = 0
-let lastCell = 0, flips = 0
-let introStart = 0, introDone = RM
-const bumps = new Array(N).fill(0)
-let openIdx = null, myName = ''
-let G = { sw: 360, sh: 640, W: 340, H: 440, step: 70 }
-
+let f = 0, vel = 0, target = 0, dragging = false, raf = 0, last = 0, lastCell = 0, flips = 0
+let introStart = 0, introDone = RM, bumps = []
+let openId = null
+const STRIP = 44, VIS = 4
+let G = { sh: 640, W: 340, H: 460, step: 70, rows: 5 }
 function measure() {
   const r = stage.getBoundingClientRect()
-  const W = Math.min(r.width - 6, 540)
-  const H = Math.min(r.height * 0.7, W * 1.38, 680)
-  G = { sw: r.width, sh: r.height, W, H, step: clamp(r.height * 0.1, 54, 88) }
+  const W = Math.min(r.width - 40, 420)
+  const hinge = Math.max(12, r.height * 0.03)
+  const H = Math.max(300, Math.min(r.height - hinge - STRIP * VIS - 4, W * 1.5))
+  const rows = clamp(Math.floor((H - 56 - 12 - 22.5 - 12 - 20 - 46 - 12) / 36), 2, 7)
+  const changed = rows !== G.rows
+  G = { sh: r.height, W, H, step: clamp(r.height * 0.1, 54, 88), rows }
   file.style.setProperty('--W', `${W}px`)
   file.style.setProperty('--H', `${H}px`)
-  file.style.setProperty('--hingeB', `${r.height * 0.09}px`)
+  file.style.setProperty('--hingeB', `${hinge}px`)
+  if (changed && POCKETS.length) POCKETS.forEach((_, i) => renderPocket(i))
 }
-
-/* d = 칸 번호 − 지금 보는 위치. 0이면 똑바로 선 칸, 양수는 뒤에 기대 선 칸, 음수는 앞으로 넘어간 칸 */
 const FLAT = -84
 function pose(d) {
   let rot, ty, tz, shade, op = 1
   if (d >= 0) {
-    const k = Math.min(d, 9)
-    rot = 3 + k * 1.3; ty = -k * 16; tz = -k * 34; shade = Math.min(0.5, k * 0.065)
-    if (d > 8) op = Math.max(0, 9 - d)
+    const k = Math.min(d, VIS + 1)
+    rot = 2 + k * 1.6; ty = -k * STRIP; tz = -k * 22; shade = Math.min(0.45, k * 0.08)
+    if (d > VIS) op = Math.max(0, VIS + 1 - d)
   } else if (d > -1) {
     const t = ease(-d)
-    rot = 3 + (FLAT - 3) * t; ty = 8 * t; tz = 20 * t; shade = 0.34 * t
+    rot = 2 + (FLAT - 2) * t; ty = 8 * t; tz = 20 * t; shade = 0.3 * t
   } else {
     const k = Math.min(-d - 1, 6)
-    rot = FLAT - k * 1.2; ty = 8 + k * 5; tz = 20 + k * 3; shade = 0.4 + k * 0.03
+    rot = FLAT - k * 1.2; ty = 8 + k * 5; tz = 20 + k * 3; shade = 0.36 + k * 0.03
     if (-d > 6) op = Math.max(0, 7 + d)
   }
   return { rot, ty, tz, shade, op }
@@ -262,23 +479,17 @@ function pose(d) {
 function layout(now) {
   const cell = Math.round(f)
   const settled = Math.abs(f - cell) < 0.18 && introDone
-  let introBusy = false
-  for (let i = 0; i < N; i++) {
+  let busy = false
+  for (let i = 0; i < N(); i++) {
     const el = POCKETS[i]
     const d = i - f
     const p = pose(d)
-    // 처음 열 때: 앞 칸부터 차례로 아래에서 주르륵 올라옴
     let e = 1
-    if (!introDone) {
-      e = clamp((now - introStart - i * 55) / 460, 0, 1)
-      if (e < 1) introBusy = true
-      e = backOut(e)
-    }
-    const b = bumps[i]
+    if (!introDone) { e = clamp((now - introStart - i * 55) / 460, 0, 1); if (e < 1) busy = true; e = backOut(e) }
+    const b = bumps[i] || 0
     const rot = p.rot * e - b * 5
     const ty = p.ty * e + (1 - e) * G.sh * 0.75 + b * 6
-    const tz = p.tz * e
-    el.style.transform = `translate3d(0,${ty.toFixed(2)}px,${tz.toFixed(2)}px) rotateX(${rot.toFixed(2)}deg)`
+    el.style.transform = `translate3d(0,${ty.toFixed(2)}px,${(p.tz * e).toFixed(2)}px) rotateX(${rot.toFixed(2)}deg)`
     el.style.opacity = p.op
     el.style.visibility = p.op < 0.01 ? 'hidden' : ''
     el.style.setProperty('--shade', p.shade.toFixed(3))
@@ -286,17 +497,17 @@ function layout(now) {
     const back = rot < -70
     if (el._back !== back) { el._back = back; el.classList.toggle('is-back', back) }
     const focus = settled && i === cell
-    if (el._focus !== focus) { el._focus = focus; el.classList.toggle('is-focus', focus) }
+    if (el._focus !== focus) { el._focus = focus; el.classList.toggle('is-focus', focus); el.setAttribute('aria-hidden', String(!focus)) }
   }
-  if (!introDone && !introBusy && introStart) introDone = true
+  if (!introDone && !busy && introStart) introDone = true
 }
 function crossing() {
-  const cell = clamp(Math.round(f), 0, N - 1)
+  const cell = clamp(Math.round(f), 0, N() - 1)
   if (cell === lastCell) return
   const n = Math.abs(cell - lastCell)
   lastCell = cell
   for (let k = 0; k < Math.min(n, 4); k++) setTimeout(() => flick(0.8 + Math.random() * 0.4), k * 24)
-  countEl.textContent = `${pad(cell + 1)} / ${pad(N)}`
+  posEl.textContent = `${cell + 1} / ${N()}`
   flips += n
   if (flips >= 3) hint.classList.add('gone')
 }
@@ -313,19 +524,18 @@ function tick(t) {
       if (Math.abs(target - f) < 0.0008 && Math.abs(vel) < 0.003) { f = target; vel = 0 }
     }
   }
-  for (let i = 0; i < N; i++) if (bumps[i]) { bumps[i] *= Math.exp(-dt * 7); if (bumps[i] < 0.002) bumps[i] = 0 }
+  for (let i = 0; i < N(); i++) if (bumps[i]) { bumps[i] *= Math.exp(-dt * 7); if (bumps[i] < 0.002) bumps[i] = 0 }
   crossing()
   layout(t)
   if (dragging || f !== target || !introDone || bumps.some(Boolean)) kick()
   else last = 0
 }
 function kick() { if (!raf) raf = requestAnimationFrame(tick) }
-function goTo(i) { target = clamp(i, 0, N - 1); kick() }
+function goTo(i) { target = clamp(i, 0, N() - 1); kick() }
 
-/* 끌어서 넘기기 */
 let down = null, samples = []
 stage.addEventListener('pointerdown', (e) => {
-  if (e.button !== 0 || openIdx != null) return
+  if (e.button !== 0 || openId) return
   ac()
   down = { x: e.clientX, y: e.clientY, f0: f, moved: false }
   samples = [{ y: e.clientY, t: performance.now() }]
@@ -338,7 +548,7 @@ stage.addEventListener('pointermove', (e) => {
   if (!dragging) return
   let nf = down.f0 - dy / G.step
   if (nf < 0) nf *= 0.35
-  if (nf > N - 1) nf = N - 1 + (nf - (N - 1)) * 0.35
+  if (nf > N() - 1) nf = N() - 1 + (nf - (N() - 1)) * 0.35
   f = nf
   const now = performance.now()
   samples.push({ y: e.clientY, t: now })
@@ -355,191 +565,365 @@ function endDrag(e, cancelled) {
   const a = samples[0], b = samples[samples.length - 1]
   const dt = Math.max(0.016, (b.t - a.t) / 1000)
   vel = clamp(-((b.y - a.y) / dt) / G.step, -40, 40)
-  target = clamp(Math.round(f + vel * 0.17), 0, N - 1)
+  target = clamp(Math.round(f + vel * 0.17), 0, N() - 1)
   kick()
 }
 stage.addEventListener('pointerup', (e) => endDrag(e, false))
 stage.addEventListener('pointercancel', (e) => endDrag(e, true))
 function tap(x, y) {
-  const pocket = document.elementFromPoint(x, y)?.closest('.pocket[data-i]')
+  const el = document.elementFromPoint(x, y)
+  const pocket = el?.closest('.pocket[data-i]')
   if (!pocket) return
   const i = Number(pocket.dataset.i)
-  if (i === Math.round(target) && Math.abs(f - target) < 0.08) openSheet(i)
-  else goTo(i)
+  const front = i === Math.round(target) && Math.abs(f - target) < 0.08
+  if (!front) { goTo(i); return }
+  const fa = el.closest('[data-fa]')?.dataset.fa
+  if (fa === 'like') toggleLike(PL[i].id)
+  else if (fa === 'share') share(PL[i].id)
+  else if (fa === 'add') openAdd(PL[i].id)
+  else openDetail(PL[i].id)
 }
-
-/* 휠 · 키보드 */
 let wheelAcc = 0
 stage.addEventListener('wheel', (e) => {
   e.preventDefault()
-  if (openIdx != null) return
+  if (openId) return
   wheelAcc += e.deltaMode === 1 ? e.deltaY * 30 : e.deltaY
-  while (Math.abs(wheelAcc) >= 55) {
-    const s = Math.sign(wheelAcc)
-    target = clamp(target + s, 0, N - 1)
-    wheelAcc -= s * 55
-  }
+  while (Math.abs(wheelAcc) >= 55) { const s = Math.sign(wheelAcc); target = clamp(target + s, 0, N() - 1); wheelAcc -= s * 55 }
   kick()
 }, { passive: false })
-window.addEventListener('keydown', (e) => {
-  if (openIdx != null) {
-    if (e.key === 'Escape') { e.preventDefault(); if (!$('#slip-form')?.hidden) toggleForm(false); else closeSheet() }
-    return
-  }
-  if (e.target.closest?.('input, button')) return
-  if (['ArrowDown', 'ArrowRight', 'j', 'PageDown'].includes(e.key)) { e.preventDefault(); goTo(target + 1) }
-  else if (['ArrowUp', 'ArrowLeft', 'k', 'PageUp'].includes(e.key)) { e.preventDefault(); goTo(target - 1) }
-  else if (e.key === 'Enter') { e.preventDefault(); if (Math.abs(f - target) < 0.08) openSheet(Math.round(target)) }
+stage.addEventListener('keydown', (e) => {
+  if (['ArrowDown', 'ArrowRight', 'PageDown'].includes(e.key)) { e.preventDefault(); goTo(target + 1) }
+  else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); goTo(target - 1) }
+  else if (e.key === 'Enter' && e.target === stage) { e.preventDefault(); if (Math.abs(f - target) < 0.08) openDetail(PL[Math.round(target)].id) }
 })
+const idxOf = (id) => PL.findIndex((p) => p.id === id)
+function refreshFile(id) { const i = idxOf(id); if (i >= 0) renderPocket(i); layout(performance.now()) }
 
-/* ════════ 꺼낸 시트 ════════ */
-const layer = $('#layer'), card = $('#card'), backdrop = $('#backdrop')
-function cardHTML(l) {
-  const slips = l.songs.filter((s) => s.by).length
-  return `<div class="card-head"><h2 class="card-title" id="card-title">${esc(l.title)}</h2><button class="put-back" data-act="close-sheet">다시 꽂기</button></div>
-    <div class="card-body">
-      <p class="card-who">${esc(l.owner)}님의 플레이리스트 · ${l.songs.length}곡 · 쪽지 ${slips}장</p>
-      <ol class="lines">${l.songs.map((s, i) => s.by
-        ? `<li class="slip" style="--r:${slipTilt(s)}deg"><span class="n">${pad(i + 1)}</span><span class="s"><b>${esc(s.t)}</b><i>${esc(s.a)}</i></span><span class="who">${esc(s.by)}님이 넣음</span></li>`
-        : `<li><span class="n">${pad(i + 1)}</span><span class="s"><b>${esc(s.t)}</b><i>${esc(s.a)}</i></span><span></span></li>`).join('')}</ol>
-    </div>
-    <div class="card-foot" id="card-foot"><button class="add" data-act="slip-form">쪽지 넣기</button></div>
-    <form class="slip-form" id="slip-form" novalidate hidden>
-      <p class="form-h">쪽지에 적어 주세요</p>
-      <input id="sf-title" placeholder="노래 제목" maxlength="60" autocomplete="off" aria-label="노래 제목">
-      <input id="sf-artist" placeholder="가수" maxlength="40" autocomplete="off" aria-label="가수">
-      <input id="sf-name" placeholder="내 이름" maxlength="10" autocomplete="off" aria-label="내 이름" value="${esc(myName)}">
-      <p class="sf-err" id="sf-err" role="alert"></p>
-      <div class="sf-row"><button type="button" class="sf-cancel" data-act="slip-cancel">그만두기</button><button type="submit" class="sf-go">쏙 넣기</button></div>
-    </form>`
+/* ════════ 상세 (열린 파일) ════════ */
+const dl = $('#dl'), detail = $('#detail')
+function detailHTML(p) {
+  return `<header class="dcover${isImg(p) ? ' is-img' : ''}" style="${coverVars(p)}">${isImg(p) ? '<div class="cv-img"></div>' : ''}
+      <div class="dtop"><span class="t-body-s">${esc(p.owner)}님의 플레이리스트</span>${C.ibtn('x', '닫기', { v: 'on-cover', act: 'close-detail' })}</div>
+      <h2 class="t-title-l" id="d-title">${esc(p.title)}</h2>
+      <p class="t-caption dmeta">${p.songs.length}곡 · 좋아요 ${p.likes}</p>
+      ${C.actionBar(p, 'cover')}
+    </header>
+    <div class="dbody">
+      ${p.songs.length ? `<ol class="songs" id="d-songs">${p.songs.map((s, k) => C.songRow(s, k, 'feed')).join('')}</ol>` : '<p class="dhint t-body-s">아직 곡이 없어요. 첫 곡을 넣어 보세요.</p>'}
+      <p class="dhint t-caption">곡을 누르면 들을 곳을 골라요. 오른쪽 손잡이를 끌면 순서가 바뀌어요.</p>
+    </div>`
 }
-function openSheet(i) {
-  if (openIdx != null) return
-  openIdx = i
-  card.innerHTML = cardHTML(LISTS[i])
-  layer.hidden = false
-  const p = POCKETS[i]
-  const from = p.querySelector('.paper').getBoundingClientRect()
-  p.classList.add('pulled')
+function renderDetail(focusSel) {
+  const p = byId(openId)
+  const y = $('.dbody', detail)?.scrollTop || 0
+  detail.innerHTML = detailHTML(p)
+  $('.dbody', detail).scrollTop = y
+  const list = $('#d-songs', detail)
+  if (list) enableReorder(list, () => byId(openId).songs, () => { renderDetail(); refreshFile(openId) })
+  if (focusSel) $(focusSel, detail)?.focus({ preventScroll: true })
+}
+function openDetail(id) {
+  if (openId) return
+  openId = id
+  renderDetail()
+  dl.hidden = false
   swish()
-  if (!RM) {
-    const to = card.getBoundingClientRect()
-    card.animate([
-      { transform: `translate(${from.left - to.left}px,${from.top - to.top}px) scale(${from.width / to.width},${from.height / to.height})` },
-      { transform: 'translate(0,-10px) scale(1.01)', offset: 0.75 },
-      { transform: 'none' },
-    ], { duration: 520, easing: 'cubic-bezier(.2,.8,.2,1)' })
-    backdrop.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 300 })
+  const pocket = POCKETS[idxOf(id)]
+  if (!RM && pocket) {
+    const from = pocket.getBoundingClientRect(), to = detail.getBoundingClientRect()
+    detail.animate([
+      { transform: `translate(${from.left - to.left}px,${from.top - to.top}px) scale(${from.width / to.width},${from.height / to.height})`, opacity: 0.6 },
+      { transform: 'none', opacity: 1 },
+    ], { duration: 420, easing: 'cubic-bezier(.2,.8,.2,1)' })
+    $('.dim', dl).animate([{ opacity: 0 }, { opacity: 1 }], { duration: 280 })
   }
-  $('.put-back', card).focus({ preventScroll: true })
+  $('[data-act="close-detail"].ibtn', detail)?.focus({ preventScroll: true })
 }
-function closeSheet(after) {
-  if (openIdx == null) { after?.(); return }
-  const p = POCKETS[openIdx]
-  const finish = () => {
-    card.getAnimations().forEach((a) => a.cancel())
-    backdrop.getAnimations().forEach((a) => a.cancel())
-    layer.hidden = true
-    card.innerHTML = ''
-    p.classList.remove('pulled')
-    openIdx = null
-    stage.focus({ preventScroll: true })
-    after?.()
-  }
-  if (RM) { finish(); return }
-  const to = p.querySelector('.paper').getBoundingClientRect()
-  const from = card.getBoundingClientRect()
+function closeDetail() {
+  if (!openId) return
+  const pocket = POCKETS[idxOf(openId)]
+  const finish = () => { detail.getAnimations().forEach((a) => a.cancel()); $('.dim', dl).getAnimations().forEach((a) => a.cancel()); dl.hidden = true; detail.innerHTML = ''; openId = null; stage.focus({ preventScroll: true }) }
+  if (RM || !pocket) { finish(); return }
   swish(true)
-  card.animate([
-    { transform: 'none' },
-    { transform: `translate(${to.left - from.left}px,${to.top - from.top}px) scale(${to.width / from.width},${to.height / from.height})` },
-  ], { duration: 360, easing: 'cubic-bezier(.55,0,.75,.2)', fill: 'forwards' }).finished.then(finish, finish)
-  backdrop.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 360, fill: 'forwards' })
+  const to = pocket.getBoundingClientRect(), from = detail.getBoundingClientRect()
+  detail.animate([{ transform: 'none', opacity: 1 }, { transform: `translate(${to.left - from.left}px,${to.top - from.top}px) scale(${to.width / from.width},${to.height / from.height})`, opacity: 0.4 }], { duration: 300, easing: 'cubic-bezier(.55,0,.75,.2)', fill: 'forwards' }).finished.then(finish, finish)
+  $('.dim', dl).animate([{ opacity: 1 }, { opacity: 0 }], { duration: 300, fill: 'forwards' })
 }
-function toggleForm(on) {
-  const form = $('#slip-form'), foot = $('#card-foot')
-  form.hidden = !on
-  foot.hidden = on
-  if (on) {
-    $('#sf-err').textContent = ''
-    $('#sf-title').focus({ preventScroll: true })
-    form.scrollIntoView({ block: 'nearest' })
-    if (!RM) form.animate([{ transform: 'translateY(40px) rotate(3deg)', opacity: 0 }, { transform: 'rotate(-0.8deg)', opacity: 1 }], { duration: 320, easing: 'cubic-bezier(.3,1.4,.5,1)' })
-  } else $('.add', card)?.focus({ preventScroll: true })
+
+/* ════════ 순서 바꾸기 (끌기 + 방향키) ════════ */
+function enableReorder(list, getArr, done) {
+  list.addEventListener('pointerdown', (e) => {
+    const grip = e.target.closest('[data-grip]')
+    if (!grip || e.button !== 0) return
+    e.preventDefault()
+    ac()
+    const row = grip.closest('.srow'), rows = [...list.children], from = rows.indexOf(row)
+    const h = row.offsetHeight, y0 = e.clientY
+    let to = from
+    row.classList.add('dragging')
+    grip.setPointerCapture(e.pointerId)
+    const move = (ev) => {
+      const dy = ev.clientY - y0
+      row.style.transform = `translateY(${dy}px)`
+      const nt = clamp(from + Math.round(dy / h), 0, rows.length - 1)
+      if (nt !== to) { to = nt; tick2() }
+      rows.forEach((r, k) => { if (r === row) return; let s = 0; if (from < to && k > from && k <= to) s = -h; if (from > to && k < from && k >= to) s = h; r.style.transform = s ? `translateY(${s}px)` : ''; r.style.transition = RM ? '' : 'transform .18s ease-out' })
+    }
+    const up = () => {
+      grip.removeEventListener('pointermove', move); grip.removeEventListener('pointerup', up); grip.removeEventListener('pointercancel', up)
+      rows.forEach((r) => { r.style.transform = ''; r.style.transition = '' })
+      row.classList.remove('dragging')
+      if (to !== from) { const arr = getArr(); arr.splice(to, 0, arr.splice(from, 1)[0]); done(); toast('순서를 바꿨어요') }
+    }
+    grip.addEventListener('pointermove', move); grip.addEventListener('pointerup', up); grip.addEventListener('pointercancel', up)
+  })
+  list.addEventListener('keydown', (e) => {
+    const grip = e.target.closest('[data-grip]')
+    if (!grip || !['ArrowUp', 'ArrowDown'].includes(e.key)) return
+    e.preventDefault()
+    const from = Number(grip.closest('.srow').dataset.k), arr = getArr(), to = clamp(from + (e.key === 'ArrowUp' ? -1 : 1), 0, arr.length - 1)
+    if (to === from) return
+    arr.splice(to, 0, arr.splice(from, 1)[0])
+    done()
+    document.querySelector(`.srow[data-k="${to}"] [data-grip]`)?.focus()
+  })
 }
-function submitSlip() {
-  const title = $('#sf-title').value.trim()
-  const artist = $('#sf-artist').value.trim()
-  const name = $('#sf-name').value.trim().replace(/님$/, '')
-  const err = !title ? '노래 제목을 적어 주세요' : !name ? '이름을 적어 주세요. 주인에게 ‘○○님이 넣음’으로 보여요' : ''
-  if (err) { $('#sf-err').textContent = err; return }
-  const i = openIdx
-  const from = $('#slip-form').getBoundingClientRect()
-  myName = name
-  LISTS[i].songs.push(S(title, artist || '모르는 가수', name))
-  closeSheet(() => flySlip(from, i, title, name))
+
+/* ════════ 좋아요 · 공유 · 듣기 ════════ */
+function toggleLike(id) {
+  const p = byId(id)
+  if (liked.has(id)) { liked.delete(id); p.likes-- } else { liked.add(id); p.likes++ ; tick2() }
+  store.set('liked', [...liked])
+  refreshFile(id)
+  if (openId === id) renderDetail('[data-act="like"]')
 }
-function flySlip(from, i, title, name) {
-  const p = POCKETS[i]
-  const arrive = () => {
-    thud()
-    bumps[i] = 1
-    p.innerHTML = pocketInner(LISTS[i], i, true)
-    kick()
-    const fr = p.querySelector('.front').getBoundingClientRect()
-    const pop = document.createElement('p')
-    pop.className = 'pop'
-    pop.textContent = '쏙!'
-    pop.style.left = `${fr.left + fr.width / 2 - 22}px`
-    pop.style.top = `${fr.top - 70}px`
-    document.body.append(pop)
-    if (RM) setTimeout(() => pop.remove(), 600)
-    else pop.animate([{ transform: 'translateY(10px) scale(.6)', opacity: 0 }, { transform: 'translateY(-8px) scale(1.1)', opacity: 1, offset: 0.35 }, { transform: 'translateY(-26px) scale(1)', opacity: 0 }], { duration: 900, easing: 'ease-out' }).finished.then(() => pop.remove())
-  }
-  if (RM) { arrive(); return }
-  const fr = p.querySelector('.front').getBoundingClientRect()
-  const w = 168, h = 92
-  const x0 = from.left + from.width / 2 - w / 2, y0 = from.top + from.height / 2 - h / 2
-  const x1 = fr.left + fr.width / 2 - w / 2, y1 = fr.top - h * 0.62
-  const fl = document.createElement('div')
-  fl.className = 'flyer'
-  fl.innerHTML = `<b>${esc(title)}</b><span>${esc(name)}</span>`
-  document.body.append(fl)
-  fl.animate([
-    { transform: `translate(${x0}px,${y0}px) rotate(-4deg) scale(1)` },
-    { transform: `translate(${(x0 + x1) / 2}px,${Math.min(y0, y1) - 90}px) rotate(12deg) scale(.82)`, offset: 0.45 },
-    { transform: `translate(${x1}px,${y1}px) rotate(-3deg) scale(.6)`, offset: 0.8 },
-    { transform: `translate(${x1}px,${y1 + 50}px) rotate(0deg) scale(.55)`, opacity: 0 },
-  ], { duration: 820, easing: 'cubic-bezier(.3,.7,.4,1)', fill: 'forwards' }).finished.then(() => fl.remove())
-  setTimeout(arrive, 650)
+function share(id) {
+  const link = `https://example.com/kanqaroo/p/${id}`
+  const ok = () => toast('공유 링크를 복사했어요')
+  try { navigator.clipboard.writeText(link).then(ok, () => toast(`링크: ${link}`)) } catch { toast(`링크: ${link}`) }
 }
+function openListen(k) {
+  const s = byId(openId).songs[k]
+  const q = encodeURIComponent(`${s.t} ${s.a}`)
+  const opt = (href, ic, label) => `<a class="lopt" href="${href}" target="_blank" rel="noopener">${icon(ic, 'ic-24')}${label}${icon('caret-right')}</a>`
+  openBS(`<div class="handle"></div>
+    <div class="bs-head"><h2 class="t-title-m" id="bs-title">${esc(s.t)}</h2><p class="t-body-s">${esc(s.a)}${s.by ? ` · ${esc(s.by)}님이 넣음` : ''}</p></div>
+    <div class="lopts">${opt(`https://www.youtube.com/results?search_query=${q}`, 'youtube-logo', 'YouTube에서 듣기')}${opt(`https://open.spotify.com/search/${q}`, 'spotify-logo', 'Spotify에서 듣기')}${opt(`https://music.apple.com/kr/search?term=${q}`, 'apple-logo', 'Apple Music에서 듣기')}</div>
+    ${C.btn('닫기', { v: 'secondary', size: 'l', act: 'close-bs' })}`)
+}
+
+/* ════════ 곡 넣기 · 편집 (BottomSheet) ════════ */
+const bs = $('#bs'), bsheet = $('#bsheet')
+let bsSubmit = null
+function openBS(html, onSubmit = null) {
+  bsheet.innerHTML = html
+  bsSubmit = onSubmit
+  bs.hidden = false
+  if (!RM) { bsheet.animate([{ transform: 'translateY(100%)' }, { transform: 'none' }], { duration: 280, easing: 'cubic-bezier(.2,.8,.2,1)' }); $('.dim', bs).animate([{ opacity: 0 }, { opacity: 1 }], { duration: 280 }) }
+  ;($('input', bsheet) || $('a, button', bsheet))?.focus({ preventScroll: true })
+}
+function closeBS() { bs.hidden = true; bsheet.innerHTML = ''; bsSubmit = null }
+function songForm({ title, sub, withName, s = {}, cta }) {
+  return `<form id="sf" novalidate style="display:grid;gap:16px"><div class="handle"></div>
+    <div class="bs-head"><h2 class="t-title-m" id="bs-title">${esc(title)}</h2>${sub ? `<p class="t-body-s">${esc(sub)}</p>` : ''}</div>
+    ${C.tf('f-t', '제목', { value: s.t || '', ph: '예: Kyoto' })}
+    ${C.tf('f-a', '아티스트', { value: s.a || '', ph: '예: Phoebe Bridgers', max: 40 })}
+    ${withName ? C.tf('f-n', '내 이름', { value: myName, ph: '플레이리스트에 함께 보여요', max: 12 }) : ''}
+    <button type="submit" class="btn primary xl">${esc(cta)}</button></form>`
+}
+function fieldErr(id, msg) { const w = $(`#${id}-w`), m = $(`#${id}-m`); w.classList.toggle('err', !!msg); m.hidden = !msg; m.textContent = msg || '' }
+function readSong(withName) {
+  const t = $('#f-t').value.trim(), a = $('#f-a').value.trim(), n = withName ? $('#f-n').value.trim().replace(/님$/, '') : ''
+  fieldErr('f-t', t ? '' : '제목을 적어 주세요'); fieldErr('f-a', a ? '' : '아티스트를 적어 주세요')
+  if (withName) fieldErr('f-n', n ? '' : '이름을 적어 주세요. 넣은 곡에 함께 보여요')
+  if (!t || !a || (withName && !n)) { $('.tf.err input', bsheet)?.focus(); return null }
+  return { t, a, n }
+}
+function openAdd(id, { owner = false } = {}) {
+  const p = byId(id)
+  openBS(songForm({ title: `‘${p.title}’에 곡 넣기`, sub: owner ? '' : '넣은 곡은 맨 아래에 들어가요. 넣은 뒤 끌어서 자리를 옮길 수 있어요.', withName: !owner, cta: '넣기' }), () => {
+    const v = readSong(!owner)
+    if (!v) return
+    if (!owner) { myName = v.n; store.set('name', myName) }
+    const s = S(v.t, v.a, owner ? null : v.n)
+    p.songs.push(s)
+    closeBS()
+    refreshFile(id)
+    if (openId === id) { renderDetail(); const row = detail.querySelector(`.srow[data-k="${p.songs.length - 1}"]`); row?.classList.add('fresh'); row?.scrollIntoView({ block: 'nearest', behavior: RM ? 'auto' : 'smooth' }) }
+    if (route.cur.startsWith('edit-')) renderEdit(id)
+    bumps[idxOf(id)] = 1; kick()
+    toast(`‘${v.t}’를 넣었어요`)
+  })
+}
+function openEditSong(id, k) {
+  const p = byId(id), s = p.songs[k]
+  openBS(songForm({ title: '곡 편집', withName: false, s, cta: '저장' }), () => {
+    const v = readSong(false)
+    if (!v) return
+    s.t = v.t; s.a = v.a
+    closeBS(); renderEdit(id); refreshFile(id); toast('저장했어요')
+  })
+}
+
+/* ════════ 다이얼로그 · 토스트 ════════ */
+const dg = $('#dg'), dlg = $('#dlg')
+let dgOk = null
+function confirmDlg({ title, body, ok, onOk }) {
+  dlg.innerHTML = `<h2 class="t-title-m" id="dg-title">${esc(title)}</h2><p class="t-body-s">${esc(body)}</p><div class="row2">${C.btn('취소', { v: 'secondary', size: 'l', act: 'close-dg' })}${C.btn(ok, { v: 'danger', size: 'l', act: 'dg-ok' })}</div>`
+  dgOk = onOk
+  dg.hidden = false
+  $('[data-act="close-dg"]', dlg).focus()
+}
+let toastT = 0
+function toast(msg) {
+  const t = $('#toast')
+  t.textContent = msg
+  t.hidden = false
+  if (!RM) t.animate([{ opacity: 0, transform: 'translate(-50%, 8px)' }, { opacity: 1, transform: 'translate(-50%, 0)' }], { duration: 200, easing: 'ease-out' })
+  clearTimeout(toastT)
+  toastT = setTimeout(() => { t.hidden = true }, 2200)
+}
+
+/* ════════ 페이지: 내 플레이리스트 · 편집 · 컴포넌트 ════════ */
+const pgMe = $('#pg-me'), pgEdit = $('#pg-edit'), pgComp = $('#pg-comp')
+const themeNow = () => document.documentElement.dataset.theme || 'system'
+function renderMe() {
+  const mine = PL.filter((p) => p.mine)
+  pgMe.innerHTML = `<div class="page-in">
+      <div class="ph"><h1 class="t-title-l">내 플레이리스트</h1><p class="t-body-s">이 기기에서 만든 플레이리스트예요. 다른 기기에서도 관리하려면 관리 링크를 저장해 두세요.</p></div>
+      <div>${C.btn('관리 링크 복사', { v: 'secondary', size: 'm', ic: 'link', act: 'copy-manage' })}</div>
+      <div><p class="sec-title">플레이리스트 ${mine.length}개</p><div class="card glass">${mine.length ? mine.map(C.prow).join('') : '<p class="t-body-s" style="padding:16px;color:var(--text-2)">아직 없어요. 아래에서 새로 만들어 보세요.</p>'}</div></div>
+      <div><p class="sec-title">설정</p><div class="card glass">
+        <div class="setrow"><span class="t-body-s">내 이름</span><span class="t-body-s" style="color:var(--text-2)">${esc(myName)}</span></div>
+        <div class="setrow"><span class="t-body-s">화면</span>${C.seg('theme', [['system', '시스템'], ['light', '라이트'], ['dark', '다크']], themeNow())}</div>
+        <div class="setrow"><span class="t-body-s">넘길 때 소리</span>${C.seg('sound', [['on', '켬'], ['off', '끔']], soundOn ? 'on' : 'off')}</div>
+        <button type="button" class="setrow link" data-act="go-comp"><span class="t-body-s">컴포넌트 시트</span>${icon('caret-right')}</button>
+      </div></div>
+    </div>
+    <div class="cta"><div>${C.btn('새 플레이리스트', { v: 'primary', size: 'xl', ic: 'plus', act: 'new-pl' })}</div></div>`
+}
+function renderEdit(id) {
+  const p = byId(id)
+  if (!p) { location.hash = 'me'; return }
+  const y = pgEdit.scrollTop
+  pgEdit.innerHTML = `<div class="page-in">
+      <div class="subbar">${C.btn('내 플레이리스트', { v: 'ghost', size: 'm', ic: 'caret-left', attrs: 'data-go="me"' })}${C.btn('완료', { v: 'secondary', size: 's', attrs: 'data-go="me"' })}</div>
+      <div class="preview">${C.face(p, { rows: 2 })}</div>
+      ${C.tf('e-title', '플레이리스트 제목', { value: p.title, max: 30 })}
+      <div class="tf"><label>표지</label><div class="swatches" role="group" aria-label="표지 색">
+        ${COLORS.map((c) => `<button type="button" class="sw" style="--c:${c};--on:${onColor(c)}" data-act="cover" data-v="${c}" aria-label="색 ${c}" aria-pressed="${p.cover.type === 'color' && p.cover.v === c}">${p.cover.type === 'color' && p.cover.v === c ? icon('check') : ''}</button>`).join('')}
+        <label class="sw up" aria-label="그림 올리기" ${p.cover.type === 'image' ? 'aria-pressed="true"' : ''}>${icon('image')}<input type="file" accept="image/*" id="e-img"></label>
+      </div></div>
+      <div><div class="subbar" style="margin-left:0"><p class="sec-title" style="padding-bottom:0">곡 ${p.songs.length}개</p>${C.btn('곡 추가', { v: 'secondary', size: 's', ic: 'plus', act: 'owner-add' })}</div>
+        <div class="card glass" style="margin-top:8px">${p.songs.length ? `<ol class="songs" id="e-songs">${p.songs.map((s, k) => C.songRow(s, k, 'manage')).join('')}</ol>` : '<p class="t-body-s" style="padding:16px;color:var(--text-2)">곡이 없어요.</p>'}</div></div>
+      <div class="dz"><p class="sec-title">플레이리스트 삭제</p>${C.btn('이 플레이리스트 삭제', { v: 'danger', size: 'l', ic: 'trash', act: 'del-pl' })}</div>
+    </div>`
+  pgEdit.scrollTop = y
+  pgEdit.dataset.id = id
+  const list = $('#e-songs', pgEdit)
+  if (list) enableReorder(list, () => byId(id).songs, () => { renderEdit(id); refreshFile(id) })
+  $('#e-title').addEventListener('input', (e) => { p.title = e.target.value.trim() || '제목 없음'; $('.preview .ttl', pgEdit).textContent = p.title; refreshFile(id) })
+  $('#e-img').addEventListener('change', (e) => { const file0 = e.target.files?.[0]; if (!file0) return; p.cover = { type: 'image', v: URL.createObjectURL(file0) }; renderEdit(id); refreshFile(id); toast('표지 그림을 바꿨어요') })
+}
+function renderComp() {
+  const sample = PL[0], imgSample = PL[4]
+  const tok = (name, v) => `<div class="tok"><i style="--v:${v}"></i><span><b>${name}</b><br><code data-tok="${name}"></code></span></div>`
+  pgComp.innerHTML = `<div class="page-in">
+    <div class="subbar">${C.btn('내 플레이리스트', { v: 'ghost', size: 'm', ic: 'caret-left', attrs: 'data-go="me"' })}${C.seg('theme', [['system', '시스템'], ['light', '라이트'], ['dark', '다크']], themeNow())}</div>
+    <div class="ph"><h1 class="t-title-l">컴포넌트</h1><p class="t-body-s">화면은 이 부품들로만 만들어요. 이름은 Figma 컴포넌트 이름과 같아요.</p></div>
+    <section class="comp"><p class="sec-title">색 토큰 (지금 테마)</p><div class="comp-box"><div class="toks">${['bg', 'text', 'text-2', 'text-3', 'fill', 'line', 'primary', 'danger', 'glass'].map((k) => tok(k, `var(--${k})`)).join('')}</div></div></section>
+    <section class="comp"><p class="sec-title">글자 (TDS T 스케일)</p><div class="comp-box col">
+      <p class="t-title-l">title-l 26/35 · 새벽 운전</p><p class="t-title-m">title-m 20/29 · 새벽 운전</p><p class="t-body">body 17/25.5 · Nights</p><p class="t-body-s">body-s 15/22.5 · Frank Ocean</p><p class="t-caption">caption 13/19.5 · 민지님이 넣음</p></div></section>
+    <section class="comp"><p class="sec-title">Header · HeaderButton</p><div class="comp-box col"><div class="hdr glass static"><span class="logo">${LOGO}kanqaroo</span><span class="hbtn">${icon('user')}</span></div>
+      <div style="display:flex;gap:12px"><span class="hbtn">${icon('user')}</span><span class="hbtn" style="background:var(--primary);color:var(--on-primary)">${icon('user')}</span></div></div></section>
+    <section class="comp"><p class="sec-title">Button (primary · secondary · ghost · danger / 56 · 48 · 38 · 32)</p><div class="comp-box col">
+      ${C.btn('새 플레이리스트', { v: 'primary', size: 'xl', ic: 'plus' })}
+      <div style="display:flex;flex-wrap:wrap;gap:8px">${['primary', 'secondary', 'ghost', 'danger'].map((v) => C.btn('곡 넣기', { v, size: 'l' })).join('')}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">${['primary', 'secondary', 'ghost', 'danger'].map((v) => C.btn('곡 넣기', { v, size: 'm', ic: 'plus' })).join('')}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">${['primary', 'secondary', 'ghost', 'danger'].map((v) => C.btn('완료', { v, size: 's' })).join('')}${C.btn('비활성', { v: 'primary', size: 's', attrs: 'disabled' })}</div></div></section>
+    <section class="comp"><p class="sec-title">IconButton (38 · 32)</p><div class="comp-box">${C.ibtn('share-network', '공유')}${C.ibtn('x', '닫기', { v: 'ghost' })}${C.ibtn('pencil-simple', '편집', { size: 's' })}${C.ibtn('trash', '삭제', { size: 's', v: 'ghost danger' })}</div></section>
+    <section class="comp"><p class="sec-title">File (색 · 그림)</p><div class="comp-box"><div class="face-static">${C.face(sample, { rows: 5 })}</div><div class="face-static">${C.face(imgSample, { rows: 5 })}</div></div></section>
+    <section class="comp"><p class="sec-title">DetailSheet 머리 + ActionBar</p><div class="comp-box col" style="padding:0;overflow:hidden"><div class="dcover" style="${coverVars(sample)}"><div class="dtop"><span class="t-body-s">${esc(sample.owner)}님의 플레이리스트</span>${C.ibtn('x', '닫기', { v: 'on-cover' })}</div><h2 class="t-title-l">${esc(sample.title)}</h2><p class="t-caption dmeta">${sample.songs.length}곡 · 좋아요 ${sample.likes}</p>${C.actionBar(sample, 'cover')}</div></div></section>
+    <section class="comp"><p class="sec-title">SongRow (기본 · 손님이 넣음 · 관리용)</p><div class="comp-box col" style="padding:8px"><ol class="songs">${C.songRow(sample.songs[0], 0, 'show')}${C.songRow(sample.songs[1], 1, 'show')}${C.songRow(sample.songs[2], 2, 'manage')}</ol></div></section>
+    <section class="comp"><p class="sec-title">TextField (기본 · 오류)</p><div class="comp-box col">${C.tf('c1', '제목', { ph: '예: Kyoto' })}<div class="tf err"><label>아티스트</label><input value="" placeholder="예: Phoebe Bridgers" aria-label="오류 예시"><p class="msg">아티스트를 적어 주세요</p></div></div></section>
+    <section class="comp"><p class="sec-title">ListenOption</p><div class="comp-box col"><div class="lopts">${[['youtube-logo', 'YouTube에서 듣기'], ['spotify-logo', 'Spotify에서 듣기'], ['apple-logo', 'Apple Music에서 듣기']].map(([i, l]) => `<span class="lopt">${icon(i, 'ic-24')}${l}${icon('caret-right')}</span>`).join('')}</div></div></section>
+    <section class="comp"><p class="sec-title">PlaylistRow · Segmented</p><div class="comp-box col"><div class="card glass">${C.prow(PL[9])}${C.prow(PL[4])}</div>${C.seg('demo', [['a', '시스템'], ['b', '라이트'], ['c', '다크']], 'a')}</div></section>
+    <section class="comp"><p class="sec-title">CoverPicker</p><div class="comp-box"><div class="swatches">${COLORS.map((c, k) => `<span class="sw" style="--c:${c};--on:${onColor(c)}" ${k === 0 ? 'aria-pressed="true"' : ''}>${k === 0 ? icon('check') : ''}</span>`).join('')}<span class="sw up">${icon('image')}</span></div></div></section>
+    <section class="comp"><p class="sec-title">Toast · Dialog</p><div class="comp-box col"><span class="glass" style="justify-self:start;padding:12px 20px;border-radius:999px;font-size:15px;font-weight:600">‘Kyoto’를 넣었어요</span>
+      <div class="dlg glass"><h2 class="t-title-m">플레이리스트를 삭제할까요?</h2><p class="t-body-s">‘퇴근길’과 곡 2개가 사라져요. 되돌릴 수 없어요.</p><div class="row2">${C.btn('취소', { v: 'secondary', size: 'l' })}${C.btn('삭제', { v: 'danger', size: 'l' })}</div></div></div></section>
+  </div>`
+  pgComp.querySelectorAll('.comp-box button').forEach((b) => { if (!b.dataset.seg) b.tabIndex = -1 })
+  const cs = getComputedStyle(document.documentElement)
+  pgComp.querySelectorAll('[data-tok]').forEach((c) => { c.textContent = cs.getPropertyValue(`--${c.dataset.tok}`).trim() })
+}
+
+/* ════════ 라우팅 (#me · #edit-<id> · #components) ════════ */
+function route() {
+  const h = location.hash.slice(1)
+  route.cur = h
+  if (openId) { dl.hidden = true; detail.innerHTML = ''; openId = null }
+  closeBS()
+  pgMe.hidden = h !== 'me'
+  pgEdit.hidden = !h.startsWith('edit-')
+  pgComp.hidden = h !== 'components'
+  $('#me-btn').setAttribute('aria-pressed', String(h !== ''))
+  if (h === 'me') renderMe()
+  else if (h.startsWith('edit-')) renderEdit(h.slice(5))
+  else if (h === 'components') renderComp()
+  else stage.focus({ preventScroll: true })
+  ;[pgMe, pgEdit, pgComp].forEach((pg) => { if (!pg.hidden) pg.scrollTop = 0 })
+}
+route.cur = ''
+const go = (h) => { if (location.hash.slice(1) === h) route(); else location.hash = h }
 
 /* ════════ 이벤트 ════════ */
 document.addEventListener('click', (e) => {
+  const g = e.target.closest('[data-go]')
+  if (g) { const h = g.dataset.go; if (g.id === 'me-btn' && route.cur !== '') go(''); else go(h); return }
+  const sg = e.target.closest('[data-seg]')
+  if (sg) {
+    const v = sg.dataset.v
+    if (sg.dataset.seg === 'theme') { if (v === 'system') delete document.documentElement.dataset.theme; else document.documentElement.dataset.theme = v; if (!pgComp.hidden) renderComp() }
+    if (sg.dataset.seg === 'sound') { soundOn = v === 'on'; store.set('sound', soundOn); ac(); if (soundOn) flick() }
+    sg.parentElement.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', String(b === sg)))
+    return
+  }
   const a = e.target.closest('[data-act]')
   if (!a) return
   const act = a.dataset.act
-  if (act === 'close-sheet') closeSheet()
-  else if (act === 'slip-form') toggleForm(true)
-  else if (act === 'slip-cancel') toggleForm(false)
+  if (act === 'close-detail') closeDetail()
+  else if (act === 'close-bs') closeBS()
+  else if (act === 'close-dg') { dg.hidden = true; dgOk = null }
+  else if (act === 'dg-ok') { dg.hidden = true; dgOk?.(); dgOk = null }
+  else if (act === 'like') toggleLike(a.dataset.id)
+  else if (act === 'share') share(a.dataset.id)
+  else if (act === 'add') openAdd(a.dataset.id)
+  else if (act === 'listen') openListen(Number(a.dataset.k))
+  else if (act === 'owner-add') openAdd(pgEdit.dataset.id, { owner: true })
+  else if (act === 'edit-song') openEditSong(pgEdit.dataset.id, Number(a.dataset.k))
+  else if (act === 'del-song') { const p = byId(pgEdit.dataset.id), s = p.songs.splice(Number(a.dataset.k), 1)[0]; renderEdit(p.id); refreshFile(p.id); toast(`‘${s.t}’를 삭제했어요`) }
+  else if (act === 'cover') { const p = byId(pgEdit.dataset.id); p.cover = { type: 'color', v: a.dataset.v }; renderEdit(p.id); refreshFile(p.id) }
+  else if (act === 'del-pl') { const p = byId(pgEdit.dataset.id); confirmDlg({ title: '플레이리스트를 삭제할까요?', body: `‘${p.title}’과 곡 ${p.songs.length}개가 사라져요. 되돌릴 수 없어요.`, ok: '삭제', onOk: () => { PL.splice(idxOf(p.id), 1); build(); target = f = clamp(Math.round(f), 0, N() - 1); measure(); layout(performance.now()); posEl.textContent = `${Math.round(f) + 1} / ${N()}`; go('me'); toast('플레이리스트를 삭제했어요') } }) }
+  else if (act === 'new-pl') { const used = new Set(PL.map((p) => p.cover.v)); const c = COLORS.find((x) => !used.has(x)) || COLORS[0]; const p = { id: 'p' + Date.now().toString(36), title: '새 플레이리스트', owner: myName, mine: true, cover: { type: 'color', v: c }, likes: 0, songs: [] }; PL.unshift(p); build(); f = target = 0; lastCell = 0; measure(); layout(performance.now()); posEl.textContent = `1 / ${N()}`; go(`edit-${p.id}`); toast('새 플레이리스트를 만들었어요') }
+  else if (act === 'copy-manage') { const link = 'https://example.com/kanqaroo/manage/예시'; try { navigator.clipboard.writeText(link).then(() => toast('관리 링크를 복사했어요'), () => toast(`관리 링크: ${link}`)) } catch { toast(`관리 링크: ${link}`) } }
+  else if (act === 'go-comp') go('components')
 })
-document.addEventListener('submit', (e) => {
-  if (e.target.id !== 'slip-form') return
-  e.preventDefault()
-  submitSlip()
+document.addEventListener('submit', (e) => { if (e.target.id === 'sf') { e.preventDefault(); bsSubmit?.() } })
+document.addEventListener('keydown', (e) => {
+  if (e.key !== 'Escape') return
+  if (!dg.hidden) { dg.hidden = true; dgOk = null } else if (!bs.hidden) closeBS()
+  else if (openId) closeDetail()
+  else if (route.cur) go('')
 })
-$('#sound').addEventListener('click', (e) => {
-  ac()
-  soundOn = !soundOn
-  e.currentTarget.setAttribute('aria-pressed', String(soundOn))
-  e.currentTarget.textContent = soundOn ? '소리 켬' : '소리 끔'
-  if (soundOn) flick()
-})
+window.addEventListener('hashchange', route)
 window.addEventListener('resize', () => { measure(); layout(performance.now()) })
 
-build()
+/* ════════ 시작 ════════ */
 measure()
+build()
+posEl.textContent = `1 / ${N()}`
 introStart = performance.now()
 layout(introStart)
 kick()
+if (location.hash) route()
 </script>
