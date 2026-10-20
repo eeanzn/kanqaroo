@@ -13,7 +13,7 @@
 | 비전·원칙·PRD·플로우·로드맵·결정 기록·리서치 | Notion [Kanqaroo](https://app.notion.com/p/damhong/Kanqaroo-3f20e0600bce810296edc52af16b4c3a) |
 | 용어 (UI 용어 ↔ 코드 이름)                   | Notion Glossary (아래 표는 복사본이 아니라 코드 쪽 요약)                                      |
 | DB 스키마                                    | `src/db/schema.ts` → `drizzle/` 마이그레이션                                                  |
-| 디자인 시스템 v4 (토큰·재질·규칙) (지금)     | `design/DESIGN.md` (M2부터는 Figma Variables가 원본, 여기로 동기화)                           |
+| 디자인 시스템 v4.1 (토큰·재질·규칙) (지금)   | `design/DESIGN.md` (M2부터는 Figma Variables가 원본, 여기로 동기화)                           |
 | Stitch 프롬프트·Stitch–Claude–Figma 계획     | Notion [디자인 v4 · 작업 계획](https://app.notion.com/p/3fe0e0600bce814f958debddb9290a11)     |
 | 탐색 인터랙션·움직임 (지금)                  | `prototype/accordion.html` (아코디언 Artifact의 원본)                                         |
 | 기능 흐름·UI 문구 (지금)                     | `prototype/folder.html` (폴더 시안 Artifact의 원본)                                           |

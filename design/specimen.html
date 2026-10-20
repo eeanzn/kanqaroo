@@ -1,0 +1,649 @@
+<title>Kanqaroo 디자인 시트</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Nanum+Gothic+Coding:wght@400;700&display=swap">
+<style>
+/* Layout: a specimen sheet. Two phone screens and a live audit side by side, parts and tokens below.
+   Tokens mirror design/DESIGN.md v4.1. Single light theme on purpose: the system has no dark variant yet. */
+:root {
+  color-scheme: light;
+  --canvas: #F1F2EE;      /* Paper Gray */
+  --ink: #17181C;         /* Ink Black */
+  --ink-2: #5A5E68;       /* Graphite */
+  --ink-3: #8F939C;       /* Ash */
+  --surface: #FFFFFF;     /* Sheet White */
+  --hair: rgba(23, 24, 28, 0.14);
+  --signal: #ED692C;      /* Kanqaroo Orange */
+  --signal-ink: #B8460F;  /* Burnt Orange */
+  --glass-fill: rgba(255, 255, 255, 0.55);
+  --glass-edge: rgba(255, 255, 255, 0.85);
+  --scrim: rgba(16, 17, 20, 0.45);
+  --frame: #D9DBD4;
+  --p1: #2F6FED; --p2: #0E9F8E; --p3: #7A4FE0; --p4: #D23A8C;
+  --p5: #B88A00; --p6: #3E8E2F; --p7: #8A5A3C; --p8: #4A5F7A;
+  --pass: #2F6B3A; --pass-bg: #E3EEE3; --fail: #9A2F1F; --fail-bg: #F6E2DC;
+  --mono: 'IBM Plex Mono', 'Nanum Gothic Coding', ui-monospace, 'SFMono-Regular', Menlo, Consolas, monospace;
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--canvas);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 16px;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+  word-break: keep-all;
+}
+.wrap {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 32px 48px;
+  display: grid;
+  gap: 48px;
+}
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: 28px; font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; text-wrap: balance; }
+h2 { font-size: 20px; font-weight: 600; line-height: 1.35; text-wrap: balance; }
+.lede { color: var(--ink-2); max-width: 60ch; }
+.note { color: var(--ink-2); font-size: 13px; line-height: 1.5; max-width: 60ch; }
+.icon { width: 20px; height: 20px; display: inline-block; flex: none; }
+
+/* header */
+.head { display: flex; flex-wrap: wrap; gap: 24px; align-items: flex-end; justify-content: space-between; }
+.head > div:first-child { display: grid; gap: 8px; min-width: 0; }
+.ver { display: inline-flex; background: var(--surface); border: 1px solid var(--ink-3); border-radius: 999px; padding: 4px; gap: 4px; }
+.ver button {
+  font: 600 13px/1.4 var(--mono); letter-spacing: 0.02em; color: var(--ink);
+  background: transparent; border: 0; border-radius: 999px; height: 36px; padding: 0 16px; cursor: pointer;
+}
+.ver button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--signal-ink); outline-offset: 2px; }
+
+/* top area: screens + audit */
+.top { display: grid; gap: 32px; grid-template-columns: minmax(0, 1fr); justify-items: center; }
+@media (min-width: 780px) { .top { grid-template-columns: repeat(2, minmax(0, 360px)); justify-content: center; } .audit { grid-column: 1 / -1; width: 100%; } }
+@media (min-width: 1180px) { .top { grid-template-columns: 360px 360px minmax(0, 1fr); justify-items: start; } .audit { grid-column: auto; } }
+figure { margin: 0; display: grid; gap: 12px; width: 100%; max-width: 360px; }
+figcaption { font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+figcaption b { color: var(--ink); font-weight: 600; }
+
+/* ---------- phone ---------- */
+.phone {
+  position: relative; width: 100%; max-width: 360px; height: 720px; overflow: hidden;
+  background: var(--canvas); border-radius: 28px; box-shadow: 0 0 0 6px var(--frame);
+  isolation: isolate;
+}
+.phone::before { content: ""; position: absolute; inset: 0; background: var(--grain); opacity: 0.18; pointer-events: none; z-index: 0; }
+
+.v4only { display: none !important; }
+.v4 .v4only { display: revert !important; }
+.v4 .v41only { display: none !important; }
+
+/* glass: v4.1 uses it on the top bar only */
+.glass {
+  background: var(--glass-fill);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+  backdrop-filter: blur(16px) saturate(140%);
+  border: 1px solid var(--glass-edge);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10);
+}
+.bar {
+  position: absolute; top: 12px; left: 12px; right: 12px; height: 52px; z-index: 20;
+  border-radius: 999px; display: flex; align-items: center; gap: 8px; padding: 0 8px 0 16px;
+  font: 600 13px/1.4 var(--mono); letter-spacing: 0.02em;
+}
+.bar .wm { margin-right: auto; }
+.seg { display: inline-flex; border-radius: 999px; background: rgba(255, 255, 255, 0.6); padding: 2px; }
+.seg span { padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+.seg .on { background: var(--ink); color: var(--surface); }
+.hint .cnt { color: var(--ink); font-weight: 600; }
+.bar .snd { width: 36px; height: 36px; display: grid; place-items: center; }
+
+/* v4 top: three separate glass pills */
+.bar4 { position: absolute; top: 12px; left: 12px; right: 12px; z-index: 20; display: grid; gap: 8px; font: 600 12px/1.4 var(--mono); letter-spacing: 0.04em; }
+.pill4 { border-radius: 999px; height: 44px; display: flex; align-items: center; gap: 8px; padding: 0 18px; }
+.pill4.wm4 { justify-content: space-between; }
+.row4 { display: flex; gap: 8px; }
+.row4 .pill4 { height: 36px; }
+.row4 .pill4:first-child { flex: 1; }
+.v4 .bar4 .pill4 {
+  background: rgba(255, 255, 255, 0.40);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-edge); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* stage */
+.stage { position: absolute; left: 0; right: 0; top: 84px; bottom: 44px; z-index: 1; }
+.v4 .stage { top: 128px; }
+.sleeve { position: absolute; border-radius: 12px; }
+.sleeve.back {
+  top: calc(var(--i) * 22px + 30px); bottom: 0;
+  left: calc(12px + (5 - var(--i)) * 3px); right: calc(12px + (5 - var(--i)) * 3px);
+  background:
+    linear-gradient(rgba(23, 24, 28, calc((4 - var(--i)) * 0.03)), rgba(23, 24, 28, calc((4 - var(--i)) * 0.03))),
+    linear-gradient(rgba(var(--id), 0.24), rgba(var(--id), 0.24)),
+    rgba(255, 255, 255, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+}
+.tab {
+  position: absolute; top: -30px; left: var(--x); height: 31px; padding: 4px 6px 0;
+  border-radius: 12px 12px 0 0;
+  background: linear-gradient(rgba(var(--id), 0.24), rgba(var(--id), 0.24)), rgba(255, 255, 255, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.7); border-bottom: 0;
+}
+.tab .ins { display: block; height: 22px; line-height: 22px; padding: 0 8px; background: var(--surface); border-radius: 4px; font: 600 13px/22px var(--mono); letter-spacing: 0.02em; white-space: nowrap; }
+
+.sleeve.front { top: 150px; bottom: 0; left: 12px; right: 12px; }
+.peek { position: absolute; inset: 0; z-index: 1; }
+.peek-sheet {
+  position: absolute; top: -34px; left: 20px; width: 52%; height: 64px; background: var(--surface);
+  border-radius: 4px; border: 1px solid var(--hair); padding: 6px 10px; display: grid; gap: 0;
+  font-size: 12px; line-height: 1.4; color: var(--ink-2);
+}
+.peek-slip {
+  position: absolute; top: -22px; left: 60%; width: 30%; height: 56px; background: var(--surface);
+  border-radius: 4px; border: 1px solid var(--hair); padding: 4px; transform: rotate(-2deg);
+}
+.peek-slip.two { top: -12px; left: 68%; transform: rotate(3deg); }
+.v4 .peek-slip { border: 0; border-left: 3px solid var(--p); }
+
+.covers { position: absolute; right: 20px; bottom: 24px; width: 206px; display: grid; grid-template-columns: repeat(2, 98px); gap: 10px; z-index: 2; }
+.cover {
+  aspect-ratio: 1; max-width: 100%; background: var(--c); color: rgba(255, 255, 255, 0.85);
+  font: 600 11px/1 var(--mono); display: flex; align-items: flex-end; padding: 6px;
+}
+.covers .cover:nth-child(1) { transform: rotate(-3deg); }
+.covers .cover:nth-child(2) { transform: rotate(2deg) translateY(6px); }
+.covers .cover:nth-child(3) { transform: rotate(1deg); }
+.covers .cover:nth-child(4) { transform: rotate(-2deg) translate(-4px, 4px); }
+.front .covers .cover { filter: blur(4px); opacity: 0.85; }
+.v4 .front .covers .cover { filter: none; opacity: 1; }
+
+.plastic {
+  position: absolute; inset: 0; z-index: 3; border-radius: 12px;
+  background: linear-gradient(rgba(var(--id), 0.22), rgba(var(--id), 0.22)), rgba(255, 255, 255, 0.30);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+}
+.plastic::after { content: ""; position: absolute; inset: 0; border-radius: inherit; background: var(--grain); opacity: 0.12; }
+
+.label {
+  position: absolute; top: 16px; left: 16px; width: 74%; z-index: 4;
+  background: var(--surface); border-radius: 4px; border: 1px solid var(--hair);
+  padding: 16px; display: grid; gap: 4px;
+}
+.label .d { font-size: 28px; font-weight: 600; line-height: 1.2; letter-spacing: -0.01em; }
+.m { font-size: 13px; line-height: 1.5; color: var(--ink-2); }
+.new { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); font-weight: 600; margin-left: 8px; }
+.dot { width: 8px; height: 8px; border-radius: 999px; background: var(--signal); display: inline-block; }
+.stickers { position: absolute; left: 16px; top: 152px; z-index: 4; display: flex; gap: 8px; align-items: center; }
+.eyebrow { font: 600 12px/1.4 var(--mono); letter-spacing: 0.04em; color: var(--ink-2); }
+.hint { position: absolute; left: 0; right: 0; bottom: 12px; text-align: center; font-size: 13px; color: var(--ink-2); z-index: 2; }
+.hint4 { position: absolute; left: 20px; bottom: 16px; z-index: 4; font: 600 12px/1.4 var(--mono); letter-spacing: 0.04em; }
+
+/* sticker placeholder: the real kangaroo is drawn by the designer */
+.stk {
+  display: grid; place-items: center; flex: none; background: var(--surface); color: var(--ink);
+  border: 2px solid var(--p); border-radius: 4px; font-weight: 600;
+}
+.s24 { width: 24px; height: 24px; font-size: 11px; }
+.s40 { width: 40px; height: 40px; font-size: 15px; }
+.s56 { width: 56px; height: 56px; font-size: 20px; }
+
+/* v4 overrides on the browse screen */
+.v4 .sleeve.back, .v4 .tab, .v4 .plastic {
+  background: linear-gradient(rgba(var(--id), 0.28), rgba(var(--id), 0.28)), rgba(255, 255, 255, 0.58);
+  -webkit-backdrop-filter: blur(28px) saturate(140%);
+  backdrop-filter: blur(28px) saturate(140%);
+}
+.v4 .sleeve, .v4 .plastic { border-radius: 14px; }
+.v4 .tab { border-radius: 8px 8px 0 0; }
+.v4 .tab .ins { background: transparent; font-size: 12px; letter-spacing: 0.04em; }
+.v4 .label { background: transparent; border: 0; padding: 20px; }
+.v4 .label .m { color: var(--ink); font-size: 12px; }
+.v4 .stickers { top: 156px; flex-wrap: wrap; width: 200px; }
+.v4 .stk { border-radius: 8px; }
+
+/* ---------- sheet screen ---------- */
+.ghost { position: absolute; left: 20px; right: 20px; border-radius: 12px; background: linear-gradient(rgba(var(--id), 0.24), rgba(var(--id), 0.24)), rgba(255, 255, 255, 0.34); }
+.scrim { position: absolute; inset: 0; background: var(--scrim); z-index: 2; }
+.sheet {
+  position: absolute; top: 20px; left: 8px; right: 8px; bottom: 84px; z-index: 3; overflow: hidden;
+  background: var(--surface); border-radius: 4px; padding: 24px; display: flex; flex-direction: column; gap: 12px;
+}
+.sheet-covers { display: flex; gap: 6px; }
+.sheet-covers .cover { width: 32px; padding: 0; }
+.sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.t { font-size: 20px; font-weight: 600; line-height: 1.35; }
+.rows { list-style: none; margin: 0; padding: 0; display: grid; }
+.row { display: grid; grid-template-columns: 24px minmax(0, 1fr); gap: 8px; padding: 10px 0; border-bottom: 1px solid var(--hair); align-items: start; }
+.row .no { color: var(--ink-2); }
+.row .tt { min-width: 0; }
+.row .ar { color: var(--ink-2); }
+.row.slip {
+  grid-template-columns: 24px 40px minmax(0, 1fr); gap: 8px 12px; padding: 12px; margin: 4px -12px;
+  border: 1px solid var(--hair); border-radius: 4px; background: var(--surface);
+  box-shadow: 0 1px 0 var(--hair); transform: rotate(-0.4deg);
+}
+.row.slip .by { grid-column: 3; margin-top: -8px; }
+#kq:not(.v4) .row.slip .sep { display: none !important; }
+#kq:not(.v4) .row.slip .ar { display: block; }
+.sheet .grow { flex: 1; }
+
+.btn {
+  font: 600 13px/1.4 var(--mono); letter-spacing: 0.02em; color: var(--ink);
+  height: 44px; padding: 0 16px; border-radius: 999px; cursor: pointer; flex: none;
+}
+.btn.pri { background: var(--signal); border: 0; }
+.btn.sec { background: var(--surface); border: 1px solid var(--ink-3); }
+.btn.wide { width: 100%; }
+.toast {
+  position: absolute; left: 50%; bottom: 20px; transform: translateX(-50%); z-index: 4; white-space: nowrap;
+  background: var(--ink); color: var(--surface); border-radius: 999px; padding: 12px 20px; font-size: 16px; line-height: 1.25;
+}
+.toast u { text-underline-offset: 3px; }
+
+/* v4 overrides on the sheet screen */
+.v4 .sheet { border-radius: 22px; padding: 20px; left: 12px; right: 12px; }
+.v4 .t { font-size: 18px; }
+.v4 [data-body] { font-size: 14px; }
+.v4 .m { font-size: 12px; }
+.v4 .row .ar { color: var(--ink); }
+.v4 .row.slip { border: 0; border-left: 3px solid var(--p); border-radius: 4px; box-shadow: none; transform: rotate(-1deg); }
+.v4 .btn.sec, .v4 .toast {
+  background: rgba(255, 255, 255, 0.40); color: var(--ink);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border: 1px solid var(--glass-edge); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+.v4 .toast { font-size: 14px; }
+
+/* ---------- audit ---------- */
+.audit { display: grid; gap: 16px; align-content: start; min-width: 0; }
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--hair); border-radius: 4px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; line-height: 1.5; }
+th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--hair); vertical-align: top; }
+th { font-weight: 600; color: var(--ink-2); }
+tr:last-child td { border-bottom: 0; }
+td.num { font-weight: 600; }
+th:first-child, td:first-child { width: 36%; }
+th.cur, td.cur { background: rgba(23, 24, 28, 0.04); }
+.chip { display: inline-block; font-weight: 600; padding: 1px 8px; border-radius: 999px; white-space: nowrap; }
+.chip.ok { background: var(--pass-bg); color: var(--pass); }
+.chip.no { background: var(--fail-bg); color: var(--fail); }
+.chip.info { background: rgba(23, 24, 28, 0.06); color: var(--ink-2); }
+.score { display: flex; gap: 12px; flex-wrap: wrap; }
+.score div { background: var(--surface); border: 1px solid var(--hair); border-radius: 4px; padding: 12px 16px; display: grid; gap: 2px; min-width: 140px; }
+.score b { font-size: 20px; line-height: 1.35; }
+
+/* ---------- parts + tokens ---------- */
+.band { display: grid; gap: 16px; }
+.panel { background: var(--surface); border: 1px solid var(--hair); border-radius: 4px; padding: 24px; display: grid; gap: 24px; }
+.grid2 { display: grid; gap: 24px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); }
+.part { display: grid; gap: 12px; align-content: start; min-width: 0; }
+.part h3, .tok h3 { font-size: 13px; font-weight: 600; letter-spacing: 0.02em; color: var(--ink-2); }
+.hstack { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.gap { display: flex; align-items: center; gap: 8px; height: 40px; color: var(--signal-ink); font: 600 13px/1.4 var(--mono); letter-spacing: 0.02em; }
+.gap::before, .gap::after { content: ""; flex: 1; border-top: 1.5px dashed var(--signal); }
+.field { display: grid; gap: 6px; }
+.field label { font-size: 13px; color: var(--ink-2); }
+.field input {
+  font: 400 16px/1.6 var(--mono); color: var(--ink); height: 44px; padding: 0 12px;
+  border: 1px solid var(--ink-3); border-radius: 4px; background: var(--surface); width: 100%;
+}
+.field input:focus-visible { outline: 2px solid var(--signal-ink); outline-offset: 2px; }
+.pswitch { display: inline-flex; border: 1px solid var(--ink-3); border-radius: 999px; padding: 3px; font: 600 13px/1.4 var(--mono); letter-spacing: 0.02em; }
+.pswitch span { padding: 6px 12px; border-radius: 999px; }
+.pswitch .on { background: var(--ink); color: var(--surface); }
+.v4 .band .btn.sec { background: rgba(255, 255, 255, 0.40); }
+.v4 .field input { border: 1px solid var(--hair); border-radius: 8px; }
+.v4 .pswitch { border-radius: 999px; }
+
+.typerow { display: grid; grid-template-columns: 88px minmax(0, 1fr); gap: 12px; align-items: baseline; padding: 8px 0; border-bottom: 1px solid var(--hair); }
+.typerow:last-child { border-bottom: 0; }
+.typerow .k { font-size: 13px; color: var(--ink-2); }
+.sw { display: grid; grid-template-columns: 40px minmax(0, 1fr); gap: 12px; align-items: center; }
+.sw i { width: 40px; height: 40px; border-radius: 4px; border: 1px solid var(--hair); background: var(--c); display: block; }
+.sw p { font-size: 13px; line-height: 1.45; }
+.sw b { font-weight: 600; }
+.swatches { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr)); }
+.people { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.people i { width: 12px; height: 12px; border-radius: 999px; background: var(--c); display: block; }
+.radii { display: flex; gap: 16px; flex-wrap: wrap; align-items: end; }
+.radii div { display: grid; gap: 6px; justify-items: center; font-size: 13px; color: var(--ink-2); }
+.radii span { display: block; width: 72px; height: 48px; border: 1.5px solid var(--ink); background: var(--canvas); }
+.mats { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 150px), 1fr)); }
+.mat { position: relative; height: 120px; overflow: hidden; border-radius: 4px; background: var(--canvas); }
+.mat .bgc { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(3, 1fr); }
+.mat .bgc i { background: var(--c); }
+.mat .face { position: absolute; left: 14px; right: 14px; top: 22px; bottom: 34px; display: grid; place-items: center; font-size: 13px; font-weight: 600; }
+.mat .cap { position: absolute; left: 0; right: 0; bottom: 0; background: var(--surface); padding: 6px 10px; font-size: 13px; }
+.mat .f-sleeve { border-radius: 12px; background: linear-gradient(rgba(75, 79, 168, 0.22), rgba(75, 79, 168, 0.22)), rgba(255, 255, 255, 0.30); border: 1px solid rgba(255, 255, 255, 0.75); }
+.mat .f-sleeve span { background: var(--surface); border-radius: 4px; padding: 2px 8px; }
+.mat .f-paper { border-radius: 4px; background: var(--surface); }
+.mat .f-glass { border-radius: 999px; top: 34px; bottom: 46px; background: var(--glass-fill); -webkit-backdrop-filter: blur(16px) saturate(140%); backdrop-filter: blur(16px) saturate(140%); border: 1px solid var(--glass-edge); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10); }
+.mat.content .bgc i { filter: none; }
+.mat.blurcov .bgc i { filter: blur(4px); opacity: 0.85; }
+
+.changes { margin: 0; padding-left: 20px; display: grid; gap: 8px; max-width: 72ch; }
+.changes li::marker { color: var(--ink-3); }
+.src { font-size: 13px; color: var(--ink-2); line-height: 1.6; max-width: 80ch; }
+.src a { color: var(--ink); }
+
+</style>
+
+<main class="wrap" id="kq">
+  <header class="head">
+    <div>
+      <h1>Kanqaroo 디자인 시트</h1>
+      <p class="lede">v4에서 AI스러운 신호를 걷어낸 v4.1이에요. 오른쪽 버튼으로 같은 두 화면을 v4와 바꿔 보며 비교해요.</p>
+    </div>
+    <div class="ver" role="group" aria-label="보여 줄 버전">
+      <button type="button" id="btn-v4" aria-pressed="false">v4</button>
+      <button type="button" id="btn-v41" aria-pressed="true">v4.1</button>
+    </div>
+  </header>
+
+  <section class="top" aria-label="화면 비교">
+    <!-- browse -->
+    <figure>
+      <div class="phone" id="s-browse">
+        <div class="bar glass v41only">
+          <span class="wm">kanqaroo</span>
+          <span class="seg"><span class="on">둘러보기</span><span>내 파일철</span></span>
+          <span class="snd" role="img" aria-label="소리 켜짐"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M155.51,24.81a8,8,0,0,0-8.42.88L77.25,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H77.25l69.84,54.31A8,8,0,0,0,160,224V32A8,8,0,0,0,155.51,24.81ZM32,96H72v64H32ZM144,207.64,88,164.09V91.91l56-43.55Zm54-106.08a40,40,0,0,1,0,52.88,8,8,0,0,1-12-10.58,24,24,0,0,0,0-31.72,8,8,0,0,1,12-10.58ZM248,128a79.9,79.9,0,0,1-20.37,53.34,8,8,0,0,1-11.92-10.67,64,64,0,0,0,0-85.33,8,8,0,1,1,11.92-10.67A79.83,79.83,0,0,1,248,128Z"/></svg></span>
+        </div>
+        <div class="v4only"><div class="bar4">
+          <div class="pill4 wm4"><span>kanqaroo</span><span>소리 켬</span></div>
+          <div class="row4"><span class="pill4">둘러보기 | 내 파일철</span><span class="pill4">01 / 10</span></div>
+        </div></div>
+
+        <div class="stage">
+          <div class="sleeve back" style="--i:0; --id: 217,165,32; --x:0%"><span class="tab"><span class="ins">첫 자취방</span></span></div>
+          <div class="sleeve back" style="--i:1; --id: 200,55,45; --x:22%"><span class="tab"><span class="ins">헬스장 금지곡</span></span></div>
+          <div class="sleeve back" style="--i:2; --id: 94,127,134; --x:44%"><span class="tab"><span class="ins">비 오는 날</span></span></div>
+          <div class="sleeve back" style="--i:3; --id: 62,142,90; --x:4%"><span class="tab"><span class="ins">출근길 30분</span></span></div>
+          <div class="sleeve back" style="--i:4; --id: 47,143,168; --x:30%"><span class="tab"><span class="ins">여름 끝물</span></span></div>
+
+          <div class="sleeve front" style="--id: 75,79,168">
+            <div class="peek">
+              <div class="peek-sheet"><span>01 Nights</span><span>02 Kyoto</span><span>03 Square (2017)</span></div>
+              <div class="peek-slip" style="--p: var(--p1)"><span class="stk s24">민</span></div>
+              <div class="peek-slip two" style="--p: var(--p4)"><span class="stk s24">준</span></div>
+            </div>
+            <div class="covers" aria-hidden="true">
+              <span class="cover" style="--c:#2E3470">커버</span>
+              <span class="cover" style="--c:#6B5BA8">커버</span>
+              <span class="cover" style="--c:#B59A6A">커버</span>
+              <span class="cover" style="--c:#1F2A44">커버</span>
+            </div>
+            <div class="plastic"></div>
+            <div class="label">
+              <p class="d">새벽 운전</p>
+              <p class="m">지우님의 플레이리스트</p>
+              <p class="m">7곡 · 쪽지 2<span class="new v41only"><i class="dot"></i>새 쪽지 2</span><span class="v4only"> [새 쪽지 2]</span></p>
+            </div>
+            <div class="stickers">
+              <span class="eyebrow v4only" style="width:100%">넣은 캥거루들</span>
+              <span class="stk s40" style="--p: var(--p1)">민</span>
+              <span class="stk s40" style="--p: var(--p4)">준</span>
+            </div>
+            <p class="hint4 v4only">▸ 눌러서 꺼내기</p>
+          </div>
+        </div>
+        <p class="hint v41only"><b class="cnt">01 / 10</b> · 위로 넘기고, 누르면 꺼내요</p>
+      </div>
+      <figcaption><b>둘러보기.</b> 커버 색 상자와 이니셜 스티커는 자리표시예요. 실제 캥거루는 디자이너가 그려요.</figcaption>
+    </figure>
+
+    <!-- sheet -->
+    <figure>
+      <div class="phone" id="s-sheet">
+        <div class="ghost" style="--id: 47,143,168; top: 60px; bottom: 60px"></div>
+        <div class="ghost" style="--id: 75,79,168; top: 110px; bottom: 30px"></div>
+        <div class="scrim"></div>
+        <article class="sheet">
+          <div class="sheet-covers" aria-hidden="true">
+            <span class="cover" style="--c:#2E3470"></span><span class="cover" style="--c:#6B5BA8"></span><span class="cover" style="--c:#B59A6A"></span><span class="cover" style="--c:#1F2A44"></span>
+          </div>
+          <div class="sheet-head">
+            <h3 class="t">새벽 운전</h3>
+            <button type="button" class="btn sec">다시 꽂기</button>
+          </div>
+          <p class="m">지우님의 플레이리스트 · 7곡 · 쪽지 2</p>
+          <ol class="rows">
+            <li class="row"><span class="no" data-body>01</span><span class="tt" data-body>Nights<span class="v41only"> · </span><span class="v4only"> — </span><span class="ar">Frank Ocean</span></span></li>
+            <li class="row slip" style="--p: var(--p1)"><span class="no" data-body>02</span><span class="stk s40">민</span><span class="tt" data-body>Kyoto<span class="v41only sep"> · </span><span class="v4only"> — </span><span class="ar">Phoebe Bridgers</span></span><span class="by m">민지님이 넣음</span></li>
+            <li class="row"><span class="no" data-body>03</span><span class="tt" data-body>Square (2017)<span class="v41only"> · </span><span class="v4only"> — </span><span class="ar">백예린</span></span></li>
+            <li class="row"><span class="no" data-body>04</span><span class="tt" data-body>Antifreeze<span class="v41only"> · </span><span class="v4only"> — </span><span class="ar">검정치마</span></span></li>
+            <li class="row slip" style="--p: var(--p4)"><span class="no" data-body>05</span><span class="stk s40">준</span><span class="tt" data-body>Plastic Love<span class="v41only sep"> · </span><span class="v4only"> — </span><span class="ar">竹内まりや</span></span><span class="by m">민준님이 넣음</span></li>
+          </ol>
+          <div class="grow"></div>
+          <button type="button" class="btn pri wide">쪽지 넣기</button>
+        </article>
+        <div class="toast" data-body>쏙! 3번째 자리에 넣었어요</div>
+      </div>
+      <figcaption><b>꺼낸 시트 (방문자).</b> 아래 토스트는 쪽지를 넣은 뒤 뜨는 예시예요.</figcaption>
+    </figure>
+
+    <!-- audit -->
+    <section class="audit" aria-labelledby="audit-h">
+      <h2 id="audit-h">자동 점검</h2>
+      <p class="note">왼쪽 두 화면을 이 페이지가 직접 세어요. 기준은 oh-my-agent oma-design의 안티패턴 목록과 pixelslop 패턴 카탈로그예요.</p>
+      <div class="score" id="score"></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th scope="col">신호</th><th scope="col" id="th-v4">v4</th><th scope="col" id="th-v41">v4.1</th><th scope="col">기준</th></tr></thead>
+          <tbody id="audit-body"></tbody>
+        </table>
+      </div>
+    </section>
+  </section>
+
+  <section class="band" aria-labelledby="parts-h">
+    <h2 id="parts-h">부품</h2>
+    <div class="panel grid2">
+      <div class="part">
+        <h3>버튼 (한 화면에 주 버튼 하나)</h3>
+        <div class="hstack"><button type="button" class="btn pri">쏙 넣기</button><button type="button" class="btn sec">그만두기</button></div>
+      </div>
+      <div class="part">
+        <h3>끼울 자리</h3>
+        <div class="gap"><svg class="icon" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"/></svg>여기에 끼우기</div>
+      </div>
+      <div class="part">
+        <h3>입력</h3>
+        <div class="field"><label for="f-title">노래 제목</label><input id="f-title" value="Motion Sickness"></div>
+      </div>
+      <div class="part">
+        <h3>전환 (내 시트)</h3>
+        <div><span class="pswitch"><span>목록</span><span class="on">활동 2</span><span>공유</span></span></div>
+      </div>
+      <div class="part">
+        <h3>낙서 스티커 24 · 40 · 56</h3>
+        <div class="hstack">
+          <span class="stk s24" style="--p: var(--p2)">지</span>
+          <span class="stk s40" style="--p: var(--p3)">하</span>
+          <span class="stk s56" style="--p: var(--p5)">늘</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" aria-labelledby="tok-h">
+    <h2 id="tok-h">v4.1 토큰</h2>
+    <div class="panel grid2">
+      <div class="tok part">
+        <h3>글자 (크기는 네 단계뿐)</h3>
+        <div>
+          <div class="typerow"><span class="k">28 · 600</span><span style="font-size:28px;font-weight:600;line-height:1.2">새벽 운전</span></div>
+          <div class="typerow"><span class="k">20 · 600</span><span style="font-size:20px;font-weight:600">지우님의 시트</span></div>
+          <div class="typerow"><span class="k">16 · 400</span><span>Nights · Frank Ocean</span></div>
+          <div class="typerow"><span class="k">13 · 400</span><span class="m">지우님의 플레이리스트 · 7곡</span></div>
+        </div>
+      </div>
+      <div class="tok part">
+        <h3>모서리 (재질이 정함)</h3>
+        <div class="radii">
+          <div><span style="border-radius:4px"></span>4 종이</div>
+          <div><span style="border-radius:12px"></span>12 플라스틱</div>
+          <div><span style="border-radius:999px"></span>알약 유리·버튼</div>
+        </div>
+        <h3>재질</h3>
+        <div class="mats">
+          <div class="mat content"><div class="bgc"><i style="--c:#2E3470"></i><i style="--c:#B59A6A"></i><i style="--c:#6B5BA8"></i></div><div class="cap">내용 (커버)</div></div>
+          <div class="mat blurcov"><div class="bgc"><i style="--c:#2E3470"></i><i style="--c:#B59A6A"></i><i style="--c:#6B5BA8"></i></div><div class="face f-sleeve"><span>라벨</span></div><div class="cap">클리어 슬리브</div></div>
+          <div class="mat"><div class="bgc"><i style="--c:#2E3470"></i><i style="--c:#B59A6A"></i><i style="--c:#6B5BA8"></i></div><div class="face f-paper">종이</div><div class="cap">종이</div></div>
+          <div class="mat"><div class="bgc"><i style="--c:#2E3470"></i><i style="--c:#B59A6A"></i><i style="--c:#6B5BA8"></i></div><div class="face f-glass">유리</div><div class="cap">유리 (상단 바만)</div></div>
+        </div>
+      </div>
+      <div class="tok part" style="grid-column: 1 / -1">
+        <h3>색 (강조색은 주황 하나)</h3>
+        <div class="swatches">
+          <div class="sw"><i style="--c:#17181C"></i><p><b>Ink Black</b> #17181C<br>읽는 글자 전부</p></div>
+          <div class="sw"><i style="--c:#5A5E68"></i><p><b>Graphite</b> #5A5E68<br>가수, 주인 줄 (5.8:1)</p></div>
+          <div class="sw"><i style="--c:#8F939C"></i><p><b>Ash</b> #8F939C<br>입력 테두리, 비활성만</p></div>
+          <div class="sw"><i style="--c:#F1F2EE"></i><p><b>Paper Gray</b> #F1F2EE<br>바탕 + 입자 3%</p></div>
+          <div class="sw"><i style="--c:#FFFFFF"></i><p><b>Sheet White</b> #FFFFFF<br>라벨, 시트, 쪽지</p></div>
+          <div class="sw"><i style="--c:#ED692C"></i><p><b>Kanqaroo Orange</b> #ED692C<br>주 버튼, 끼울 자리, 새것, 재생</p></div>
+          <div class="sw"><i style="--c:#B8460F"></i><p><b>Burnt Orange</b> #B8460F<br>흰 바탕 주황 글자, 포커스</p></div>
+          <div class="sw"><i style="--c:rgba(75,79,168,.35)"></i><p><b>정체성 틴트</b> 커버에서 추출<br>슬리브에 20~30%</p></div>
+        </div>
+        <div class="people" aria-label="사람 색 8개"><span class="m">사람 색 (스티커 테두리, 활동 점만)</span><i style="--c:#2F6FED"></i><i style="--c:#0E9F8E"></i><i style="--c:#7A4FE0"></i><i style="--c:#D23A8C"></i><i style="--c:#B88A00"></i><i style="--c:#3E8E2F"></i><i style="--c:#8A5A3C"></i><i style="--c:#4A5F7A"></i></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" aria-labelledby="chg-h">
+    <h2 id="chg-h">v4에서 바뀐 것</h2>
+    <ol class="changes">
+      <li>칸막이를 서리 유리에서 <b>클리어 슬리브 + 종이 라벨</b>로 바꿨어요. 커버는 알아볼 만큼만 흐리고, 글자는 전부 종이 위에 둬요.</li>
+      <li>유리는 떠 있는 <b>상단 바 하나</b>만. 토스트는 검은 알약, 보조 버튼은 종이예요.</li>
+      <li>쪽지 왼쪽의 굵은 색 줄을 없앴어요. 누가 넣었는지는 낙서, 이름, 스티커 테두리로 알려요.</li>
+      <li><b>엠대시를 없앴어요.</b> 제목과 가수는 가운뎃점으로 나눠요.</li>
+      <li><b>▸, [괄호], 위에 붙는 작은 라벨</b> 같은 터미널 소품을 걷어냈어요. 모노 글꼴은 그대로 써요.</li>
+      <li>본문을 14에서 <b>16px</b>으로 키우고, 보조 글자는 12에서 13으로 키웠어요.</li>
+      <li>모서리는 다섯 가지에서 <b>4 · 12 · 알약 세 가지</b>로 줄였어요. 그리드 밖 여백(14, 18, 20)도 정리했어요.</li>
+      <li>열릴 때 튀는 움직임을 빼고, 전환은 200~400ms 안으로 줄였어요. 아이콘은 Phosphor 한 벌만 써요.</li>
+    </ol>
+    <p class="src">기준: <a href="https://github.com/first-fluke/oh-my-agent">first-fluke/oh-my-agent</a>의 oma-design (MIT) anti-patterns · checklist, pixelslop 0.3.8 패턴 카탈로그 (Apache-2.0). 토큰 원본은 design/DESIGN.md (v4.1)예요.</p>
+  </section>
+</main>
+
+<script>
+(function () {
+  var root = document.getElementById('kq');
+  var screens = [document.getElementById('s-browse'), document.getElementById('s-sheet')];
+
+  function shown(el) {
+    return el.getClientRects().length > 0 && getComputedStyle(el).visibility !== 'hidden';
+  }
+
+  function measureScreen(s) {
+    var r = { glass: 0, accent: 0, dash: 0, small: 0, term: 0, radii: new Set() };
+    s.querySelectorAll('*').forEach(function (el) {
+      if (!shown(el)) return;
+      var cs = getComputedStyle(el);
+      var bf = cs.backdropFilter || cs.webkitBackdropFilter;
+      if (bf && bf !== 'none') r.glass++;
+      var w = [cs.borderTopWidth, cs.borderRightWidth, cs.borderBottomWidth, cs.borderLeftWidth].map(parseFloat);
+      if (w.filter(function (x) { return x >= 3; }).length === 1 && w.filter(function (x) { return x < 2; }).length >= 2) r.accent++;
+      var rad = Math.max(parseFloat(cs.borderTopLeftRadius) || 0, parseFloat(cs.borderTopRightRadius) || 0);
+      if (rad > 0) r.radii.add(rad >= 100 ? 'pill' : Math.round(rad));
+      if (el.hasAttribute('data-body') && parseFloat(cs.fontSize) < 16) r.small++;
+    });
+    var tw = document.createTreeWalker(s, NodeFilter.SHOW_TEXT);
+    var n;
+    while ((n = tw.nextNode())) {
+      var p = n.parentElement;
+      if (!p || !shown(p)) continue;
+      if (/[—–]/.test(n.nodeValue)) r.dash++;
+      if (/▸|\[[^\]]*\]/.test(n.nodeValue)) r.term++;
+    }
+    return r;
+  }
+
+  function measure() {
+    var a = measureScreen(screens[0]);
+    var b = measureScreen(screens[1]);
+    var radii = new Set();
+    a.radii.forEach(function (x) { radii.add(x); });
+    b.radii.forEach(function (x) { radii.add(x); });
+    var list = Array.from(radii).sort(function (x, y) {
+      if (x === 'pill') return 1; if (y === 'pill') return -1; return x - y;
+    });
+    return {
+      glassA: a.glass, glassB: b.glass,
+      accent: a.accent + b.accent,
+      dash: a.dash + b.dash,
+      small: a.small + b.small,
+      term: a.term + b.term,
+      radii: list
+    };
+  }
+
+  function setVer(v) {
+    root.classList.toggle('v4', v === 'v4');
+    document.getElementById('btn-v4').setAttribute('aria-pressed', String(v === 'v4'));
+    document.getElementById('btn-v41').setAttribute('aria-pressed', String(v !== 'v4'));
+  }
+
+  function chip(ok, text) {
+    return '<span class="chip ' + (ok ? 'ok' : 'no') + '">' + text + '</span>';
+  }
+
+  var current = 'v41';
+  function render() {
+    setVer('v4'); var m4 = measure();
+    setVer('v41'); var m41 = measure();
+    setVer(current);
+
+    var radText = function (l) { return l.map(function (x) { return x === 'pill' ? '알약' : x; }).join(' · '); };
+    var radOk = function (l) { return l.every(function (x) { return x === 4 || x === 12 || x === 'pill'; }); };
+    var rows = [
+      ['유리(backdrop-filter) 표면, 둘러보기 / 시트', m4.glassA + ' / ' + m4.glassB, m41.glassA + ' / ' + m41.glassB, '화면당 2 이하', function (m) { return m.glassA <= 2 && m.glassB <= 2; }],
+      ['한쪽만 굵은 색 테두리', m4.accent, m41.accent, '0', function (m) { return m.accent === 0; }],
+      ['엠대시 · 엔대시', m4.dash, m41.dash, '0', function (m) { return m.dash === 0; }],
+      ['16px보다 작은 본문', m4.small, m41.small, '0', function (m) { return m.small === 0; }],
+      ['터미널 소품 (▸, [ ])', m4.term, m41.term, '0', function (m) { return m.term === 0; }],
+      ['쓰인 모서리 반경', radText(m4.radii), radText(m41.radii), '4 · 12 · 알약', function (m) { return radOk(m.radii); }]
+    ];
+    var pass4 = 0, pass41 = 0;
+    var html = rows.map(function (r) {
+      var ok4 = r[4](m4), ok41 = r[4](m41);
+      if (ok4) pass4++; if (ok41) pass41++;
+      return '<tr><td>' + r[0] + '</td>' +
+        '<td class="num c4">' + r[1] + '<br>' + chip(ok4, ok4 ? '통과' : '넘음') + '</td>' +
+        '<td class="num c41">' + r[2] + '<br>' + chip(ok41, ok41 ? '통과' : '넘음') + '</td>' +
+        '<td>' + r[3] + '</td></tr>';
+    }).join('');
+    html += '<tr><td>모노 글꼴 (pixelslop은 신호로 봄)</td><td class="num c4">전부</td><td class="num c41">전부</td><td><span class="chip info">의도</span> 종이에 타자 친 글자로 씀. 다른 기술 티 신호를 걷어서 홀로 남김</td></tr>';
+    document.getElementById('audit-body').innerHTML = html;
+    document.getElementById('score').innerHTML =
+      '<div><span class="m">v4 통과</span><b>' + pass4 + ' / ' + rows.length + '</b></div>' +
+      '<div><span class="m">v4.1 통과</span><b>' + pass41 + ' / ' + rows.length + '</b></div>';
+    highlight();
+  }
+
+  function highlight() {
+    var is4 = current === 'v4';
+    document.getElementById('th-v4').classList.toggle('cur', is4);
+    document.getElementById('th-v41').classList.toggle('cur', !is4);
+    document.querySelectorAll('td.c4').forEach(function (td) { td.classList.toggle('cur', is4); });
+    document.querySelectorAll('td.c41').forEach(function (td) { td.classList.toggle('cur', !is4); });
+  }
+
+  document.getElementById('btn-v4').addEventListener('click', function () { current = 'v4'; setVer(current); highlight(); });
+  document.getElementById('btn-v41').addEventListener('click', function () { current = 'v41'; setVer(current); highlight(); });
+
+  if (document.fonts && document.fonts.ready) {
+    render();
+    document.fonts.ready.then(render);
+  } else {
+    render();
+  }
+})();
+</script>
