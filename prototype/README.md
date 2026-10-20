@@ -2,13 +2,13 @@
 
 한 파일짜리 HTML을 claude.ai Artifact로 올려서 확인한다.
 
-| 파일             | 무엇                                                                                                         | Artifact                                          |
-| ---------------- | ------------------------------------------------------------------------------------------------------------ | ------------------------------------------------- |
-| `folder.html`    | 기능 흐름 기준 시안. 둘러보기·자리 골라 넣기·활동·공유. 프런트만, 예시 데이터                                | https://claude.ai/artifact/6y8L3tJJCAzDVU5fpGCUCp |
-| `accordion.html` | **지금 기준 탐색 인터랙션.** 아코디언 파일철 (소리 있음). 시각은 v3(흑백 · Pretendard)이라 v4 재질 적용 예정 | https://claude.ai/artifact/T3CuToCF2UEwHveMEjfQ4j |
-| `src.html`       | v2 데모. Artifact 공유 저장소로 실제 저장됨 (공개 링크에선 주인만 쓰기). 색·버튼 토큰 원본                   | https://claude.ai/artifact/UZhD2gemzbihsP5vWZM1uU |
+| 파일             | 무엇                                                                                                                                | Artifact                                          |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `folder.html`    | 기능 흐름 기준 시안. 둘러보기·자리 골라 넣기·활동·공유. 프런트만, 예시 데이터                                                       | https://claude.ai/artifact/6y8L3tJJCAzDVU5fpGCUCp |
+| `accordion.html` | **지금 기준 탐색 인터랙션.** 아코디언 파일철 (소리 있음). 시각은 예전 v3(흑백 · Pretendard)이고, Stitch 방향이 정해지면 다시 입혀요 | https://claude.ai/artifact/T3CuToCF2UEwHveMEjfQ4j |
+| `src.html`       | v2 데모. Artifact 공유 저장소로 실제 저장됨 (공개 링크에선 주인만 쓰기). 색·버튼 토큰 원본                                          | https://claude.ai/artifact/UZhD2gemzbihsP5vWZM1uU |
 
-결정 배경은 Notion Decision Log, 디자인 시스템은 `design/DESIGN.md`, Stitch 프롬프트와 작업 계획은 Notion 디자인 v4.
+결정 배경은 Notion Decision Log, 디자인 브리프는 `PRODUCT.md`와 `design/STITCH.md`. 프로토타입은 움직임과 기능 흐름 참고용이고 Stitch에는 넣지 않아요.
 
 ## 빌드
 

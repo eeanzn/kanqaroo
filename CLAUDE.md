@@ -2,7 +2,7 @@
 
 @AGENTS.md
 
-사람이 사람에게 곡을 소매넣기 하는 웹 서비스. 지금은 **UI 시안 단계**: 프런트만, 예시 데이터로. 탐색은 `prototype/accordion.html`, 기능 흐름은 `prototype/folder.html`. Stitch로 디자인을 먼저 확정하고(`design/DESIGN.md`, 계획·프롬프트는 Notion 디자인 v4), 기능은 그 뒤에 합친다. MVP는 프런트만, 백엔드는 MVP 뒤. `src/`의 Stage 2 앱은 개편 전(v1) 상태로 보류 중.
+사람이 사람에게 곡을 소매넣기 하는 웹 서비스. 지금은 **UI 시안 단계**: 프런트만, 예시 데이터로. 탐색은 `prototype/accordion.html`, 기능 흐름은 `prototype/folder.html`. 디자인은 Stitch에 개념(`PRODUCT.md`)만 주고 새로 받아서 확정한 뒤(`design/STITCH.md`), 기능을 합친다. 웹이지만 폰 앱·아이패드 앱처럼 보여야 하고, 공간·크기·배율은 토스 디자인 시스템 비율을 따른다. MVP는 프런트만, 백엔드는 MVP 뒤. `src/`의 Stage 2 앱은 개편 전(v1) 상태로 보류 중.
 
 ## SSoT: 무엇을 어디서 확인하나
 
@@ -13,8 +13,10 @@
 | 비전·원칙·PRD·플로우·로드맵·결정 기록·리서치 | Notion [Kanqaroo](https://app.notion.com/p/damhong/Kanqaroo-3f20e0600bce810296edc52af16b4c3a) |
 | 용어 (UI 용어 ↔ 코드 이름)                   | Notion Glossary (아래 표는 복사본이 아니라 코드 쪽 요약)                                      |
 | DB 스키마                                    | `src/db/schema.ts` → `drizzle/` 마이그레이션                                                  |
-| 디자인 시스템 v4.1 (토큰·재질·규칙) (지금)   | `design/DESIGN.md` (M2부터는 Figma Variables가 원본, 여기로 동기화)                           |
-| Stitch 프롬프트·Stitch–Claude–Figma 계획     | Notion [디자인 v4 · 작업 계획](https://app.notion.com/p/3fe0e0600bce814f958debddb9290a11)     |
+| 무엇을 만들지 (디자인 브리프)                | `PRODUCT.md` (impeccable 스킬도 읽음)                                                         |
+| Stitch 프롬프트·토스 비율                    | `design/STITCH.md`                                                                            |
+| 디자인 시스템                                | `DESIGN.md` (Stitch 결과로 새로 받음, 아직 없음. M2부터는 Figma Variables가 원본)             |
+| 디자인 작업 계획                             | Notion [디자인 작업 계획](https://app.notion.com/p/3fe0e0600bce814f958debddb9290a11)          |
 | 탐색 인터랙션·움직임 (지금)                  | `prototype/accordion.html` (아코디언 Artifact의 원본)                                         |
 | 기능 흐름·UI 문구 (지금)                     | `prototype/folder.html` (폴더 시안 Artifact의 원본)                                           |
 | v2 데모 색·버튼 토큰 (v2 기록)               | `prototype/src.html` (v2 데모, 실제 저장되는 버전)                                            |
@@ -22,6 +24,8 @@
 | UI 문구 (Stage 2 앱)                         | 각 화면 컴포넌트                                                                              |
 
 결정을 바꾸거나 새로 내리면 Notion **Decision Log**에 한 줄 남긴다.
+
+디자인 점검·다듬기는 `.claude/skills/impeccable` 스킬을 쓴다 (`/impeccable critique`·`audit`·`polish`). 자동 훅은 설치하지 않았다.
 
 ## 용어 (코드 이름)
 
