@@ -8,67 +8,67 @@ web
 
 ## Users
 
-- **Owners**: Korean people in their 20s who make playlists and share them with friends over Instagram stories and KakaoTalk. They want friends to put songs in, and they want to see who did it.
-- **Friends (visitors)**: open an owner's link, browse, and slip one song into a playlist for that person. No account, a minute or two.
-- Anyone can also browse public playlists of strangers for discovery, the way they scroll a feed.
+- **주인**: 플레이리스트를 만들어 인스타그램 스토리나 카카오톡으로 친구들에게 공유하는 20대 한국 사람. 친구들이 곡을 넣어 주길 바라고, 누가 넣었는지 보고 싶어 해요.
+- **친구(방문자)**: 주인의 링크를 열어 둘러보고, 그 사람을 위해 곡 하나를 플레이리스트에 슬쩍 넣어요. 계정 없이 1~2분이면 끝나요.
+- 모르는 사람의 공개 플레이리스트를 피드 넘기듯 구경하며 새 음악을 찾기도 해요.
 
 ## Product Purpose
 
-Streaming algorithms keep recommending more of the same. Kanqaroo replaces the algorithm with people: a friend who knows you tucks a song into your playlist, at the exact spot they think it belongs. Success means an owner gets songs that are both "exactly my taste" and "something I would never have found", and wants to share the link again.
+스트리밍 알고리즘은 비슷한 노래만 계속 추천해요. kanqaroo는 알고리즘 대신 사람이 골라 줘요. 나를 아는 친구가 내 플레이리스트에, 그 곡이 있어야 한다고 생각하는 바로 그 자리에 곡을 넣어 줘요. 성공은 주인이 "딱 내 취향"이면서 "혼자서는 절대 못 찾았을" 곡을 받고, 링크를 또 공유하고 싶어지는 거예요.
 
 ## Positioning
 
-Not a recommendation engine and not a chat. The act is 소매넣기: quietly slipping something into someone's pocket. A friend picks the position between two songs and signs with a hand-drawn kangaroo face. The playlist becomes a record of who gave what.
+추천 엔진도 채팅도 아니에요. 핵심 행동은 '소매넣기', 누군가의 주머니에 뭔가를 슬쩍 넣어 주는 거예요. 친구는 두 곡 사이의 자리를 직접 고르고, 손으로 그린 캥거루 얼굴로 서명해요. 플레이리스트는 누가 무엇을 줬는지의 기록이 돼요.
 
 ## Operating Context
 
-- Delivered as a website, but it must feel like an app: a phone app on mobile (one hand, thumb reach, bottom actions, sheets) and a tablet or desktop app on iPad and laptops (it uses the extra width; not a stretched phone and not a web page).
-- People usually arrive from a link inside Instagram or KakaoTalk, often in an in-app browser.
-- Browsing many playlists should feel like flicking through a social feed. Working metaphor: an accordion file folder where each playlist is a divider you flip forward and pull out to read. The metaphor is the interaction idea; its visual form is open.
-- Songs play on YouTube (opened externally for now; an embedded player later). Audio is never hosted.
+- 웹으로 배포하지만 앱처럼 느껴져야 해요. 폰에서는 폰 앱(한 손, 엄지가 닿는 곳, 하단 버튼, 시트), 아이패드와 노트북에서는 태블릿·데스크톱 앱(넓은 폭을 쓰고, 늘어난 폰이나 웹페이지처럼 보이지 않게).
+- 보통 인스타그램이나 카카오톡 안의 링크로 들어와요. 인앱 브라우저인 경우가 많아요.
+- 여러 플레이리스트를 SNS 피드처럼 빠르게 넘겨 보는 느낌이어야 해요. 지금 생각하는 비유는 아코디언 파일철이에요. 플레이리스트 하나가 칸막이 하나고, 앞으로 넘기고, 꺼내서 읽어요. 비유는 인터랙션 아이디어일 뿐 생김새는 자유예요.
+- 곡은 유튜브에서 재생해요(지금은 밖에서 열고, 나중에 페이지 안 플레이어). 음원을 직접 호스팅하지 않아요.
 
 ## Capabilities and Constraints
 
-Confirmed features:
+확정된 기능:
 
-1. **둘러보기**: flick through playlists. Each shows its title, owner ("○○님의 플레이리스트"), song and slip counts, album covers, the kangaroos of friends who slipped songs in, and whether something is new.
-2. **Open a playlist**: songs in order. Friends' songs look clearly different from the owner's, each marked with who added it ("민지님이 넣음") and their kangaroo.
-3. **쪽지 넣기**: choose the exact spot (between any two songs, top or bottom), write title, artist, optional YouTube link and own name, draw a kangaroo face on a fixed base face (no eyes or mouth; one pen; undo stroke; clear; six presets 웃음, 윙크, 선글라스, 헤드폰, 졸림, 놀람), then 쏙 넣기. It goes in right away; no approval.
-4. **내 파일철**: the owner's playlists, which have new slips, visibility (공개 / 링크 있는 사람만), and creating a new one.
-5. **Manage a playlist**: 목록 with 빼기 and immediate 되돌리기; 활동 (who added what, at which position, when); 공유 (copy 추가 링크, Instagram story, X, visibility, the private 관리 링크).
-6. **New playlist**: name, owner name, songs typed one per line or imported from a screenshot (on-device text recognition with progress, and "확인해 주세요" on uncertain rows).
-7. **Other states**: embedded player (later; the video stays visible, at least 200px tall), empty playlist, playlist not found.
+1. **둘러보기**: 플레이리스트를 넘겨 봐요. 각각 제목, 주인("○○님의 플레이리스트"), 곡 수와 쪽지 수, 앨범 커버, 곡을 넣은 친구들의 캥거루, 새 소식이 있는지가 보여요.
+2. **플레이리스트 열기**: 곡이 순서대로 보여요. 친구가 넣은 곡은 주인 곡과 확실히 다르게 보이고, 누가 넣었는지("민지님이 넣음")와 그 사람의 캥거루가 붙어요.
+3. **쪽지 넣기**: 정확한 자리(두 곡 사이, 맨 위, 맨 아래)를 고르고, 제목·가수·유튜브 링크(선택)·내 이름을 쓰고, 고정된 바탕 얼굴(눈·입 없음) 위에 캥거루 얼굴을 그려요. 펜 하나, 한 획 지우기, 다 지우기, 프리셋 6개(웃음, 윙크, 선글라스, 헤드폰, 졸림, 놀람). 그리고 '쏙 넣기'. 승인 없이 바로 들어가요.
+4. **내 파일철**: 주인의 플레이리스트, 새 쪽지가 온 것, 공개 범위(공개 / 링크 있는 사람만), 새로 만들기.
+5. **플레이리스트 관리**: '목록'(빼기, 바로 되돌리기), '활동'(누가 몇 번째 자리에 무엇을 언제 넣었는지), '공유'(추가 링크 복사, 인스타그램 스토리, X, 공개 범위, 나만 갖는 관리 링크).
+6. **새 플레이리스트**: 이름, 주인 이름, 곡은 한 줄씩 적거나 캡처에서 가져와요(기기 안에서 글자 인식, 진행 상태, 애매한 줄에는 "확인해 주세요").
+7. **그 밖의 상태**: 페이지 안 플레이어(나중, 영상은 항상 보이고 높이 200px 이상), 빈 플레이리스트, 찾을 수 없는 플레이리스트.
 
-Constraints:
+제약:
 
-- No accounts or login. The owner keeps a 관리 링크; friends get an 추가 링크.
-- No onboarding or tutorial screens. The first screen is 둘러보기.
-- No likes, reactions, comments or approvals.
-- MVP is front end only, with sample data. No backend yet.
-- Product words: 둘러보기, 내 파일철, 쪽지 넣기, 여기에 끼우기, 쏙 넣기, 다시 꽂기, 빼기, 되돌리기, 활동, 공유, 추가 링크, 관리 링크, 내 캥거루. Never: 로그인, 회원가입, 영수증, 주머니, 보드, 반응, 수락, 거절.
-- Open decision: whether anyone can add to a public playlist or only people with the link (currently anyone).
+- 계정과 로그인이 없어요. 주인은 '관리 링크', 친구는 '추가 링크'를 가져요.
+- 온보딩이나 사용법 화면이 없어요. 첫 화면은 '둘러보기'예요.
+- 좋아요, 반응, 댓글, 승인이 없어요.
+- MVP는 프런트만, 예시 데이터로 만들어요. 백엔드는 아직 없어요.
+- 쓰는 말: 둘러보기, 내 파일철, 쪽지 넣기, 여기에 끼우기, 쏙 넣기, 다시 꽂기, 빼기, 되돌리기, 활동, 공유, 추가 링크, 관리 링크, 내 캥거루. 안 쓰는 말: 로그인, 회원가입, 영수증, 주머니, 보드, 반응, 수락, 거절.
+- 아직 안 정한 것: 공개 플레이리스트에 아무나 넣을 수 있는지, 링크 있는 사람만 넣을 수 있는지(지금은 아무나).
 
 ## Brand Commitments
 
-- Name: kanqaroo. The kangaroo pouch and the hand-drawn kangaroo faces are the identity.
-- Voice: Korean polite casual (해요체), short and warm. People are addressed as "○○님".
-- Spacing, sizing and type scale follow the proportions of the Toss Design System (TDS): its proportions only, not its colors, component looks or visual language. The numbers are in `design/STITCH.md`.
-- It must not look AI-generated: no purple or blue gradients or gradient blobs, no glass effects on everything, no em dashes, no grids of icon cards, no decorative terminal symbols, no bouncy motion everywhere.
+- 이름은 kanqaroo. 캥거루 주머니와 손으로 그린 캥거루 얼굴이 정체성이에요.
+- 말투는 해요체로 짧고 다정하게. 사람은 "○○님"이라고 불러요.
+- 공간·크기·글자 배율은 토스 디자인 시스템(TDS)의 비율을 따라요. 비율만 따르고, 색·컴포넌트 생김새·디자인 언어는 따르지 않아요. 숫자는 아래 '비율' 블록(`design/STITCH.md`)에 있어요.
+- AI가 만든 것처럼 보이면 안 돼요. 보라·파랑 그라디언트나 그라디언트 덩어리, 여기저기 쓴 유리 효과, 엠대시, 아이콘 카드 격자, 장식용 터미널 기호, 모든 게 튀는 움직임은 쓰지 않아요.
 
 ## Evidence on Hand
 
-- Sample content (playlists, owners, friends' slips): `design/STITCH.md`.
-- Interaction prototypes: `prototype/accordion.html` (flipping through playlists) and `prototype/folder.html` (feature flow). They show behavior, not a visual direction; do not copy their look.
-- There are no real users, testimonials, metrics or rights to album artwork. Use labeled placeholders for covers, and never invent numbers or quotes.
+- 예시 내용(플레이리스트, 주인, 친구 쪽지)은 아래 '예시 내용' 블록(`design/STITCH.md`)에 있어요.
+- 인터랙션 프로토타입: `prototype/accordion.html`(플레이리스트 넘기기), `prototype/folder.html`(기능 흐름). 움직임과 흐름만 보여 줄 뿐 시각 방향이 아니에요. 생김새를 따라 하지 마세요.
+- 실제 사용자, 후기, 지표, 앨범 아트 사용 권리가 없어요. 커버는 표시된 자리표시로 두고, 숫자나 인용을 지어내지 마세요.
 
 ## Product Principles
 
-1. People over algorithms: every song shows who gave it.
-2. One gesture, one meaning: flip to browse, pull out to read, slip in to give.
-3. Giving a song takes under a minute and needs no account.
-4. The owner stays in control without gatekeeping: no approval step, but they can always see and undo.
-5. Album covers and friends' kangaroos are the content people care about.
+1. 알고리즘보다 사람: 모든 곡에 누가 줬는지가 보여요.
+2. 손짓 하나에 뜻 하나: 넘기면 둘러보기, 꺼내면 읽기, 끼우면 주기.
+3. 곡 하나 주는 데 1분이 안 걸리고 계정도 필요 없어요.
+4. 주인은 문지기 노릇 없이도 통제권을 가져요. 승인 단계는 없지만 언제든 보고 되돌릴 수 있어요.
+5. 사람들이 아끼는 건 앨범 커버와 친구들의 캥거루예요.
 
 ## Accessibility & Inclusion
 
-WCAG 2.1 AA. Touch targets at least 44px. Body text readable at phone size and following the system text size. Never rely on color alone (friends are identified by their kangaroo and name too). Respect reduced motion (flipping needs a non-3D fallback). Works inside Instagram and KakaoTalk in-app browsers.
+WCAG 2.1 AA. 터치 영역은 44px 이상. 본문은 폰 크기에서 잘 읽히고 시스템 글자 크기를 따라요. 색만으로 구분하지 않아요(친구는 캥거루와 이름으로도 알아봐요). 움직임 줄이기 설정을 존중해요(넘기기에는 3D가 아닌 대안이 있어야 해요). 인스타그램·카카오톡 인앱 브라우저에서도 동작해요.

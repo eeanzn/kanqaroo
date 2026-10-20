@@ -1,22 +1,36 @@
 # Stitch 브리프
 
-Stitch에는 **무엇을 만들지**만 줘요. 어떻게 생겨야 하는지(색, 글꼴, 재질, 레이아웃)는 Stitch가 정해요.
+Stitch에는 **무엇을 만들지**만 줘요. 어떻게 생겨야 하는지(색, 글꼴, 재질, 레이아웃)는 Stitch가 정해요. 전부 한국어로 요청해요.
 
-1. 새 프로젝트 첫 메시지에 루트의 `PRODUCT.md` 전체를 붙이고, 이어서 아래 **비율** 블록을 붙여요. 예전 DESIGN.md나 우리 프로토타입 화면은 넣지 않아요.
+1. 새 프로젝트 첫 메시지에 루트의 `PRODUCT.md` 전체, 아래 **비율** 블록, **예시 내용** 블록을 이어서 붙여요. 예전 DESIGN.md나 우리 프로토타입 화면은 넣지 않아요.
 2. 프롬프트 P1~P6을 순서대로 써요. P1에서 방향 셋 중 하나를 고르면, P2부터는 그 방향으로만 가요.
 3. 마지막 P7로 디자인 시스템을 받아서 루트에 `DESIGN.md`로 저장해요. Stitch 내보내기를 쓰거나, Claude에게 정리를 맡겨요.
 
 ## 비율 (토스 디자인 시스템에서 숫자만)
 
 ```text
-Proportions to follow. They come from the Toss Design System; use only these numbers, not its colors or visual style.
-- Phone base width 375. Screen side margins 20 to 24.
-- Type scale (size / line height, px): 30/40, 26/35, 22/31, 20/29, 17/25.5, 15/22.5, 13/19.5. Body text 15 to 17.
-- Button heights: 56 (main bottom action), 48, 38, 32.
-- List rows: 24 side padding; thumbnails 40 or 54; icons 20 or 24.
-- Bottom action area: 20 side padding, 18 below plus the safe area.
-- Common spacing steps: 8, 12, 16, 20, 24, 28.
-- iPad and desktop: keep the same type and control sizes; use the extra width for more content, not for bigger elements.
+[비율]
+따를 비율이에요. 토스 디자인 시스템에서 숫자만 가져왔어요. 색이나 시각 스타일은 따르지 마세요.
+- 폰 기준 폭 375. 화면 좌우 여백 20~24.
+- 글자 크기 / 줄 높이(px): 30/40, 26/35, 22/31, 20/29, 17/25.5, 15/22.5, 13/19.5. 본문은 15~17.
+- 버튼 높이: 56(하단 주요 버튼), 48, 38, 32.
+- 리스트 행: 좌우 여백 24, 썸네일 40 또는 54, 아이콘 20 또는 24.
+- 하단 버튼 영역: 좌우 20, 아래 18 + 안전 영역.
+- 자주 쓰는 간격: 8, 12, 16, 20, 24, 28.
+- 아이패드·데스크톱: 글자와 컨트롤 크기는 그대로 두고, 넓어진 폭은 요소를 키우는 데가 아니라 내용을 더 보여 주는 데 쓰세요.
+```
+
+## 예시 내용
+
+```text
+[예시 내용]
+모든 화면에 이 내용을 써 주세요. ★는 친구가 넣은 곡이고, 괄호 안이 넣은 사람이에요.
+- 새벽 운전 (주인 지우): Nights / Frank Ocean, ★Kyoto / Phoebe Bridgers (민지), Square (2017) / 백예린, Antifreeze / 검정치마, ★Plastic Love / 竹内まりや (민준), Space Song / Beach House, 밤편지 / 아이유
+- 첫 자취방 (주인 준호): 별일 없이 산다 / 장기하와 얼굴들, 위잉위잉 / 혁오, ★난춘 / 새소년 (민지), NO PAIN / 실리카겔, 주저하는 연인들을 위해 / 잔나비
+- 헬스장 금지곡 (주인 도윤): Lose Yourself / Eminem, Stronger / Kanye West, Numb / Linkin Park, ★말달리자 / 크라잉넛 (서준), ★낭만고양이 / 체리필터 (유나)
+- 비 오는 날 작업용 (주인 민지): No Surprises / Radiohead, ★Chamber of Reflection / Mac DeMarco (하늘), 기억을 걷는 시간 / 넬, ★산책 / 백예린 (지우)
+- 그 밖의 플레이리스트 제목: 출근길 30분, 여름 끝물, 이별 후 3일차, 노래방 18번, 고양이랑 낮잠, 시험 기간
+- 요즘 듣는 거 (내 플레이리스트, 주인 하린): Ivy / Frank Ocean, Hollywood / 검정치마, ★Motion Sickness / Phoebe Bridgers (지우), Panda Bear / 혁오, ★Everything / 검정치마 (민지)
 ```
 
 ## 프롬프트
@@ -24,55 +38,55 @@ Proportions to follow. They come from the Toss Design System; use only these num
 ### P1 · 방향 셋
 
 ```text
-Propose three genuinely different visual directions for kanqaroo, grounded in the product brief. Show each on the 둘러보기 screen (phone) with the same sample content. Give each a short name and one sentence on its idea. They should differ in concept, not only in color.
+제품 브리프를 바탕으로 kanqaroo의 시각 방향을 서로 확실히 다른 세 가지로 제안해 주세요. 셋 다 같은 예시 내용으로 '둘러보기' 화면(폰)에 보여 주세요. 각각 짧은 이름과 아이디어를 설명하는 한 문장을 붙여 주세요. 색만 다른 게 아니라 개념부터 달라야 해요.
 ```
 
 ### P2 · 둘러보기와 넘기기
 
 ```text
-Design 둘러보기, the first screen, in the chosen direction. Visitors flick through many playlists quickly, read each one at a glance, and decide which to open. Include switching to 내 파일철, where you are in the stack, sound on or off, and a quiet hint about how to flip and open (no onboarding). Then show flipping as 3 still frames: one playlist, a fast flick through several, and jumping to one further back.
+고른 방향으로 첫 화면인 '둘러보기'를 디자인해 주세요. 방문자는 여러 플레이리스트를 빠르게 넘기면서 하나하나를 한눈에 파악하고, 무엇을 열지 정해요. '내 파일철'로 전환하기, 지금 몇 번째를 보고 있는지, 소리 켜기/끄기, 넘기고 여는 방법을 조용히 알려 주는 힌트(온보딩 화면 없이)를 넣어 주세요. 그다음 넘기는 동작을 정지 화면 3장으로 보여 주세요: 한 장 넘기기, 여러 장 빠르게 넘기기, 뒤쪽 플레이리스트로 바로 건너뛰기.
 ```
 
 ### P3 · 꺼내 읽고 쪽지 넣기
 
 ```text
-Design the visitor's core loop as a sequence of phone screens: open "새벽 운전" and read it (owner's songs and friends' songs clearly different, who added each, play a song, put it back); choose the spot for a new song; write the slip with the kangaroo pad (empty, drawn, preset chosen, missing-title error); the 쏙 넣기 moment in 3 frames; and the playlist right after, now holding the new slip, with a short confirmation.
+방문자의 핵심 흐름을 폰 화면 여러 장으로 디자인해 주세요.
+1. '새벽 운전'을 꺼내서 읽기: 주인이 넣은 곡과 친구가 넣은 곡이 확실히 구분되고, 누가 넣었는지 보이고, 곡을 재생하고, 다시 꽂을 수 있어요.
+2. 새 곡을 넣을 자리 고르기.
+3. 쪽지 쓰기와 캥거루 그리기: 빈 상태, 그린 상태, 프리셋을 고른 상태, 제목을 안 써서 생긴 오류.
+4. '쏙 넣기' 순간을 정지 화면 3장으로.
+5. 바로 뒤의 플레이리스트: 새 쪽지가 들어가 있고, 짧은 확인 메시지가 떠요.
 ```
 
 ### P4 · 주인 화면
 
 ```text
-Design the owner's side: 내 파일철 (new slips, 공개 vs 링크 있는 사람만, start a new playlist); managing "요즘 듣는 거" in three views, 목록 (빼기 with 되돌리기), 활동 and 공유; and creating "퇴근길" with typed songs or a screenshot import (progress, "확인해 주세요" rows), ending with the new playlist joining the file.
+주인 쪽 화면을 디자인해 주세요.
+1. '내 파일철': 새 쪽지가 온 플레이리스트, '공개'와 '링크 있는 사람만' 구분, 새 플레이리스트 시작하기.
+2. '요즘 듣는 거' 관리 화면 세 가지: '목록'(빼기와 되돌리기), '활동', '공유'.
+3. '퇴근길' 새로 만들기: 곡을 한 줄씩 적거나 캡처로 가져오기(진행 상태, '확인해 주세요'가 붙은 줄). 마지막에 새 플레이리스트가 파일철에 들어가는 모습까지.
 ```
 
 ### P5 · 나머지 상태
 
 ```text
-Design the remaining states: the embedded YouTube player inside a playlist (video always visible, at least 200px tall; what's playing, previous, pause, next, close, open in YouTube), an empty playlist that invites the first slip, and a playlist that can't be found.
+나머지 상태를 디자인해 주세요.
+1. 플레이리스트 안의 유튜브 플레이어: 영상은 항상 보이고 높이 200px 이상. 지금 나오는 곡, 이전, 일시정지, 다음, 닫기, 유튜브에서 열기.
+2. 비어 있는 플레이리스트: 첫 쪽지를 넣고 싶게 만드는 화면.
+3. 찾을 수 없는 플레이리스트.
 ```
 
 ### P6 · 아이패드와 데스크톱
 
 ```text
-Show the same product as an iPad app (landscape) and a desktop window: 둘러보기 with a playlist open, and the owner's 내 파일철. It should feel like a native tablet or desktop app that uses the width, not a stretched phone or a website.
+같은 제품을 아이패드 앱(가로)과 데스크톱 창으로 보여 주세요. 플레이리스트 하나를 연 '둘러보기'와 주인의 '내 파일철'이요. 늘어난 폰이나 웹사이트가 아니라, 넓은 폭을 쓰는 아이패드·데스크톱 앱처럼 느껴져야 해요.
 ```
 
 ### P7 · 디자인 시스템 정리
 
 ```text
-Summarize the design system you used across all screens as a DESIGN.md: typography roles and sizes, named colors and what each is for, surfaces, shape and spacing rules, every component with its states, motion notes for flipping, opening and slipping in, and how layouts adapt from phone to iPad and desktop.
+지금까지 모든 화면에 쓴 디자인 시스템을 DESIGN.md 형식으로 정리해 주세요. 글자 역할과 크기, 이름 붙인 색과 각각의 용도, 면(surface), 모양과 간격 규칙, 모든 컴포넌트와 상태, 넘기기·꺼내기·쏙 넣기 움직임 메모, 폰에서 아이패드·데스크톱으로 레이아웃이 어떻게 바뀌는지까지요.
 ```
-
-## 예시 내용
-
-| 플레이리스트         | 주인 | 곡 (★ 친구가 넣은 곡, 넣은 사람)                                                                                                                                                         |
-| -------------------- | ---- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 새벽 운전            | 지우 | Nights / Frank Ocean · ★Kyoto / Phoebe Bridgers (민지) · Square (2017) / 백예린 · Antifreeze / 검정치마 · ★Plastic Love / 竹内まりや (민준) · Space Song / Beach House · 밤편지 / 아이유 |
-| 첫 자취방            | 준호 | 별일 없이 산다 / 장기하와 얼굴들 · 위잉위잉 / 혁오 · ★난춘 / 새소년 (민지) · NO PAIN / 실리카겔 · 주저하는 연인들을 위해 / 잔나비                                                        |
-| 헬스장 금지곡        | 도윤 | Lose Yourself / Eminem · Stronger / Kanye West · Numb / Linkin Park · ★말달리자 / 크라잉넛 (서준) · ★낭만고양이 / 체리필터 (유나)                                                        |
-| 비 오는 날 작업용    | 민지 | No Surprises / Radiohead · ★Chamber of Reflection / Mac DeMarco (하늘) · 기억을 걷는 시간 / 넬 · ★산책 / 백예린 (지우)                                                                   |
-| 그 밖의 플레이리스트 |      | 출근길 30분 · 여름 끝물 · 이별 후 3일차 · 노래방 18번 · 고양이랑 낮잠 · 시험 기간                                                                                                        |
-| 요즘 듣는 거 (내 것) | 하린 | Ivy / Frank Ocean · Hollywood / 검정치마 · ★Motion Sickness / Phoebe Bridgers (지우) · Panda Bear / 혁오 · ★Everything / 검정치마 (민지)                                                 |
 
 ## 결과 볼 때
 
