@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Safari 막대 실험</title>
+<!-- iOS 26 Safari에서 상태 막대·주소 막대 뒤로 페이지가 비치게 하는 방법 비교. ?v=a|b|c|d -->
+<script>
+  const V = new URLSearchParams(location.search).get('v') || 'list'
+  document.documentElement.className = 'v-' + V
+</script>
+<style>
+:root { color-scheme: dark; --hdr-top: calc(env(safe-area-inset-top, 0px) + 8px); }
+* { box-sizing: border-box; }
+html, body { margin: 0; background: #14142b; color: #fff; font: 16px/1.5 -apple-system, BlinkMacSystemFont, system-ui, sans-serif; word-break: keep-all; }
+/* 줄무늬가 막대 뒤로 보이면 "뚫림", 줄무늬 없이 한 색이면 Safari가 칠한 것 */
+.art { background:
+  repeating-linear-gradient(135deg, rgba(255, 255, 255, .2) 0 14px, transparent 14px 28px),
+  radial-gradient(60% 30% at 20% 8%, #ff4d6d, transparent 70%),
+  radial-gradient(60% 30% at 85% 30%, #33c3ff, transparent 70%),
+  radial-gradient(70% 35% at 25% 65%, #8c5bff, transparent 70%),
+  radial-gradient(60% 30% at 80% 94%, #ffc23d, transparent 70%),
+  #1b1b3a; }
+.hdr { position: fixed; z-index: 5; top: var(--hdr-top); left: 12px; right: 12px; height: 56px; border-radius: 999px; display: flex; align-items: center; padding: 0 20px; font-weight: 700; background: rgba(255, 255, 255, .16); -webkit-backdrop-filter: blur(6px) saturate(190%); backdrop-filter: blur(6px) saturate(190%); box-shadow: inset 0 0 0 .5px rgba(255, 255, 255, .4); }
+.pager { position: fixed; z-index: 5; left: 50%; transform: translateX(-50%); bottom: calc(env(safe-area-inset-bottom, 0px) + 14px); padding: 8px 18px; border-radius: 999px; font-size: 14px; font-weight: 600; background: rgba(255, 255, 255, .16); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); white-space: nowrap; }
+.card { border-radius: 12px; padding: 16px 18px; background: rgba(10, 10, 24, .72); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); display: grid; gap: 10px; }
+.card h1 { margin: 0; font-size: 22px; line-height: 1.3; }
+.card p { margin: 0; color: rgba(255, 255, 255, .78); font-size: 15px; }
+.links { display: flex; flex-wrap: wrap; gap: 8px; }
+.links a { flex: 1 1 40%; padding: 10px 12px; border-radius: 8px; background: rgba(255, 255, 255, .12); color: #fff; text-decoration: none; font-weight: 600; font-size: 15px; text-align: center; }
+.links a[aria-current] { background: #fff; color: #111; }
+dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: 13px; font-variant-numeric: tabular-nums; }
+dt { color: rgba(255, 255, 255, .6); }
+dd { margin: 0; }
+.probe { position: fixed; top: 0; left: 0; width: 0; height: 0; padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); visibility: hidden; pointer-events: none; }
+/* 화면 가운데 카드: 위·아래 가장자리에는 닿지 않게 */
+.mid { position: fixed; z-index: 4; left: 16px; right: 16px; top: calc(var(--hdr-top) + 72px); bottom: calc(env(safe-area-inset-bottom, 0px) + 64px); overflow: auto; display: grid; align-content: center; }
+
+/* A. 지금 프로토타입 방식: 배경이 fixed로 화면 전체 */
+.v-a, .v-a body { height: 100%; overflow: hidden; }
+.v-a .bg { position: fixed; inset: 0; }
+
+/* B. 배경을 fixed 대신 absolute로, 화면 밖 위아래까지 넓게. 스크롤 없음 */
+.v-b, .v-b body { height: 100%; overflow: hidden; }
+.v-b .bg { position: absolute; left: 0; right: 0; top: -240px; bottom: -240px; }
+
+/* C. 문서를 화면보다 위아래로 240px씩 길게 만들고 가운데에 세워 둠(스크롤 잠금). 넘기기는 지금처럼 직접 처리 */
+.v-c { overflow: hidden; }
+.v-c body { position: relative; height: calc(100vh + 480px); }
+.v-c .bg { position: absolute; inset: 0; }
+
+/* D. 구글처럼 진짜 문서 스크롤. 위로 밀면 내려가고 주소창이 접힘 */
+.v-d body, .v-list body { position: relative; }
+.v-d .bg, .v-list .bg { position: absolute; inset: 0; z-index: -1; }
+.flow { padding: calc(var(--hdr-top) + 72px) 16px calc(env(safe-area-inset-bottom, 0px) + 80px); display: grid; gap: 16px; }
+.v-d .mid, .v-list .mid { display: none; }
+.v-a .flow, .v-b .flow, .v-c .flow { display: none; }
+.filler { height: 70vh; border-radius: 12px; background: rgba(255, 255, 255, .08); display: grid; place-items: center; font-size: 40px; font-weight: 800; color: rgba(255, 255, 255, .5); }
+</style>
+</head>
+<body>
+<div class="bg art" aria-hidden="true"></div>
+<div class="probe" id="probe"></div>
+<header class="hdr">kanqaroo · 막대 실험 <span id="vname" style="margin-left:auto;font-weight:600"></span></header>
+<div class="mid"><div class="card" id="card-fixed"></div></div>
+<main class="flow" id="flow"></main>
+<p class="pager" id="pager">아래 막대 뒤가 비치나요?</p>
+
+<script>
+const VARIANTS = {
+  a: ['A. 지금 방식', '배경이 position: fixed로 화면 전체를 덮어요. 지금 프로토타입과 같아서 위아래가 한 색으로 칠해질 거예요(비교 기준).'],
+  b: ['B. 배경을 화면 밖까지', '배경을 fixed 대신 absolute로, 화면 위아래 밖까지 넓게 깔았어요. 스크롤은 없어요.'],
+  c: ['C. 문서를 살짝 길게', '문서를 화면보다 위아래로 길게 만들고 가운데에 세워 뒀어요(손으로는 안 움직여요). 피드 넘기기는 지금처럼 직접 처리할 수 있는 방식이에요.'],
+  d: ['D. 진짜 스크롤', '구글 페이지처럼 문서가 스크롤돼요. 위로 밀어 내려 보면서 주소창이 접히는지, 위아래가 비치는지 봐 주세요.'],
+}
+const $ = (s) => document.querySelector(s)
+const ios = (navigator.userAgent.match(/OS (\d+)_(\d+)/) || []).slice(1).join('.') || '-'
+const safari = (navigator.userAgent.match(/Version\/([\d.]+)/) || [])[1] || '-'
+const links = () => `<div class="links">${Object.keys(VARIANTS).map((k) => `<a href="?v=${k}"${k === V ? ' aria-current="page"' : ''}>${VARIANTS[k][0]}</a>`).join('')}</div>`
+const metrics = () => {
+  const ps = getComputedStyle($('#probe')), vv = window.visualViewport
+  return `<dl>
+    <dt>iOS · Safari</dt><dd>${ios} · ${safari}</dd>
+    <dt>화면 / 창</dt><dd>${screen.width}×${screen.height} / ${innerWidth}×${innerHeight}</dd>
+    <dt>visualViewport</dt><dd>${vv ? `${Math.round(vv.width)}×${Math.round(vv.height)} (위 ${Math.round(vv.offsetTop)})` : '-'}</dd>
+    <dt>safe-area 위·아래</dt><dd>${ps.paddingTop} · ${ps.paddingBottom}</dd>
+    <dt>scrollY / 문서 높이</dt><dd>${Math.round(scrollY)} / ${document.documentElement.scrollHeight}</dd>
+    <dt>홈 화면 앱</dt><dd>${matchMedia('(display-mode: standalone)').matches ? '예' : '아니요'}</dd>
+  </dl>`
+}
+const look = '<p><b>볼 것:</b> 시계가 있는 맨 위 줄과 아래 주소창 둘레에 <b>줄무늬</b>가 보이면 뚫린 거예요. 줄무늬 없이 한 색이면 Safari가 칠한 거예요. 위·아래 따로 봐 주세요.</p>'
+
+function render() {
+  if (V === 'list') {
+    $('#vname').textContent = ''
+    $('#pager').textContent = '하나씩 열어 보고 스크린샷 부탁해요'
+    $('#flow').innerHTML = `<div class="card"><h1>Safari 위·아래 막대 실험</h1><p>iOS 26 Safari에서 페이지가 상태 막대·주소창 뒤로 비치게 하는 방법 네 가지예요. 각각 열어서 위·아래가 어떻게 보이는지 스크린샷 찍어 주세요.</p>${look}${links()}</div><div class="card">${metrics()}</div>`
+    return
+  }
+  const [name, desc] = VARIANTS[V] || VARIANTS.a
+  $('#vname').textContent = V.toUpperCase()
+  const html = `<h1>${name}</h1><p>${desc}</p>${look}${links()}<p><a href="./bars.html" style="color:#fff">목록으로</a></p>${metrics()}`
+  if (V === 'd') {
+    $('#flow').innerHTML = `<div class="card">${html}</div>` + [1, 2, 3, 4, 5].map((n) => `<div class="filler">${n}</div>`).join('') + `<div class="card"><p>맨 아래예요. 다시 위로 올려 보면서 주소창이 펼쳐질 때도 봐 주세요.</p></div>`
+    $('#pager').textContent = '위로 밀어서 내려 보세요'
+  } else $('#card-fixed').innerHTML = html
+}
+render()
+if (V === 'c') {
+  const mid = () => { document.documentElement.scrollTop = 240 }
+  mid(); addEventListener('load', mid); addEventListener('resize', mid)
+  addEventListener('scroll', () => { if (Math.abs(scrollY - 240) > 1) mid() })
+}
+let t = 0
+const refresh = () => { clearTimeout(t); t = setTimeout(() => { const dl = $('dl'); if (dl) dl.outerHTML = metrics() }, 100) }
+addEventListener('scroll', refresh, { passive: true }); addEventListener('resize', refresh)
+window.visualViewport?.addEventListener('resize', refresh)
+</script>
+</body>
+</html>

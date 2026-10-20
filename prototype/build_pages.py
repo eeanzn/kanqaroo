@@ -1,4 +1,4 @@
-"""GitHub Pages용 데모를 만든다: prototype/dist/pages/ (index.html + tess/ + .nojekyll).
+"""GitHub Pages용 데모를 만든다: prototype/dist/pages/ (index.html + tess/ + lab/ + .nojekyll).
 
 Artifact는 문서 뼈대(doctype·head·charset·viewport)를 대신 씌워 주지만 GitHub Pages는 그렇지 않아서,
 빌드한 프로토타입을 완전한 HTML 문서로 감싼다. OCR 글자 데이터(tess/)도 같이 둔다.
@@ -42,5 +42,6 @@ if pages.exists():
 (pages / 'index.html').write_text(doc)
 for f in ['kor.js', 'eng.js']:
     shutil.copy(dist / 'tess' / f, pages / 'tess' / f)
+shutil.copytree(here / 'lab', pages / 'lab')  # 기기에서만 확인할 수 있는 실험 페이지 (예: lab/bars.html)
 (pages / '.nojekyll').write_text('')
 print(pages, round(sum(f.stat().st_size for f in pages.rglob('*') if f.is_file()) / 1024 / 1024, 2), 'MB')

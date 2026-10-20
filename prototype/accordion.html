@@ -59,7 +59,7 @@
 *, *::before, *::after { box-sizing: border-box; }
 [hidden] { display: none !important; }
 html { height: 100%; transition: --tint .7s ease; }
-body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); color: var(--text); font-family: var(--font); font-size: 17px; line-height: 1.5; word-break: keep-all; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
+body { height: 100%; margin: 0; overflow: hidden; background: var(--bg); transition: background-color .7s ease; color: var(--text); font-family: var(--font); font-size: 17px; line-height: 1.5; word-break: keep-all; -webkit-font-smoothing: antialiased; font-variant-numeric: tabular-nums; }
 button, input { font: inherit; color: inherit; }
 canvas { display: block; }
 button { -webkit-tap-highlight-color: transparent; }
@@ -92,6 +92,10 @@ ol, ul { padding: 0; list-style: none; }
 .amb-img { background: var(--img) center / cover; filter: blur(56px) saturate(1.4); }
 .amb-l canvas { filter: blur(28px) saturate(1.25); }
 .amb::after { content: ""; position: absolute; inset: 0; background: var(--veil); }
+/* Safari 26은 theme-color 대신 화면 위·아래 가장자리 색을 샘플링해 상태 막대·주소 막대를 칠해요. 안 보이는(opacity 0) 띠로 그 색을 알려 줘요 */
+.chrome-tint { position: fixed; z-index: 69; left: 0; right: 0; height: 12px; opacity: 0; pointer-events: none; transition: background-color .7s ease; }
+.chrome-tint.top { top: 0; }
+.chrome-tint.bot { bottom: 0; }
 @keyframes drift { from { transform: scale(1.08) rotate(0deg); } to { transform: scale(1.28) rotate(9deg) translate(2%, -3%); } }
 
 /* ── Header ── */
@@ -339,11 +343,13 @@ ol, ul { padding: 0; list-style: none; }
   .srow.fresh { animation: none; }
   .amb-l { transition: none; }
   .amb-l > * { animation: none; }
+  body, .chrome-tint { transition: none; }
   .prog i { transition: none; }
 }
 </style>
 
 <div class="amb" id="amb" aria-hidden="true"><div class="amb-l"></div><div class="amb-l"></div></div>
+<div class="chrome-tint top" id="ct-top" aria-hidden="true"></div><div class="chrome-tint bot" id="ct-bot" aria-hidden="true"></div>
 
 <div class="edge" id="edge" hidden></div>
 <header class="hdr glass lg" id="hdr">
@@ -766,10 +772,59 @@ function setAmbient(p) {
   ambKey = key
   const layers = amb.children, next = layers[(ambI ^= 1)], prev = layers[ambI ^ 1]
   next.innerHTML = ''
-  if (p && isImg(p)) { const d = document.createElement('div'); d.className = 'amb-img'; d.style.setProperty('--img', `url('${p.cover.v}')`); next.append(d) }
-  else if (p) next.append(ambCanvas(p.cover.v))
+  if (p && isImg(p)) {
+    const d = document.createElement('div'); d.className = 'amb-img'; d.style.setProperty('--img', `url('${p.cover.v}')`); next.append(d)
+    loadImg(p.cover.v).then((im) => { if (ambKey === key) sampleEdges(im, true) }, () => {})
+  } else if (p) { const c = ambCanvas(p.cover.v); next.append(c); sampleEdges(c, false) }
+  else { ambSrc = ambEdge = null; paintChrome() }
   next.classList.add('on')
   prev.classList.remove('on')
+}
+
+/* ════════ Safari 위·아래 막대 색: 멈춘 파일의 배경을 따라가요 ════════
+   Safari 26(iOS)은 theme-color를 무시하고 body 배경이나 가장자리에 붙은 fixed 요소 색으로 막대를 칠해요.
+   배경 그림에서 화면 위·아래 가장자리에 보이는 색을 뽑고, 덮개(veil)·딤·시트까지 겹친 색을 띠·body·theme-color에 넣어요 */
+const ctTop = $('#ct-top'), ctBot = $('#ct-bot')
+const metaTheme = document.querySelector('meta[name="theme-color"]') || document.head.appendChild(Object.assign(document.createElement('meta'), { name: 'theme-color' }))
+let ambSrc = null, ambEdge = null
+const rgbaOf = (str) => { const m = (str.match(/[\d.]+/g) || []).map(Number); return [m[0] || 0, m[1] || 0, m[2] || 0, m[3] ?? 1] }
+const over = (base, [r, g, b, a]) => [base[0] * (1 - a) + r * a, base[1] * (1 - a) + g * a, base[2] * (1 - a) + b * a]
+function saturate([r, g, b], s) { // CSS saturate()와 같은 행렬
+  return [
+    (0.213 + 0.787 * s) * r + (0.715 - 0.715 * s) * g + (0.072 - 0.072 * s) * b,
+    (0.213 - 0.213 * s) * r + (0.715 + 0.285 * s) * g + (0.072 - 0.072 * s) * b,
+    (0.213 - 0.213 * s) * r + (0.715 - 0.715 * s) * g + (0.072 + 0.928 * s) * b,
+  ].map((v) => clamp(v, 0, 255))
+}
+function sampleEdges(src, cover) {
+  ambSrc = { src, cover }
+  const W = 24, H = clamp(Math.round(W * innerHeight / Math.max(1, innerWidth)), 12, 64)
+  const t = document.createElement('canvas'); t.width = W; t.height = H
+  const g = t.getContext('2d', { willReadFrequently: true })
+  if (cover) drawCover(g, src, W, H); else g.drawImage(src, 0, 0, W, H) // 그림은 cover, 색 캔버스는 늘려서 깔려요
+  // 배경 층은 화면보다 크게(inset -15%, drift 확대) 깔려서 화면 가장자리는 원본의 17%·83% 줄쯤
+  const band = (cy) => {
+    const y0 = Math.floor(H * (cy - 0.07)), y1 = Math.ceil(H * (cy + 0.07)), x0 = Math.floor(W * 0.17), x1 = Math.ceil(W * 0.83)
+    const d = g.getImageData(x0, y0, x1 - x0, y1 - y0).data, n = d.length / 4, c = [0, 0, 0]
+    for (let i = 0; i < d.length; i += 4) { c[0] += d[i]; c[1] += d[i + 1]; c[2] += d[i + 2] }
+    return saturate(c.map((v) => v / n), cover ? 1.4 : 1.25)
+  }
+  try { ambEdge = { top: band(0.17), bot: band(0.83) } } catch { return } // 읽을 수 없는 그림이면 이전 색 그대로
+  paintChrome()
+}
+function paintChrome() {
+  const home = route.cur === '' && ambEdge
+  ctTop.hidden = ctBot.hidden = !home
+  const cs = getComputedStyle(document.documentElement), tok = (n) => rgbaOf(cs.getPropertyValue(n))
+  if (!home) { document.body.style.backgroundColor = ''; metaTheme.content = cs.getPropertyValue('--bg').trim(); return }
+  const veil = tok('--veil'), dim = tok('--dim')
+  let top = over(ambEdge.top, veil), bot = over(ambEdge.bot, veil)
+  document.body.style.backgroundColor = rgbHex(...top.map((v, i) => (v + bot[i]) / 2))
+  for (const l of [dl, bs, dg]) if (!l.hidden) { top = over(top, dim); bot = over(bot, dim) } // 레이어마다 딤이 한 겹씩
+  if (!bs.hidden) bot = over(bot, tok('--glass-thick')) // 시트가 아래 가장자리에 붙어 있어요
+  ctTop.style.backgroundColor = rgbHex(...top)
+  ctBot.style.backgroundColor = rgbHex(...bot)
+  metaTheme.content = rgbHex(...top)
 }
 function goTo(i) { target = clamp(i, 0, N() - 1); kick() }
 
@@ -1448,6 +1503,13 @@ document.addEventListener('keydown', (e) => {
 })
 window.addEventListener('hashchange', route)
 window.addEventListener('resize', () => { measure(); layout(performance.now()) })
+
+{ const mo = new MutationObserver(() => paintChrome())
+  for (const el of [dl, bs, dg, pgMe, pgEdit, pgComp]) mo.observe(el, { attributes: true, attributeFilter: ['hidden'] })
+  mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] })
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', paintChrome)
+  let rt = 0
+  window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(() => { if (ambSrc) sampleEdges(ambSrc.src, ambSrc.cover) }, 200) }) }
 
 /* ════════ 시작 ════════ */
 measure()
