@@ -1,4 +1,4 @@
-# 프로토타입 데모를 GitHub Pages에 올린다 (prototype/build_pages.py → prototype/dist/pages)
+# 프로토타입 데모를 GitHub Pages에 올린다 (prototype/build.py → prototype/dist/pages)
 name: Demo (GitHub Pages)
 
 on:
@@ -23,11 +23,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
       - name: Build demo
-        run: python3 prototype/build_pages.py
+        run: python3 prototype/build.py
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

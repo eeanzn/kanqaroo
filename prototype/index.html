@@ -1,0 +1,308 @@
+<meta name="description" content="친구들이 한 곡씩 몰래 넣어 같이 완성하는 블라인드 플레이리스트">
+<title>Kanqaroo</title>
+<style>
+@font-face { font-family: 'Pretendard'; font-weight: 400; font-display: swap; src: url(data:font/woff2;base64,__FONT_400__) format('woff2'); }
+@font-face { font-family: 'Pretendard'; font-weight: 600; font-display: swap; src: url(data:font/woff2;base64,__FONT_600__) format('woff2'); }
+@font-face { font-family: 'Pretendard'; font-weight: 700; font-display: swap; src: url(data:font/woff2;base64,__FONT_700__) format('woff2'); }
+@font-face { font-family: 'Pretendard'; font-weight: 800; font-display: swap; src: url(data:font/woff2;base64,__FONT_800__) format('woff2'); }
+
+/* ── 토큰: 무채색 + 강조색 하나. 그라데이션 없음 ── */
+:root {
+  color-scheme: light;
+  --bg: #FFFFFF; --surface: #F3F3F1; --line: #E3E3DF; --text: #141414; --text-2: #5C5C58; --text-3: #8C8C86;
+  --accent: #FF5B22; --on-accent: #FFFFFF; --accent-soft: #FFE6DB; --ok: #1F8A4C;
+  --r: 8px; --font: 'Pretendard', system-ui, -apple-system, 'Apple SD Gothic Neo', sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root { color-scheme: dark; --bg: #0F0F10; --surface: #1C1C1E; --line: #2E2E31; --text: #F4F4F2; --text-2: #B0B0AA; --text-3: #85857F; --accent: #FF6E3A; --on-accent: #140A05; --accent-soft: #3A1C10; --ok: #4CC685; }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 17px/1.5 var(--font); word-break: keep-all; -webkit-font-smoothing: antialiased; }
+button, input { font: inherit; color: inherit; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.wrap { max-width: 480px; margin: 0 auto; padding: calc(env(safe-area-inset-top, 0px) + 8px) 20px calc(env(safe-area-inset-bottom, 0px) + 40px); }
+.top { display: flex; align-items: center; justify-content: space-between; height: 56px; }
+.logo { border: 0; background: none; padding: 0; font-size: 20px; font-weight: 800; letter-spacing: -0.03em; cursor: pointer; }
+.logo b { color: var(--accent); }
+.stack { display: grid; gap: 16px; }
+h1 { margin: 8px 0 0; font-size: 28px; line-height: 1.3; letter-spacing: -0.02em; }
+h2 { margin: 0; font-size: 20px; line-height: 1.35; }
+p { margin: 0; }
+.sub { color: var(--text-2); font-size: 15px; }
+.tiny { color: var(--text-3); font-size: 13px; }
+
+.card { background: var(--surface); border-radius: var(--r); padding: 20px; display: grid; gap: 14px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 52px; padding: 0 20px; border-radius: var(--r); border: 0; background: var(--surface); font-weight: 700; cursor: pointer; text-decoration: none; }
+.btn.primary { background: var(--accent); color: var(--on-accent); }
+.btn.line { background: none; box-shadow: inset 0 0 0 1px var(--line); }
+.btn.sm { height: 40px; padding: 0 14px; font-size: 15px; }
+.btn.full { width: 100%; }
+.btn:disabled { opacity: .4; cursor: default; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.row > .btn { flex: 1 1 0; }
+
+label { display: grid; gap: 6px; font-size: 15px; font-weight: 600; }
+input[type="text"] { height: 52px; padding: 0 14px; border-radius: var(--r); border: 0; background: var(--bg); box-shadow: inset 0 0 0 1px var(--line); font-size: 17px; width: 100%; }
+input[type="text"]:focus { outline: none; box-shadow: inset 0 0 0 2px var(--accent); }
+.check { display: flex; align-items: center; gap: 10px; font-weight: 400; }
+.check input { width: 20px; height: 20px; accent-color: var(--accent); }
+.stepper { display: flex; align-items: center; gap: 12px; }
+.stepper output { min-width: 3ch; text-align: center; font-size: 24px; font-weight: 800; }
+
+/* ── 봉투(슬롯): 찬 자리는 봉인된 봉투, 빈 자리는 점선 ── */
+.slots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+.slot { aspect-ratio: 4 / 3; border-radius: 6px; display: grid; place-items: center; font-size: 13px; font-weight: 700; position: relative; }
+.slot.empty { box-shadow: inset 0 0 0 1.5px var(--line); color: var(--text-3); background-image: none; }
+.slot.full { background: var(--text); color: var(--bg); overflow: hidden; }
+.slot.full::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 55%; background: color-mix(in srgb, var(--bg) 14%, transparent); clip-path: polygon(0 0, 100% 0, 50% 100%); }
+.slot.full::after { content: ""; position: absolute; width: 9px; height: 9px; border-radius: 50%; background: var(--accent); top: 44%; }
+.slot.mine { background: var(--accent); color: var(--on-accent); }
+.slot.mine::after { background: var(--on-accent); }
+.slot.full span { position: absolute; bottom: 4px; right: 6px; font-size: 11px; opacity: .7; }
+.slot.pop { animation: pop .5s cubic-bezier(.2, .9, .3, 1.3); }
+@keyframes pop { from { transform: scale(.4); opacity: 0; } }
+.meter { display: flex; align-items: baseline; justify-content: space-between; }
+.meter b { font-size: 32px; font-weight: 800; letter-spacing: -0.02em; }
+
+.mine-card { background: var(--accent-soft); }
+.mine-card .k { font-size: 13px; font-weight: 700; color: var(--accent); }
+
+/* ── 개봉 ── */
+.tracks { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+.track { display: grid; grid-template-columns: 28px 1fr auto; gap: 12px; align-items: center; padding: 12px 4px; border-bottom: 1px solid var(--line); }
+.track .n { color: var(--text-3); font-weight: 700; font-size: 15px; text-align: right; }
+.track .t { font-weight: 700; }
+.track .a { color: var(--text-2); font-size: 15px; }
+.track .by { font-size: 13px; color: var(--text-2); background: var(--surface); padding: 2px 8px; border-radius: 999px; }
+.track.reveal { animation: reveal .45s both cubic-bezier(.2, .8, .2, 1); }
+@keyframes reveal { from { opacity: 0; transform: translateY(8px) rotateX(70deg); } }
+.listen { display: flex; gap: 6px; grid-column: 2 / 4; }
+.listen a { font-size: 13px; color: var(--text-2); text-decoration: none; padding: 4px 10px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--line); }
+
+.rooms { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.rooms a { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px; border-radius: var(--r); background: var(--surface); text-decoration: none; }
+.rooms .st { font-size: 13px; font-weight: 700; color: var(--text-2); white-space: nowrap; }
+.rooms .st.open { color: var(--accent); }
+
+.demo { border-top: 1px dashed var(--line); padding-top: 16px; display: grid; gap: 8px; }
+.toast { position: fixed; left: 50%; bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 12px 18px; border-radius: 999px; font-size: 15px; font-weight: 600; max-width: calc(100% - 40px); }
+.sheet { white-space: pre-wrap; font-size: 15px; background: var(--bg); border-radius: 6px; padding: 12px; box-shadow: inset 0 0 0 1px var(--line); }
+@media (prefers-reduced-motion: reduce) { .slot.pop, .track.reveal { animation: none; } }
+</style>
+
+<div class="wrap">
+  <header class="top"><button class="logo" data-go="" aria-label="kanqaroo 처음으로">kanq<b>a</b>roo</button><span class="tiny">데모 · 이 기기에만 저장</span></header>
+  <main id="view" class="stack"></main>
+</div>
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>
+/* ════════ 저장 (데모: 서버 없이 이 기기 localStorage) ════════ */
+const $ = (s, r = document) => r.querySelector(s)
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]))
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('kq2.' + k); return v ? JSON.parse(v) : d } catch { return d } },
+  set(k, v) { try { localStorage.setItem('kq2.' + k, JSON.stringify(v)) } catch { /* 저장 못 함 */ } },
+}
+const uid = (n = 6) => Array.from(crypto.getRandomValues(new Uint8Array(n)), (b) => 'abcdefghjkmnpqrstuvwxyz23456789'[b % 31]).join('')
+let rooms = store.get('rooms', null)
+const me = store.get('me', {})      // 방마다 내가 넣은 곡 번호와 이름
+const own = store.get('own', {})    // 방마다 만든 사람 열쇠
+const save = () => { store.set('rooms', rooms); store.set('me', me); store.set('own', own) }
+
+if (!rooms) { // 처음 들어오면 예시 방 하나
+  const seed = [['Hikaru Nara', 'Goose house', '민지'], ['Antifreeze', '검정치마', '도윤'], ['Plastic Love', '竹内まりや', '서연'], ['Nights', 'Frank Ocean', '하준'], ['Square (2017)', '백예린', '지우'], ['NO PAIN', '실리카겔', '현우'], ['水平線', 'back number', '유나']]
+  rooms = { demo01: { id: 'demo01', title: '우리 단톡방 올해의 10곡', slots: 10, names: true, owner: '지우', key: 'demo-key', opened: false, tracks: seed.map(([t, a, by], i) => ({ t, a, by, at: Date.now() - (7 - i) * 3.6e6 })) } }
+  save()
+}
+
+/* ════════ 라우팅: #/ · #/new · #/r/<id> (?k=열쇠면 만든 사람) ════════ */
+function parse() {
+  const [path, q] = location.hash.slice(1).split('?')
+  const parts = path.split('/').filter(Boolean)
+  return { parts, key: new URLSearchParams(q || '').get('k') }
+}
+const go = (h) => { location.hash = h }
+const roomUrl = (r, admin) => location.href.split('#')[0] + '#/r/' + r.id + (admin ? '?k=' + r.key : '')
+const isFull = (r) => r.tracks.length >= r.slots
+const isOpen = (r) => r.opened || isFull(r)
+const isOwner = (r) => own[r.id] === r.key
+
+function render() {
+  const { parts, key } = parse()
+  if (parts[0] === 'r' && rooms[parts[1]]) {
+    const r = rooms[parts[1]]
+    if (key && key === r.key && own[r.id] !== key) { own[r.id] = key; save() }
+    return isOpen(r) ? viewOpen(r) : viewRoom(r)
+  }
+  if (parts[0] === 'new') return viewNew()
+  viewHome()
+}
+addEventListener('hashchange', () => { render(); scrollTo(0, 0) })
+
+/* ════════ 화면 ════════ */
+function viewHome() {
+  const list = Object.values(rooms).sort((a, b) => (b.tracks.at(-1)?.at || 0) - (a.tracks.at(-1)?.at || 0))
+  $('#view').innerHTML = `
+    <div class="stack" style="gap:8px">
+      <h1>친구들이 한 곡씩<br>몰래 넣어 완성하는 플리</h1>
+      <p class="sub">링크를 단톡방에 던지면 각자 한 곡씩 넣어요. 다 찰 때까지 누가 뭘 넣었는지 아무도 몰라요. 꽉 차면 같이 열어요.</p>
+    </div>
+    <a class="btn primary full" href="#/new">새 플리 만들기</a>
+    ${list.length ? `<section class="stack" style="gap:10px"><h2>내 플리</h2><ul class="rooms">${list.map((r) => `
+      <li><a href="#/r/${r.id}"><span>${esc(r.title)}</span><span class="st${isOpen(r) ? ' open' : ''}">${isOpen(r) ? '개봉됨' : `${r.tracks.length}/${r.slots}`}</span></a></li>`).join('')}</ul></section>` : ''}
+    <section class="card"><h2>이렇게 놀아요</h2>
+      <p class="sub">1. 플리를 만들고 자리 수를 정해요<br>2. 링크를 단톡방에 던져요<br>3. 한 사람당 한 곡, 몰래 넣어요<br>4. 다 차면 개봉하고 각자 쓰는 앱으로 가져가요</p>
+      <p class="tiny">Kanqaroo는 떡밥만 만들어요. 누가 흐름을 깼는지는 단톡방에서 얘기해요.</p></section>`
+}
+
+function viewNew() {
+  let n = 10
+  $('#view').innerHTML = `
+    <h1>새 플리 만들기</h1>
+    <form id="nf" class="card" novalidate>
+      <label>플리 이름<input type="text" id="n-title" maxlength="40" placeholder="예) 우리 단톡방 올해의 10곡" required></label>
+      <div class="stack" style="gap:6px"><span style="font-size:15px;font-weight:600">자리 수</span>
+        <div class="stepper"><button type="button" class="btn sm line" data-step="-1" aria-label="한 자리 빼기">−</button><output id="n-slots" aria-live="polite">10</output><button type="button" class="btn sm line" data-step="1" aria-label="한 자리 더하기">+</button><span class="tiny">자리 = 넣을 사람 수</span></div></div>
+      <label>내 이름<input type="text" id="n-name" maxlength="12" placeholder="단톡방에서 쓰는 이름" required></label>
+      <label class="check"><input type="checkbox" id="n-names" checked>개봉할 때 넣은 사람 이름도 보여주기</label>
+      <button class="btn primary full" type="submit">만들기</button>
+    </form>`
+  $('#nf').addEventListener('click', (e) => {
+    const b = e.target.closest('[data-step]'); if (!b) return
+    n = Math.min(30, Math.max(3, n + Number(b.dataset.step))); $('#n-slots').textContent = n
+  })
+  $('#nf').addEventListener('submit', (e) => {
+    e.preventDefault()
+    const title = $('#n-title').value.trim(), name = $('#n-name').value.trim()
+    if (!title) return $('#n-title').focus()
+    if (!name) return $('#n-name').focus()
+    const r = { id: uid(), title, slots: n, names: $('#n-names').checked, owner: name, key: uid(10), opened: false, tracks: [] }
+    rooms[r.id] = r; own[r.id] = r.key; me[r.id] = { name }; save()
+    go('#/r/' + r.id); toast('만들었어요. 링크를 단톡방에 던져 보세요')
+  })
+}
+
+function slotsHtml(r, popIdx = -1) {
+  const mine = me[r.id]?.idx
+  return `<div class="slots" role="img" aria-label="${r.slots}자리 중 ${r.tracks.length}자리 찼어요">${Array.from({ length: r.slots }, (_, i) => i < r.tracks.length
+    ? `<div class="slot full${i === mine ? ' mine' : ''}${i === popIdx ? ' pop' : ''}">${i === mine ? '<span>나</span>' : ''}</div>`
+    : `<div class="slot empty">${i + 1}</div>`).join('')}</div>`
+}
+
+function viewRoom(r, popIdx = -1) {
+  const my = me[r.id], joined = my?.idx != null, left = r.slots - r.tracks.length
+  $('#view').innerHTML = `
+    <div class="stack" style="gap:6px"><p class="tiny">${esc(r.owner)}님이 만든 블라인드 플리</p><h1>${esc(r.title)}</h1></div>
+    <section class="card">
+      <div class="meter"><span><b>${r.tracks.length}</b> / ${r.slots}자리</span><span class="sub">${left}자리 남았어요</span></div>
+      ${slotsHtml(r, popIdx)}
+      <p class="tiny">다 찰 때까지 누가 뭘 넣었는지 아무도 몰라요. 넣은 순서대로 트랙이 돼요.</p>
+    </section>
+    ${joined ? `
+      <section class="card mine-card"><span class="k">내가 넣은 곡 · ${my.idx + 1}번 트랙</span>
+        <p><b>${esc(r.tracks[my.idx].t)}</b> <span class="sub">${esc(r.tracks[my.idx].a)}</span></p>
+        <p class="tiny">나만 보여요. 다 차면 같이 열려요.</p></section>
+      <div class="row"><button class="btn primary" data-act="share">링크 공유</button><button class="btn" data-act="nudge">독촉장 보내기</button></div>
+      <div id="nudge-box"></div>`
+    : `
+      <form id="sf" class="card" novalidate><h2>한 곡 몰래 넣기</h2>
+        <label>곡 제목<input type="text" id="s-t" maxlength="60" autocomplete="off" required></label>
+        <label>아티스트<input type="text" id="s-a" maxlength="60" autocomplete="off" required></label>
+        <label>내 이름<input type="text" id="s-n" maxlength="12" value="${esc(my?.name || '')}" placeholder="단톡방에서 쓰는 이름" required></label>
+        <button class="btn primary full" type="submit">몰래 넣기</button>
+        <p class="tiny">한 사람당 한 곡이에요. 넣고 나면 바꿀 수 없어요.</p></form>
+      <button class="btn line full" data-act="share">링크만 공유하기</button>`}
+    ${isOwner(r) ? `<section class="card"><h2>만든 사람만 보여요</h2>
+      <p class="sub">끝까지 안 넣는 사람이 있으면 지금 있는 곡으로 열 수 있어요.</p>
+      <button class="btn line full" data-act="force" ${r.tracks.length ? '' : 'disabled'}>지금 개봉하기</button>
+      <button class="btn line full" data-act="admin-link">관리 링크 복사</button>
+      <p class="tiny">관리 링크로 들어오면 다른 기기에서도 만든 사람이 돼요. 단톡방엔 올리지 마세요.</p></section>` : ''}
+    ${demoTools(r)}`
+  const sf = $('#sf')
+  if (sf) sf.addEventListener('submit', (e) => {
+    e.preventDefault()
+    const t = $('#s-t').value.trim(), a = $('#s-a').value.trim(), by = $('#s-n').value.trim()
+    if (!t) return $('#s-t').focus(); if (!a) return $('#s-a').focus(); if (!by) return $('#s-n').focus()
+    if (isFull(r)) return render()
+    r.tracks.push({ t, a, by, at: Date.now() }); me[r.id] = { name: by, idx: r.tracks.length - 1 }; save()
+    if (isFull(r)) { toast('마지막 자리였어요. 개봉!'); render() } else { viewRoom(r, r.tracks.length - 1); toast('넣었어요. 다 차면 열려요') }
+  })
+}
+
+function demoTools(r) {
+  return `<section class="demo"><p class="tiny">데모 도구 · 서버가 없어서 친구 역할도 이 기기에서 해 봐요</p>
+    <div class="row"><button class="btn sm line" data-act="as-friend">다른 친구로 들어가기</button><button class="btn sm line" data-act="fill">가짜 친구로 채우기</button></div></section>`
+}
+
+function viewOpen(r) {
+  const forced = r.opened && !isFull(r)
+  $('#view').innerHTML = `
+    <div class="stack" style="gap:6px"><p class="tiny">${forced ? `${r.tracks.length}/${r.slots}자리에서 개봉` : `${r.slots}자리 꽉 참`} · ${esc(r.owner)}님이 만든 플리</p><h1>${esc(r.title)}</h1></div>
+    <ol class="tracks" id="tracks">${r.tracks.map((s, i) => `
+      <li class="track reveal" style="animation-delay:${i * 90}ms"><span class="n">${i + 1}</span><span><span class="t">${esc(s.t)}</span> <span class="a">${esc(s.a)}</span></span>${r.names ? `<span class="by">${esc(s.by)}</span>` : '<span></span>'}
+        <span class="listen">${listen(s)}</span></li>`).join('')}</ol>
+    <section class="card"><h2>내 앱으로 가져가기</h2>
+      <p class="sub">목록을 복사해서 TuneMyMusic 같은 변환 서비스에 붙여 넣으면 Spotify·Apple Music·YouTube Music 플리로 만들 수 있어요.</p>
+      <div class="row"><button class="btn primary" data-act="copy-list">목록 복사</button><button class="btn" data-act="csv">CSV 받기</button></div>
+      <a class="btn line full" href="https://www.tunemymusic.com/" target="_blank" rel="noopener">TuneMyMusic 열기</a></section>
+    <button class="btn line full" data-act="share">개봉한 플리 공유</button>
+    ${demoTools(r).replace('가짜 친구로 채우기', '처음 상태로 되돌리기').replace('data-act="fill"', 'data-act="reset"').replace('<button class="btn sm line" data-act="as-friend">다른 친구로 들어가기</button>', '')}`
+}
+function listen(s) {
+  const q = encodeURIComponent(`${s.t} ${s.a}`)
+  return `<a href="https://music.youtube.com/search?q=${q}" target="_blank" rel="noopener">YouTube</a><a href="https://open.spotify.com/search/${q}" target="_blank" rel="noopener">Spotify</a><a href="https://music.apple.com/kr/search?term=${q}" target="_blank" rel="noopener">Apple Music</a>`
+}
+
+/* ════════ 동작 ════════ */
+const listText = (r) => r.tracks.map((s) => `${s.t} - ${s.a}`).join('\n')
+async function copy(text, done) {
+  try { await navigator.clipboard.writeText(text); toast(done) } catch { prompt('복사해서 쓰세요', text) }
+}
+async function share(r) {
+  const url = roomUrl(r), text = isOpen(r) ? `'${r.title}' 개봉했어 🦘` : `'${r.title}'에 한 곡 몰래 넣어줘. 다 차면 같이 열자 🦘`
+  if (navigator.share && top === self) { try { await navigator.share({ title: 'Kanqaroo', text, url }); return } catch (e) { if (e.name === 'AbortError') return } }
+  copy(`${text}\n${url}`, '링크를 복사했어요')
+}
+const FAKE = [['밤양갱', '비비'], ['Supernova', 'aespa'], ['Magnetic', 'ILLIT'], ['Ditto', 'NewJeans'], ['唱', 'Ado'], ['APT.', 'ROSÉ'], ['Seven', '정국'], ['Love wins all', '아이유'], ['Kick It', 'NCT 127'], ['나는 아픈 건 딱 질색이니까', '(여자)아이들']]
+const FAKE_NAMES = ['수아', '태오', '하린', '민재', '예린', '준서', '채원', '시우', '다은', '건우']
+
+document.addEventListener('click', (e) => {
+  const g = e.target.closest('[data-go]'); if (g) { go('#/' + g.dataset.go); return }
+  const b = e.target.closest('[data-act]'); if (!b) return
+  const { parts } = parse(), r = rooms[parts[1]]
+  const act = b.dataset.act
+  if (act === 'share') share(r)
+  else if (act === 'nudge') {
+    const left = r.slots - r.tracks.length
+    const msg = `📮 [Kanqaroo 독촉장]\n'${r.title}' ${r.tracks.length}/${r.slots} 찼어.\n아직 ${left}자리 남았는데, 혹시 너…? 한 곡만 몰래 넣어줘 🦘\n${roomUrl(r)}`
+    $('#nudge-box').innerHTML = `<div class="card"><p class="sheet">${esc(msg)}</p><button class="btn primary full" data-act="copy-nudge">복사해서 단톡방에 붙이기</button></div>`
+    $('#nudge-box').dataset.msg = msg
+  }
+  else if (act === 'copy-nudge') copy($('#nudge-box').dataset.msg, '독촉장을 복사했어요')
+  else if (act === 'admin-link') copy(roomUrl(r, true), '관리 링크를 복사했어요')
+  else if (act === 'force') { if (confirm(`지금 있는 ${r.tracks.length}곡으로 개봉할까요? 되돌릴 수 없어요.`)) { r.opened = true; save(); render() } }
+  else if (act === 'as-friend') { const name = me[r.id]?.name; delete me[r.id]; save(); render(); toast(name ? `${name}님 자리를 비웠어요. 친구가 되어 넣어 보세요` : '친구가 되어 넣어 보세요') }
+  else if (act === 'fill') {
+    let k = 0
+    while (!isFull(r)) { const [t, a] = FAKE[k % FAKE.length]; r.tracks.push({ t, a, by: FAKE_NAMES[k % FAKE_NAMES.length], at: Date.now() }); k++ }
+    save(); toast('꽉 찼어요. 개봉!'); render()
+  }
+  else if (act === 'copy-list') copy(listText(r), '목록을 복사했어요')
+  else if (act === 'csv') {
+    const cell = (v) => `"${String(v).replace(/"/g, '""')}"`
+    const csv = '﻿Track,Title,Artist' + (r.names ? ',Added by' : '') + '\n' + r.tracks.map((s, i) => [i + 1, cell(s.t), cell(s.a), ...(r.names ? [cell(s.by)] : [])].join(',')).join('\n')
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' })); a.download = `${r.title}.csv`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000)
+  }
+  else if (act === 'reset') { if (confirm('예시 데이터로 되돌릴까요? 이 기기에 저장된 플리가 모두 지워져요.')) { ['rooms', 'me', 'own'].forEach((k) => { try { localStorage.removeItem('kq2.' + k) } catch {} }); location.hash = ''; location.reload() } }
+})
+
+let tt = 0
+function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => { t.hidden = true }, 2400) }
+
+render()
+</script>
